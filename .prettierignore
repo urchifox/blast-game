@@ -1,0 +1,7 @@
+dist
+node_modules
+*.json
+*.tsx
+*.md
+*.txt
+README
