@@ -1,0 +1,23 @@
+.game-blast-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 19px;
+
+	background-image: url("./../img/background.png");
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.game-blast-container__content {
+	padding-top: 11px;
+	padding-bottom: 4px;
+	height: 100%;
+
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	grid-template-columns: 1fr;
+	justify-items: center;
+}
