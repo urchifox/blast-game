@@ -1,0 +1,22 @@
+.movements-counter {
+	aspect-ratio: 1;
+	margin: -10px;
+
+	width: 84px;
+	height: auto;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	background-image: url("../img/movements-counter-bg.png");
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.movements-counter__text {
+	margin: 0;
+	font-size: 30px;
+	text-align: center;
+}

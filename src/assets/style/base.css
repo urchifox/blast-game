@@ -1,22 +1,42 @@
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 html,
 body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+
+	font-family: "PlaypenSans", sans-serif;
+	font-weight: 900;
+	color: #ffffff;
 }
 
 #app {
-  width: 100%;
-  height: 100%;
+	width: 100%;
+	height: 100%;
 }
 
 canvas {
-  display: block;
-  margin: 0 auto;
+	display: block;
+	margin: 0 auto;
+}
+
+/* 
+  The original font used was Marvin,
+  but I do not have this font.
+  Therefore, I am using a free one from Google Fonts instead.
+*/
+@font-face {
+	font-family: "PlaypenSans";
+	font-weight: 900;
+	font-style: normal;
+	font-display: swap;
+	src:
+		local("PlaypenSans"),
+		url("./../fonts/PlaypenSans-ExtraBold.woff2") format("woff2"),
+		url("./../fonts/PlaypenSans-ExtraBold.woff2") format("woff");
 }

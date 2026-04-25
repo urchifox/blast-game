@@ -1,0 +1,53 @@
+.booster {
+	border: none;
+	padding: 20px 14px 19px 15px;
+	min-width: 116px;
+
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: auto auto;
+	align-items: center;
+	justify-items: center;
+	gap: 4px;
+
+	background-color: transparent;
+
+	border-image-source: url("../img/booster-bg.png");
+	border-image-slice: 80 fill;
+	border-image-width: 30px;
+	border-image-repeat: stretch;
+}
+
+.booster__icon {
+	width: 35px;
+	height: 43px;
+
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.booster__icon--bomb {
+	background-image: url("../img/booster-icon-bomb.png");
+}
+
+.booster__icon--teleport {
+	background-image: url("../img/booster-icon-teleport.png");
+}
+
+.booster__counter {
+	margin: 0;
+
+	padding: 3px 16px 5px 16px;
+	width: 100%;
+
+	font-size: 24px;
+	font-weight: 900;
+	color: #ffffff;
+	text-align: center;
+
+	border-image-source: url("../img/booster-counter-bg.png");
+	border-image-slice: 55 58 fill;
+	border-image-width: 20px 21px;
+	border-image-repeat: stretch;
+}

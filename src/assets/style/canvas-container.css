@@ -1,0 +1,10 @@
+.canvas-container {
+	padding: 22px 15px 15px 15px;
+	width: 100%;
+	max-width: 362px;
+
+	border-image-source: url("../img/canvas-container-bg.png");
+	border-image-slice: 94 88 94 88 fill;
+	border-image-width: 35px 33px 35px 33px;
+	border-image-repeat: stretch;
+}

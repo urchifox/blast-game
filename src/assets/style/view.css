@@ -1,0 +1,10 @@
+.view {
+	width: 100%;
+	height: 100%;
+}
+
+.view__content {
+	padding-inline: 19px;
+	padding-block: 19px;
+	width: 100%;
+}

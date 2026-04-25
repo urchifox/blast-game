@@ -1,0 +1,16 @@
+.progress-block {
+	padding: 22px 30px 31px 34px;
+	min-width: 323px;
+
+	display: grid;
+	grid-template-columns: auto 1fr;
+	grid-template-rows: auto;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+
+	border-image-source: url("../img/progress-block-bg.png");
+	border-image-slice: 97 111 125 111 fill;
+	border-image-width: 36px 41px 46px 41px;
+	border-image-repeat: stretch;
+}

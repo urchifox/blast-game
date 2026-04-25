@@ -1,0 +1,23 @@
+.boosters-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.boosters-container__title {
+	margin: 0;
+	font-size: 30px;
+	text-transform: uppercase;
+	text-align: center;
+}
+
+.boosters-container__list {
+	margin: 0;
+	padding: 0;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	list-style: none;
+}
