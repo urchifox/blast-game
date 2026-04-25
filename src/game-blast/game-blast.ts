@@ -1,56 +1,63 @@
-import { getElementInnerSize, queryElement } from "../helpers/dom"
+import { getElementInnerSize } from "../helpers/dom"
 import { DEFAULT_COLUMNS, DEFAULT_ROWS } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
-import { Visualization } from "./visualization/visualization"
+import { Renderer } from "./rendering/renderer"
 
 export class GameBlast {
-	private readonly container = queryElement("#canvas-container")
-	private readonly visualization: Visualization
+	private readonly container: HTMLElement
+	private readonly renderer: Renderer
 	private readonly grid: Grid
 	private readonly field: Field
 
 	private readonly handleWindowResize = this.onResize.bind(this)
 
-	constructor() {
+	constructor({
+		container,
+		renderer,
+	}: {
+		container: HTMLElement
+		renderer: Renderer
+	}) {
+		this.container = container
+		const getContainerSize = () =>
+			getElementInnerSize({ element: this.container })
 		this.grid = new Grid({
-			getContainerSize: () => getElementInnerSize({ element: this.container }),
+			getContainerSize,
 		})
 
 		const getFieldSnapshot = this.grid.getSnapshot.bind(this.grid)
 
 		this.field = new Field({ getFieldSnapshot })
 
-		this.visualization = new Visualization({
-			container: this.container,
-			getFieldSnapshot,
-		})
+		this.renderer = renderer
 
 		window.addEventListener("resize", this.handleWindowResize)
 	}
 
 	async init() {
-		await this.generateLevel()
+		await this.renderer.init()
+		this.generateLevel()
 	}
 
 	destroy() {
 		window.removeEventListener("resize", this.handleWindowResize)
-		this.visualization.destroy()
+		this.renderer.destroy()
 	}
 
 	private onResize() {
-		this.visualization.resetContainerSizes()
-		this.grid.updateGridSizes()
-		this.visualization.updateContainerSizes()
+		this.renderer.resize(this.grid.updateGridSizes.bind(this.grid))
 	}
 
-	async generateLevel() {
+	generateLevel() {
 		const columns = DEFAULT_COLUMNS
 		const rows = DEFAULT_ROWS
 
 		this.grid.createGrid(columns, rows)
 		this.field.generateTiles()
-		await this.visualization.readyPromise
-		this.visualization.renderTiles(this.field.getTiles())
+		this.renderer.renderTiles({
+			tiles: this.field.getTiles(),
+			gridSnapshot: this.grid.getSnapshot(),
+		})
 	}
 }

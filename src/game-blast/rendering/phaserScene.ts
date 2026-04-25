@@ -9,15 +9,13 @@ const tileTextureModules = import.meta.glob("../assets/img/*.png", {
 	import: "default",
 }) as Record<string, string>
 
-export class RendererScene extends Phaser.Scene {
-	private readonly getFieldSnapshot: () => GridSnapshot
+export class PhaserScene extends Phaser.Scene {
 	private readonly tilesMap = new Map<Tile, Phaser.GameObjects.Sprite>()
 	private isReady = false
 	private onReadyCallbacks: Array<() => void> = []
 
-	constructor({ getFieldSnapshot }: { getFieldSnapshot: () => GridSnapshot }) {
+	constructor() {
 		super(SCENE_KEY)
-		this.getFieldSnapshot = getFieldSnapshot
 	}
 
 	preload() {
@@ -36,27 +34,21 @@ export class RendererScene extends Phaser.Scene {
 		this.isReady = true
 		this.onReadyCallbacks.forEach((callback) => callback())
 		this.onReadyCallbacks = []
-
-		this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this)
 	}
 
-	shutdown() {
-		this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this)
-	}
-
-	private handleResize() {
+	resize(gridSnapshot: GridSnapshot) {
 		for (const [tile, tileSprite] of this.tilesMap) {
-			this.updateTile(tile, tileSprite)
+			this.updateTile(tile, tileSprite, gridSnapshot)
 		}
 	}
 
-	renderTiles(tiles: Array<Tile>) {
+	renderTiles(tiles: ReadonlyArray<Tile>, gridSnapshot: GridSnapshot) {
 		if (!this.isReady) {
 			return
 		}
 
 		tiles.forEach((tile) => {
-			this.renderTile(tile)
+			this.renderTile(tile, gridSnapshot)
 		})
 	}
 
@@ -69,9 +61,9 @@ export class RendererScene extends Phaser.Scene {
 		this.onReadyCallbacks.push(callback)
 	}
 
-	private renderTile(tile: Tile) {
+	private renderTile(tile: Tile, gridSnapshot: GridSnapshot) {
 		const { x, y, zIndex, tileWidth, tileHeight, imageKey } =
-			this.getTileVisualProperties(tile)
+			this.getTileVisualProperties(tile, gridSnapshot)
 
 		const tileSprite = this.add
 			.sprite(x, y, imageKey)
@@ -82,18 +74,21 @@ export class RendererScene extends Phaser.Scene {
 		this.tilesMap.set(tile, tileSprite)
 	}
 
-	private updateTile(tile: Tile, tileSprite: Phaser.GameObjects.Sprite) {
+	private updateTile(
+		tile: Tile,
+		tileSprite: Phaser.GameObjects.Sprite,
+		gridSnapshot: GridSnapshot
+	) {
 		const { x, y, zIndex, tileWidth, tileHeight } =
-			this.getTileVisualProperties(tile)
+			this.getTileVisualProperties(tile, gridSnapshot)
 		tileSprite.setPosition(x, y)
 		tileSprite.setDepth(zIndex)
 		tileSprite.setDisplaySize(tileWidth, tileHeight)
 	}
 
-	private getTileVisualProperties(tile: Tile) {
+	private getTileVisualProperties(tile: Tile, gridSnapshot: GridSnapshot) {
 		const { column, row } = tile.getPosition()
-		const { tileWidth, tileHeight, tileGapX, tileGapY, rows } =
-			this.getFieldSnapshot()
+		const { tileWidth, tileHeight, tileGapX, tileGapY, rows } = gridSnapshot
 		const x = column * (tileWidth + tileGapX) + tileWidth / 2
 		const y = row * (tileHeight + tileGapY) + tileHeight / 2
 		const zIndex = rows - row

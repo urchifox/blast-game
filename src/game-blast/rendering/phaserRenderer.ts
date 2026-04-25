@@ -1,33 +1,25 @@
 import Phaser from "phaser"
 
 import { GridSnapshot } from "../grid"
-import { RendererScene } from "./rendererScene"
+import { PhaserScene } from "./phaserScene"
 import { Tile } from "../tile"
+import { Renderer } from "./renderer"
 
-export class Visualization {
+export class PhaserRenderer implements Renderer {
 	private readonly container: HTMLElement
 	private readonly game: Phaser.Game
-	private scene: RendererScene
-
-	private readonly getFieldSnapshot: () => GridSnapshot
+	private scene: PhaserScene
 
 	readonly readyPromise: Promise<void>
 
-	constructor(props: {
-		container: HTMLElement
-		getFieldSnapshot: () => GridSnapshot
-	}) {
-		const { container, getFieldSnapshot } = props
+	constructor(props: { container: HTMLElement }) {
+		const { container } = props
 
 		this.container = container
-		this.getFieldSnapshot = getFieldSnapshot
 
-		const { gridWidth, gridHeight } = this.getFieldSnapshot()
-		const initialCanvasWidth = this.getSafeCanvasSize(gridWidth)
-		const initialCanvasHeight = this.getSafeCanvasSize(gridHeight)
-		const rendererScene = new RendererScene({
-			getFieldSnapshot: this.getFieldSnapshot,
-		})
+		const initialCanvasWidth = this.getSafeCanvasSize()
+		const initialCanvasHeight = this.getSafeCanvasSize()
+		const rendererScene = new PhaserScene()
 
 		this.game = new Phaser.Game({
 			type: Phaser.AUTO,
@@ -46,28 +38,42 @@ export class Visualization {
 				resolve()
 			})
 		})
+	}
 
-		this.setContainerSizes({ width: gridWidth, height: gridHeight })
+	async init(): Promise<void> {
+		await this.readyPromise
 	}
 
 	destroy() {
 		this.game.destroy(true)
 	}
 
-	renderTiles(tiles: Array<Tile>) {
-		const { gridWidth, gridHeight } = this.getFieldSnapshot()
-		this.setContainerSizes({ width: gridWidth, height: gridHeight })
-
-		this.scene.renderTiles(tiles)
+	resize(updateGridSizes: () => GridSnapshot) {
+		this.resetContainerSizes()
+		const gridSnapshot = updateGridSizes()
+		this.updateContainerSizes(gridSnapshot)
+		this.scene.resize(gridSnapshot)
 	}
 
-	updateContainerSizes() {
-		const gridSnapshot = this.getFieldSnapshot()
+	renderTiles({
+		tiles,
+		gridSnapshot,
+	}: {
+		tiles: ReadonlyArray<Tile>
+		gridSnapshot: GridSnapshot
+	}) {
+		const { gridWidth, gridHeight } = gridSnapshot
+		this.setContainerSizes({ width: gridWidth, height: gridHeight })
+
+		this.scene.renderTiles(tiles, gridSnapshot)
+	}
+
+	private updateContainerSizes(gridSnapshot: GridSnapshot) {
 		const { gridWidth, gridHeight } = gridSnapshot
 		this.setContainerSizes({ width: gridWidth, height: gridHeight })
 	}
 
-	resetContainerSizes() {
+	private resetContainerSizes() {
 		this.setContainerSizes({})
 	}
 
@@ -91,7 +97,7 @@ export class Visualization {
 		this.game.scale.resize(canvasWidth, canvasHeight)
 	}
 
-	private getSafeCanvasSize(size: number | undefined) {
+	private getSafeCanvasSize(size?: number) {
 		if (typeof size !== "number" || !Number.isFinite(size) || size <= 0) {
 			return 1
 		}

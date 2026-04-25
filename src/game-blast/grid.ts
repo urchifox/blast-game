@@ -68,6 +68,7 @@ export class Grid {
 			rows: this.rows ?? 0,
 		})
 		this.setGridSizes(gridSizes)
+		return this.getSnapshot()
 	}
 
 	private setGridSizes(gridSizes: GridSizes) {
