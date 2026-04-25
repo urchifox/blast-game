@@ -21,3 +21,11 @@
 	grid-template-columns: 1fr;
 	justify-items: center;
 }
+
+.game-blast-container__canvas-container {
+	align-self: center;
+	justify-self: center;
+
+	width: var(--grid-width, 100%);
+	height: var(--grid-height, 100%);
+}
