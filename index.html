@@ -7,10 +7,60 @@
 			name="viewport"
 			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 		/>
-		<script type="module" crossorigin src="/blast-game/assets/index-GtJeOmJc.js"></script>
-		<link rel="stylesheet" crossorigin href="/blast-game/assets/index-lJwx1T5y.css">
+		<script type="module" crossorigin src="/blast-game/assets/index-BuoI3aiZ.js"></script>
+		<link rel="stylesheet" crossorigin href="/blast-game/assets/index-Di_gMUDU.css">
 	</head>
 	<body>
 		<div id="app"></div>
 	</body>
 </html>
+
+<template id="game-blast">
+	<section class="view game-blast-container">
+		<div class="view__content game-blast-container__content">
+			<div class="game-blast-container__progress-block progress-block">
+				<div class="progress-block__movements-counter movements-counter">
+					<p class="movements-counter__text" id="movements-counter-text">37</p>
+				</div>
+				<div class="progress-block__points-counter points-counter">
+					<p class="points-counter__title">Очки:</p>
+					<p class="points-counter__result" id="points-counter-result">
+						221/500
+					</p>
+				</div>
+			</div>
+
+			<div
+				class="game-blast-container__canvas-container canvas-container"
+				id="canvas-container"
+			></div>
+
+			<div class="game-blast-container__boosters-container boosters-container">
+				<p class="boosters-container__title">Бустеры</p>
+
+				<ul class="boosters-container__list">
+					<li class="boosters-container__item">
+						<button
+							class="boosters-container__booster booster"
+							id="booster-teleport"
+							type="button"
+						>
+							<span class="booster__icon booster__icon--teleport"></span>
+							<p class="booster__counter" id="booster-counter-teleport">5</p>
+						</button>
+					</li>
+					<li class="boosters-container__item">
+						<button
+							class="boosters-container__booster booster"
+							id="booster-bomb"
+							type="button"
+						>
+							<span class="booster__icon booster__icon--bomb"></span>
+							<p class="booster__counter" id="booster-counter-bomb">3</p>
+						</button>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</section>
+</template>
