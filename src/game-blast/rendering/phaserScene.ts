@@ -232,6 +232,8 @@ export class PhaserScene extends Phaser.Scene {
 		const onTweenComplete = (resolve: () => void) => {
 			tileSprite.setDepth(zIndex)
 			this.movingTweens.delete(tileSprite)
+			tileSprite.setInteractive({ useHandCursor: true })
+
 			resolve()
 		}
 
@@ -246,23 +248,16 @@ export class PhaserScene extends Phaser.Scene {
 					tileSprite.disableInteractive()
 				},
 				onComplete: () => {
-					this.movingTweens.delete(tileSprite)
-					tileSprite.setInteractive({ useHandCursor: true })
-					const bounceTween = this.tweens.add({
+					onTweenComplete(resolve)
+					this.tweens.add({
 						targets: tileSprite,
 						y: y - bounceHeight,
 						duration: TILE_BOUNCE_DURATION_MS / 2,
 						ease: "Sine.easeOut",
 						yoyo: true,
-						onComplete: () => onTweenComplete(resolve),
-						onStop: () => onTweenComplete(resolve),
 					})
-					this.movingTweens.set(tileSprite, bounceTween)
 				},
-				onStop: () => {
-					tileSprite.setInteractive({ useHandCursor: true })
-					onTweenComplete(resolve)
-				},
+				onStop: () => onTweenComplete(resolve),
 			})
 			this.movingTweens.set(tileSprite, moveTween)
 		})
