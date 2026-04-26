@@ -2,6 +2,7 @@ import Phaser from "phaser"
 
 import { GridSnapshot } from "../grid"
 import { OnTileClickHandler, TileInfoForRender } from "./renderer"
+import { wait } from "../../helpers/time"
 
 export const SCENE_KEY = "blast"
 const tileTextureModules = import.meta.glob("../assets/img/*.png", {
@@ -9,10 +10,12 @@ const tileTextureModules = import.meta.glob("../assets/img/*.png", {
 	import: "default",
 }) as Record<string, string>
 
-const TILE_MOVE_SPEED_PX_PER_SECOND = 400
+/** tile heights per second */
+const TILE_MOVE_SPEED = 8
 const MIN_TILE_MOVE_DURATION_MS = 10
 const TILE_BOUNCE_DURATION_MS = 200
 const TILE_BOUNCE_HEIGHT_RATIO = 0.05
+const TILE_APPEAR_DURATION_MS = 300
 
 export class PhaserScene extends Phaser.Scene {
 	private readonly tilesMap = new Map<string, Phaser.GameObjects.Sprite>()
@@ -57,14 +60,23 @@ export class PhaserScene extends Phaser.Scene {
 
 	renderTiles(
 		tiles: ReadonlyArray<TileInfoForRender>,
-		gridSnapshot: GridSnapshot
+		gridSnapshot: GridSnapshot,
+		isAppearOnDefaultPosition?: boolean
 	) {
 		if (!this.isReady) {
 			return
 		}
 
-		tiles.forEach((tile) => {
-			this.renderTile(tile, gridSnapshot)
+		const tileHeight = gridSnapshot.tileHeight
+		const pauseDuration =
+			this.getMoveDuration({ distance: tileHeight, tileHeight: tileHeight }) +
+			TILE_APPEAR_DURATION_MS / 2
+
+		tiles.forEach(async (tile, index) => {
+			if (isAppearOnDefaultPosition) {
+				await wait(index * pauseDuration)
+			}
+			this.renderTile(tile, gridSnapshot, isAppearOnDefaultPosition)
 		})
 	}
 
@@ -101,12 +113,16 @@ export class PhaserScene extends Phaser.Scene {
 		this.onTileClick = onTileClick
 	}
 
-	private renderTile(tileInfo: TileInfoForRender, gridSnapshot: GridSnapshot) {
+	private async renderTile(
+		tileInfo: TileInfoForRender,
+		gridSnapshot: GridSnapshot,
+		isAppearOnDefaultPosition?: boolean
+	) {
 		const { x, y, zIndex, tileWidth, tileHeight, imageKey } =
 			this.getTileVisualProperties(tileInfo, gridSnapshot)
 
 		const tileSprite = this.add
-			.sprite(x, y, imageKey)
+			.sprite(x, isAppearOnDefaultPosition ? 0 + tileHeight / 2 : y, imageKey)
 			.setDepth(zIndex)
 			.setDisplaySize(tileWidth, tileHeight)
 			.setInteractive({ useHandCursor: true })
@@ -115,20 +131,39 @@ export class PhaserScene extends Phaser.Scene {
 		this.tilesMap.set(id, tileSprite)
 		tileSprite.on("pointerdown", () => this.onTileClick?.(id))
 
-		this.animateAppear(tileSprite)
+		await this.animateAppear(tileSprite)
+		if (isAppearOnDefaultPosition) {
+			this.animateMovingToCurrentPosition(tileInfo, gridSnapshot)
+		}
 	}
 
 	private animateAppear(tileSprite: Phaser.GameObjects.Sprite) {
 		const targetScaleX = tileSprite.scaleX
 		const targetScaleY = tileSprite.scaleY
 		tileSprite.setScale(0)
-		this.tweens.add({
-			targets: tileSprite,
-			scaleX: targetScaleX,
-			scaleY: targetScaleY,
-			duration: 300,
-			ease: "Quad.easeOut",
+		return new Promise((resolve) => {
+			this.tweens.add({
+				targets: tileSprite,
+				scaleX: targetScaleX,
+				scaleY: targetScaleY,
+				duration: TILE_APPEAR_DURATION_MS,
+				ease: "Quad.easeOut",
+				onComplete: resolve,
+			})
 		})
+	}
+
+	private getMoveDuration({
+		distance,
+		tileHeight,
+	}: {
+		distance: number
+		tileHeight: number
+	}) {
+		return Math.max(
+			MIN_TILE_MOVE_DURATION_MS,
+			(distance / (Math.max(tileHeight, 1) * TILE_MOVE_SPEED)) * 1000
+		)
 	}
 
 	private animateMovingToCurrentPosition(
@@ -150,10 +185,7 @@ export class PhaserScene extends Phaser.Scene {
 			x,
 			y
 		)
-		const moveDuration = Math.max(
-			MIN_TILE_MOVE_DURATION_MS,
-			(distance / TILE_MOVE_SPEED_PX_PER_SECOND) * 1000
-		)
+		const moveDuration = this.getMoveDuration({ distance, tileHeight })
 		const bounceHeight = tileHeight * TILE_BOUNCE_HEIGHT_RATIO
 
 		this.tweens.killTweensOf(tileSprite)

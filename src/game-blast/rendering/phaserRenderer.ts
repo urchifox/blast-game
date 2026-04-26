@@ -81,14 +81,16 @@ export class PhaserRenderer implements Renderer {
 	renderTiles({
 		tilesInfo,
 		gridSnapshot,
+		isAppearOnDefaultPosition,
 	}: {
 		tilesInfo: ReadonlyArray<TileInfoForRender>
 		gridSnapshot: GridSnapshot
+		isAppearOnDefaultPosition?: boolean
 	}) {
 		const { gridWidth, gridHeight } = gridSnapshot
 		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
 
-		this.scene.renderTiles(tilesInfo, gridSnapshot)
+		this.scene.renderTiles(tilesInfo, gridSnapshot, isAppearOnDefaultPosition)
 	}
 
 	private setCanvasSizes({

@@ -2,7 +2,7 @@ import { getElementInnerSize } from "../helpers/dom"
 import { DEFAULT_COLUMNS, DEFAULT_ROWS } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
-import { Renderer } from "./rendering/renderer"
+import { Renderer, TileInfoForRender } from "./rendering/renderer"
 import { Tile, TilePosition } from "./tile"
 
 export class GameBlast {
@@ -122,9 +122,22 @@ export class GameBlast {
 			gridSnapshot,
 		})
 
-		this.renderer.renderTiles({
-			tilesInfo: Array.from(newTiles).map((tile) => tile.getInfoForRender()),
-			gridSnapshot,
-		})
+		const newTilesInfoByColumns = new Map<number, Array<TileInfoForRender>>()
+		for (const tile of newTiles) {
+			const column = tile.getPosition().column
+			const tilesInfo = newTilesInfoByColumns.get(column) || []
+			tilesInfo.push(tile.getInfoForRender())
+			newTilesInfoByColumns.set(column, tilesInfo)
+		}
+
+		for (const [_, tilesInfo] of newTilesInfoByColumns) {
+			tilesInfo.sort((a, b) => b.row - a.row)
+
+			this.renderer.renderTiles({
+				tilesInfo,
+				gridSnapshot,
+				isAppearOnDefaultPosition: true,
+			})
+		}
 	}
 }

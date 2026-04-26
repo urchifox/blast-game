@@ -16,9 +16,11 @@ export type Renderer = {
 	renderTiles({
 		tilesInfo,
 		gridSnapshot,
+		isAppearOnDefaultPosition,
 	}: {
 		tilesInfo: ReadonlyArray<TileInfoForRender>
 		gridSnapshot: GridSnapshot
+		isAppearOnDefaultPosition?: boolean
 	}): void
 	resize(
 		tilesInfo: ReadonlyArray<TileInfoForRender>,
