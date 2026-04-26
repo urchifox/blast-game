@@ -16,6 +16,7 @@ const MIN_TILE_MOVE_DURATION_MS = 10
 const TILE_BOUNCE_DURATION_MS = 200
 const TILE_BOUNCE_HEIGHT_RATIO = 0.05
 const TILE_APPEAR_DURATION_MS = 300
+const TILE_REMOVE_DURATION_MS = 300
 
 export class PhaserScene extends Phaser.Scene {
 	private readonly tilesMap = new Map<string, Phaser.GameObjects.Sprite>()
@@ -212,9 +213,27 @@ export class PhaserScene extends Phaser.Scene {
 	removeTile(tileId: string) {
 		const tileSprite = this.tilesMap.get(tileId)
 		if (tileSprite) {
-			tileSprite.destroy()
+			this.animateRemoving(tileSprite).then(() => {
+				tileSprite.destroy()
+			})
 		}
 		this.tilesMap.delete(tileId)
+	}
+
+	private animateRemoving(tileSprite: Phaser.GameObjects.Sprite) {
+		return new Promise<void>((resolve) => {
+			this.tweens.killTweensOf(tileSprite)
+			this.tweens.add({
+				targets: tileSprite,
+				scale: 0,
+				alpha: 0,
+				duration: TILE_REMOVE_DURATION_MS,
+				ease: "Quad.easeOut",
+				onComplete: () => {
+					resolve()
+				},
+			})
+		})
 	}
 
 	private updateTile(
