@@ -107,5 +107,18 @@ export class GameBlast {
 			this.field.removeTile(tile.getPosition())
 			this.renderer.removeTile(tile)
 		}
+
+		const gridSnapshot = this.grid.getSnapshot()
+		const { movedTiles, newTiles } =
+			this.field.fillEmptyPositions(positionsToRemove)
+		this.renderer.moveTiles({
+			tiles: Array.from(movedTiles),
+			gridSnapshot,
+		})
+
+		this.renderer.renderTiles({
+			tiles: Array.from(newTiles),
+			gridSnapshot,
+		})
 	}
 }

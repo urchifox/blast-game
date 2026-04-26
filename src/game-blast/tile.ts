@@ -25,4 +25,9 @@ export class Tile {
 	getPosition(): TilePosition {
 		return this.position
 	}
+
+	setPosition(position: TilePosition) {
+		this.position.row = position.row
+		this.position.column = position.column
+	}
 }

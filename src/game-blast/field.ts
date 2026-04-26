@@ -1,11 +1,10 @@
 import { pickRandomItem } from "../helpers/random"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
-import { stringifyTilePosition } from "./helpers"
-import { Tile, TilePosition, TilePositionString } from "./tile"
+import { Tile, TilePosition } from "./tile"
 
 export class Field {
-	private tilesMap = new Map<TilePositionString, Tile>()
+	private tilesByColumns: Array<Array<Tile | undefined>> = []
 
 	private readonly getFieldSnapshot: () => GridSnapshot
 	constructor({ getFieldSnapshot }: { getFieldSnapshot: () => GridSnapshot }) {
@@ -15,32 +14,70 @@ export class Field {
 	generateTiles() {
 		const { columns, rows } = this.getFieldSnapshot()
 
-		for (let row = 0; row < rows; row++) {
-			for (let column = 0; column < columns; column++) {
+		for (let column = 0; column < columns; column++) {
+			this.tilesByColumns[column] = []
+			for (let row = 0; row < rows; row++) {
 				const kind = pickRandomItem(TILES_KINDS_NORMAL)
 				const position = { row, column }
 				const tile = new Tile({ kind, position })
-				const positionString = stringifyTilePosition(position)
-				this.tilesMap.set(positionString, tile)
+				this.tilesByColumns[column].push(tile)
 			}
 		}
 	}
 
 	getTiles(): Array<Tile> {
-		return Array.from(this.tilesMap.values())
+		return this.tilesByColumns.flat().filter((tile) => tile !== undefined)
 	}
 
 	clearTiles() {
-		this.tilesMap.clear()
+		this.tilesByColumns = []
 	}
 
 	getTile(position: TilePosition) {
-		const positionString = stringifyTilePosition(position)
-		return this.tilesMap.get(positionString)
+		return this.tilesByColumns[position.column][position.row]
 	}
 
 	removeTile(position: TilePosition) {
-		const positionString = stringifyTilePosition(position)
-		this.tilesMap.delete(positionString)
+		this.tilesByColumns[position.column][position.row] = undefined
+	}
+
+	fillEmptyPositions(emptyPositions: Set<TilePosition>) {
+		const columnsWithRemovedTiles = new Set<number>()
+		for (const position of emptyPositions) {
+			columnsWithRemovedTiles.add(position.column)
+		}
+
+		const { rows } = this.getFieldSnapshot()
+
+		const movedTiles = new Set<Tile>()
+		const newTiles = new Set<Tile>()
+
+		for (const column of columnsWithRemovedTiles) {
+			this.tilesByColumns[column] = this.tilesByColumns[column].filter(
+				(tile) => tile !== undefined
+			)
+
+			while (this.tilesByColumns[column].length < rows) {
+				const kind = pickRandomItem(TILES_KINDS_NORMAL)
+				const row = rows - this.tilesByColumns[column].length - 1
+				const position = { row, column }
+				const tile = new Tile({ kind, position })
+				this.tilesByColumns[column].unshift(tile)
+				newTiles.add(tile)
+			}
+
+			this.tilesByColumns[column].forEach((tile, row) => {
+				if (tile === undefined) {
+					return
+				}
+				if (tile.getPosition().row === row) {
+					return
+				}
+				tile.setPosition({ row, column })
+				movedTiles.add(tile)
+			})
+		}
+
+		return { movedTiles, newTiles }
 	}
 }

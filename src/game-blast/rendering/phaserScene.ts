@@ -53,6 +53,16 @@ export class PhaserScene extends Phaser.Scene {
 		})
 	}
 
+	moveTiles(tiles: ReadonlyArray<Tile>, gridSnapshot: GridSnapshot) {
+		if (!this.isReady) {
+			return
+		}
+
+		tiles.forEach((tile) => {
+			this.moveTile(tile, gridSnapshot)
+		})
+	}
+
 	clearTiles() {
 		this.tilesMap.forEach((tileSprite) => {
 			tileSprite.destroy()
@@ -87,6 +97,13 @@ export class PhaserScene extends Phaser.Scene {
 		tileSprite.on("pointerdown", () => {
 			this.onTileClick?.(tile)
 		})
+	}
+
+	private moveTile(tile: Tile, gridSnapshot: GridSnapshot) {
+		const tileSprite = this.tilesMap.get(tile)
+		if (tileSprite) {
+			this.updateTile(tile, tileSprite, gridSnapshot)
+		}
 	}
 
 	removeTile(tile: Tile) {

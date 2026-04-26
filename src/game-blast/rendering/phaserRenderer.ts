@@ -65,6 +65,16 @@ export class PhaserRenderer implements Renderer {
 		this.scene.removeTile(tile)
 	}
 
+	moveTiles({
+		tiles,
+		gridSnapshot,
+	}: {
+		tiles: ReadonlyArray<Tile>
+		gridSnapshot: GridSnapshot
+	}) {
+		this.scene.moveTiles(tiles, gridSnapshot)
+	}
+
 	renderTiles({
 		tiles,
 		gridSnapshot,

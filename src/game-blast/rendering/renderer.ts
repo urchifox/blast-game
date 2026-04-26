@@ -15,4 +15,11 @@ export type Renderer = {
 	resize(gridSnapshot: GridSnapshot): void
 	clearTiles(): void
 	removeTile(tile: Tile): void
+	moveTiles({
+		tiles,
+		gridSnapshot,
+	}: {
+		tiles: ReadonlyArray<Tile>
+		gridSnapshot: GridSnapshot
+	}): void
 }
