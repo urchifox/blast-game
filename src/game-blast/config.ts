@@ -5,8 +5,12 @@ export const GROWTH_EXPONENT = 1.5
 
 export const DEFAULT_COLUMNS = 9
 export const DEFAULT_ROWS = 9
-export const DEFAULT_GOAL_SCORE = 500
-export const DEFAULT_AVG_COMBO = 4
+
+export const MIN_GOAL_SCORE = 500
+export const MAX_GOAL_SCORE = 1000
+
+export const MIN_AVG_COMBO = 2
+export const MAX_AVG_COMBO = 4
 
 export const GAP_X = 0
 export const GAP_Y = -0.1

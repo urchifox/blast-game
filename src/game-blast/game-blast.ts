@@ -1,11 +1,14 @@
 import { getElementInnerSize } from "../helpers/dom"
+import { getRandomNumber } from "../helpers/random"
 import {
 	BASE_SCORE,
-	DEFAULT_AVG_COMBO,
 	DEFAULT_COLUMNS,
-	DEFAULT_GOAL_SCORE,
 	DEFAULT_ROWS,
 	GROWTH_EXPONENT,
+	MAX_AVG_COMBO,
+	MAX_GOAL_SCORE,
+	MIN_AVG_COMBO,
+	MIN_GOAL_SCORE,
 } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
@@ -108,7 +111,11 @@ export class GameBlast {
 		const columns = DEFAULT_COLUMNS
 		const rows = DEFAULT_ROWS
 
-		this.goalScore = DEFAULT_GOAL_SCORE
+		this.goalScore = getRandomNumber({
+			min: MIN_GOAL_SCORE,
+			max: MAX_GOAL_SCORE,
+			step: 100,
+		})
 		this.updateScoreCounter({
 			score: this.score,
 			goalScore: this.goalScore,
@@ -135,8 +142,8 @@ export class GameBlast {
 			return 0
 		}
 
-		const avgScorePerMove =
-			BASE_SCORE * Math.pow(DEFAULT_AVG_COMBO, GROWTH_EXPONENT)
+		const avgCombo = getRandomNumber({ min: MIN_AVG_COMBO, max: MAX_AVG_COMBO })
+		const avgScorePerMove = BASE_SCORE * Math.pow(avgCombo, GROWTH_EXPONENT)
 
 		const moves = targetScore / avgScorePerMove
 
