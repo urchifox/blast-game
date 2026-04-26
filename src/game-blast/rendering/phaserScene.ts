@@ -28,6 +28,8 @@ export class PhaserScene extends Phaser.Scene {
 		super(SCENE_KEY)
 	}
 
+	// #region Initialization
+
 	preload() {
 		Object.entries(tileTextureModules).forEach(([modulePath, textureUrl]) => {
 			const fileName = modulePath.split("/").pop()
@@ -46,6 +48,23 @@ export class PhaserScene extends Phaser.Scene {
 		this.onReadyCallbacks = []
 	}
 
+	onReady(callback: () => void) {
+		if (this.isReady) {
+			callback()
+			return
+		}
+
+		this.onReadyCallbacks.push(callback)
+	}
+
+	setOnTileClick(onTileClick: OnTileClickHandler) {
+		this.onTileClick = onTileClick
+	}
+
+	// #endregion
+
+	// #region Resizing
+
 	resize(
 		tilesInfo: ReadonlyArray<TileInfoForRender>,
 		gridSnapshot: GridSnapshot
@@ -58,6 +77,22 @@ export class PhaserScene extends Phaser.Scene {
 			this.updateTile(tileInfo, tileSprite, gridSnapshot)
 		}
 	}
+
+	private updateTile(
+		tileInfo: TileInfoForRender,
+		tileSprite: Phaser.GameObjects.Sprite,
+		gridSnapshot: GridSnapshot
+	) {
+		const { x, y, zIndex, tileWidth, tileHeight } =
+			this.getTileVisualProperties(tileInfo, gridSnapshot)
+		tileSprite.setPosition(x, y)
+		tileSprite.setDepth(zIndex)
+		tileSprite.setDisplaySize(tileWidth, tileHeight)
+	}
+
+	// #endregion
+
+	// #region Rendering
 
 	renderTiles(
 		tiles: ReadonlyArray<TileInfoForRender>,
@@ -79,39 +114,6 @@ export class PhaserScene extends Phaser.Scene {
 			}
 			this.renderTile(tile, gridSnapshot, isAppearOnDefaultPosition)
 		})
-	}
-
-	moveTiles(
-		tiles: ReadonlyArray<TileInfoForRender>,
-		gridSnapshot: GridSnapshot
-	) {
-		if (!this.isReady) {
-			return
-		}
-
-		tiles.forEach((tile) => {
-			this.animateMovingToCurrentPosition(tile, gridSnapshot)
-		})
-	}
-
-	clearTiles() {
-		this.tilesMap.forEach((tileSprite) => {
-			tileSprite.destroy()
-		})
-		this.tilesMap.clear()
-	}
-
-	onReady(callback: () => void) {
-		if (this.isReady) {
-			callback()
-			return
-		}
-
-		this.onReadyCallbacks.push(callback)
-	}
-
-	setOnTileClick(onTileClick: OnTileClickHandler) {
-		this.onTileClick = onTileClick
 	}
 
 	private async renderTile(
@@ -156,17 +158,21 @@ export class PhaserScene extends Phaser.Scene {
 		})
 	}
 
-	private getMoveDuration({
-		distance,
-		tileHeight,
-	}: {
-		distance: number
-		tileHeight: number
-	}) {
-		return Math.max(
-			MIN_TILE_MOVE_DURATION_MS,
-			(distance / (Math.max(tileHeight, 1) * TILE_MOVE_SPEED)) * 1000
-		)
+	// #endregion
+
+	// #region Moving
+
+	moveTiles(
+		tiles: ReadonlyArray<TileInfoForRender>,
+		gridSnapshot: GridSnapshot
+	) {
+		if (!this.isReady) {
+			return
+		}
+
+		tiles.forEach((tile) => {
+			this.animateMovingToCurrentPosition(tile, gridSnapshot)
+		})
 	}
 
 	private animateMovingToCurrentPosition(
@@ -212,6 +218,10 @@ export class PhaserScene extends Phaser.Scene {
 		})
 	}
 
+	// #endregion
+
+	// #region Removing
+
 	removeTile(tileId: string) {
 		const tileSprite = this.tilesMap.get(tileId)
 		if (tileSprite) {
@@ -238,17 +248,16 @@ export class PhaserScene extends Phaser.Scene {
 		})
 	}
 
-	private updateTile(
-		tileInfo: TileInfoForRender,
-		tileSprite: Phaser.GameObjects.Sprite,
-		gridSnapshot: GridSnapshot
-	) {
-		const { x, y, zIndex, tileWidth, tileHeight } =
-			this.getTileVisualProperties(tileInfo, gridSnapshot)
-		tileSprite.setPosition(x, y)
-		tileSprite.setDepth(zIndex)
-		tileSprite.setDisplaySize(tileWidth, tileHeight)
+	// #endregion
+
+	clearTiles() {
+		this.tilesMap.forEach((tileSprite) => {
+			tileSprite.destroy()
+		})
+		this.tilesMap.clear()
 	}
+
+	// #region Helpers
 
 	private getTileVisualProperties(
 		tileInfo: TileInfoForRender,
@@ -263,4 +272,19 @@ export class PhaserScene extends Phaser.Scene {
 
 		return { x, y, zIndex, tileWidth, tileHeight, imageKey }
 	}
+
+	private getMoveDuration({
+		distance,
+		tileHeight,
+	}: {
+		distance: number
+		tileHeight: number
+	}) {
+		return Math.max(
+			MIN_TILE_MOVE_DURATION_MS,
+			(distance / (Math.max(tileHeight, 1) * TILE_MOVE_SPEED)) * 1000
+		)
+	}
+
+	// #endregion
 }
