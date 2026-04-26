@@ -118,11 +118,10 @@ export class GameBlast {
 			return
 		}
 
-		const currentBlockedTileIds = new Set<string>()
+		const temporaryblockedTilesIds = new Set<string>()
 
 		for (const tile of tilesToRemove) {
 			const removedTileId = tile.getId()
-			currentBlockedTileIds.add(removedTileId)
 			this.blockedTileIds.add(removedTileId)
 			this.field.removeTile(tile.getPosition())
 			this.renderer.removeTile(removedTileId)
@@ -134,12 +133,12 @@ export class GameBlast {
 
 		for (const movedTile of movedTiles) {
 			const movedTileId = movedTile.getId()
-			currentBlockedTileIds.add(movedTileId)
+			temporaryblockedTilesIds.add(movedTileId)
 			this.blockedTileIds.add(movedTileId)
 		}
 		for (const newTile of newTiles) {
 			const newTileId = newTile.getId()
-			currentBlockedTileIds.add(newTileId)
+			temporaryblockedTilesIds.add(newTileId)
 			this.blockedTileIds.add(newTileId)
 		}
 
@@ -170,7 +169,7 @@ export class GameBlast {
 		}
 
 		await Promise.all(renderTasks)
-		for (const blockedTileId of currentBlockedTileIds) {
+		for (const blockedTileId of temporaryblockedTilesIds) {
 			this.blockedTileIds.delete(blockedTileId)
 		}
 	}
