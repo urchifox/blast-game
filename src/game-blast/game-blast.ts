@@ -9,17 +9,22 @@ export class GameBlast {
 	private readonly renderer: Renderer
 	private readonly grid: Grid
 	private readonly field: Field
-
+	private readonly toggleContainerFullSizeMode: (isFullSize: boolean) => void
 	private readonly handleWindowResize = this.onResize.bind(this)
 
 	constructor({
 		container,
 		renderer,
+		toggleContainerFullSizeMode,
 	}: {
 		container: HTMLElement
 		renderer: Renderer
+		toggleContainerFullSizeMode: (isFullSize: boolean) => void
 	}) {
 		this.container = container
+		this.renderer = renderer
+		this.toggleContainerFullSizeMode = toggleContainerFullSizeMode
+
 		const getContainerSize = () =>
 			getElementInnerSize({ element: this.container })
 		this.grid = new Grid({
@@ -29,8 +34,6 @@ export class GameBlast {
 		const getFieldSnapshot = this.grid.getSnapshot.bind(this.grid)
 
 		this.field = new Field({ getFieldSnapshot })
-
-		this.renderer = renderer
 
 		window.addEventListener("resize", this.handleWindowResize)
 	}
@@ -46,18 +49,23 @@ export class GameBlast {
 	}
 
 	private onResize() {
-		this.renderer.resize(this.grid.updateGridSizes.bind(this.grid))
+		this.toggleContainerFullSizeMode(true)
+		const snapshot = this.grid.updateGridSizes()
+		this.toggleContainerFullSizeMode(false)
+		this.renderer.resize(snapshot)
 	}
 
 	generateLevel() {
 		const columns = DEFAULT_COLUMNS
 		const rows = DEFAULT_ROWS
 
+		this.toggleContainerFullSizeMode(true)
 		this.grid.createGrid(columns, rows)
 		this.field.generateTiles()
 		this.renderer.renderTiles({
 			tiles: this.field.getTiles(),
 			gridSnapshot: this.grid.getSnapshot(),
 		})
+		this.toggleContainerFullSizeMode(false)
 	}
 }

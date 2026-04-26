@@ -7,6 +7,7 @@ import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
 
 export class GameView extends View {
 	private gameBlast?: GameBlast
+	private gameContainer?: HTMLElement
 
 	constructor() {
 		super("game-blast")
@@ -14,16 +15,29 @@ export class GameView extends View {
 
 	override async mount() {
 		super.mount()
-		const gameContainer = queryElement("#canvas-container")
+
+		this.gameContainer = queryElement("#canvas-container")
 		const renderer = new PhaserRenderer({
-			container: gameContainer,
+			container: this.gameContainer,
 		})
-		this.gameBlast = new GameBlast({ container: gameContainer, renderer })
+		this.gameBlast = new GameBlast({
+			container: this.gameContainer,
+			renderer,
+			toggleContainerFullSizeMode:
+				this.toggleGameContainerFullSizeMode.bind(this),
+		})
 		await this.gameBlast.init()
 	}
 
 	override unmount() {
 		super.unmount()
 		this.gameBlast?.destroy()
+	}
+
+	private toggleGameContainerFullSizeMode(isFullSize: boolean) {
+		this.gameContainer?.classList.toggle(
+			"game-blast-container__canvas-container--fullsize",
+			isFullSize
+		)
 	}
 }

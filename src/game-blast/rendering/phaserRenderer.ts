@@ -48,9 +48,7 @@ export class PhaserRenderer implements Renderer {
 		this.game.destroy(true)
 	}
 
-	resize(updateGridSizes: () => GridSnapshot) {
-		this.resetContainerSizes()
-		const gridSnapshot = updateGridSizes()
+	resize(gridSnapshot: GridSnapshot) {
 		this.updateContainerSizes(gridSnapshot)
 		this.scene.resize(gridSnapshot)
 	}
@@ -63,35 +61,23 @@ export class PhaserRenderer implements Renderer {
 		gridSnapshot: GridSnapshot
 	}) {
 		const { gridWidth, gridHeight } = gridSnapshot
-		this.setContainerSizes({ width: gridWidth, height: gridHeight })
+		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
 
 		this.scene.renderTiles(tiles, gridSnapshot)
 	}
 
 	private updateContainerSizes(gridSnapshot: GridSnapshot) {
 		const { gridWidth, gridHeight } = gridSnapshot
-		this.setContainerSizes({ width: gridWidth, height: gridHeight })
+		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
 	}
 
-	private resetContainerSizes() {
-		this.setContainerSizes({})
-	}
-
-	private setContainerSizes({
+	private setCanvasSizes({
 		width,
 		height,
 	}: {
 		width?: number
 		height?: number
 	}) {
-		const isWidthSet = typeof width === "number" && width > 0
-		const isHeightSet = typeof height === "number" && height > 0
-
-		const containerWidth = isWidthSet ? width.toString() : "100%"
-		const containerHeight = isHeightSet ? height.toString() : "100%"
-		this.container.style.setProperty("--grid-width", containerWidth)
-		this.container.style.setProperty("--grid-height", containerHeight)
-
 		const canvasWidth = this.getSafeCanvasSize(width)
 		const canvasHeight = this.getSafeCanvasSize(height)
 		this.game.scale.resize(canvasWidth, canvasHeight)

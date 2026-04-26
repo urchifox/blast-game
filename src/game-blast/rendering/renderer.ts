@@ -16,5 +16,5 @@ export type Renderer = {
 		tiles: ReadonlyArray<Tile>
 		gridSnapshot: GridSnapshot
 	}): void
-	resize(updateGridSizes: () => GridSnapshot): void
+	resize(gridSnapshot: GridSnapshot): void
 }
