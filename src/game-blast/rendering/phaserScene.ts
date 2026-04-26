@@ -9,6 +9,11 @@ const tileTextureModules = import.meta.glob("../assets/img/*.png", {
 	import: "default",
 }) as Record<string, string>
 
+const TILE_MOVE_SPEED_PX_PER_SECOND = 400
+const MIN_TILE_MOVE_DURATION_MS = 10
+const TILE_BOUNCE_DURATION_MS = 200
+const TILE_BOUNCE_HEIGHT_RATIO = 0.05
+
 export class PhaserScene extends Phaser.Scene {
 	private readonly tilesMap = new Map<Tile, Phaser.GameObjects.Sprite>()
 	private isReady = false
@@ -101,9 +106,45 @@ export class PhaserScene extends Phaser.Scene {
 
 	private moveTile(tile: Tile, gridSnapshot: GridSnapshot) {
 		const tileSprite = this.tilesMap.get(tile)
-		if (tileSprite) {
-			this.updateTile(tile, tileSprite, gridSnapshot)
+		if (!tileSprite) {
+			return
 		}
+
+		const { x, y, zIndex, tileHeight } = this.getTileVisualProperties(
+			tile,
+			gridSnapshot
+		)
+		const distance = Phaser.Math.Distance.Between(
+			tileSprite.x,
+			tileSprite.y,
+			x,
+			y
+		)
+		const moveDuration = Math.max(
+			MIN_TILE_MOVE_DURATION_MS,
+			(distance / TILE_MOVE_SPEED_PX_PER_SECOND) * 1000
+		)
+		const bounceHeight = tileHeight * TILE_BOUNCE_HEIGHT_RATIO
+
+		this.tweens.killTweensOf(tileSprite)
+		tileSprite.setDepth(zIndex)
+
+		this.tweens.add({
+			targets: tileSprite,
+			x,
+			y,
+			duration: moveDuration,
+			ease: "Quad.easeIn",
+			onComplete: () => {
+				this.tweens.add({
+					targets: tileSprite,
+					y: y - bounceHeight,
+					duration: TILE_BOUNCE_DURATION_MS / 2,
+					ease: "Sine.easeOut",
+					yoyo: true,
+				})
+			},
+		})
 	}
 
 	removeTile(tile: Tile) {
