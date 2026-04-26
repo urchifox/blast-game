@@ -11,12 +11,12 @@ const tileTextureModules = import.meta.glob("../assets/img/*.png", {
 }) as Record<string, string>
 
 /** tile heights per second */
-const TILE_MOVE_SPEED = 8
+const TILE_MOVE_SPEED = 10
 const MIN_TILE_MOVE_DURATION_MS = 10
-const TILE_BOUNCE_DURATION_MS = 200
+const TILE_BOUNCE_DURATION_MS = 150
 const TILE_BOUNCE_HEIGHT_RATIO = 0.05
-const TILE_APPEAR_DURATION_MS = 300
-const TILE_REMOVE_DURATION_MS = 300
+const TILE_APPEAR_DURATION_MS = 150
+const TILE_REMOVE_DURATION_MS = 150
 
 export class PhaserScene extends Phaser.Scene {
 	private readonly tilesMap = new Map<string, Phaser.GameObjects.Sprite>()
