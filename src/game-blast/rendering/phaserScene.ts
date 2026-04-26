@@ -102,13 +102,13 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Rendering
 
-	renderTiles(
+	async renderTiles(
 		tiles: ReadonlyArray<TileInfoForRender>,
 		gridSnapshot: GridSnapshot,
 		isAppearOnDefaultPosition?: boolean
 	) {
 		if (!this.isReady) {
-			return
+			await Promise.resolve()
 		}
 
 		const tileHeight = gridSnapshot.tileHeight
@@ -116,12 +116,14 @@ export class PhaserScene extends Phaser.Scene {
 			this.getMoveDuration({ distance: tileHeight, tileHeight: tileHeight }) +
 			TILE_APPEAR_DURATION_MS / 2
 
-		tiles.forEach(async (tile, index) => {
+		const renderTasks = tiles.map(async (tile, index) => {
 			if (isAppearOnDefaultPosition) {
 				await wait(index * pauseDuration)
 			}
-			this.renderTile(tile, gridSnapshot, isAppearOnDefaultPosition)
+			await this.renderTile(tile, gridSnapshot, isAppearOnDefaultPosition)
 		})
+
+		await Promise.all(renderTasks)
 	}
 
 	private async renderTile(
@@ -180,7 +182,7 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Moving
 
-	moveTiles(
+	async moveTiles(
 		tiles: ReadonlyArray<TileInfoForRender>,
 		gridSnapshot: GridSnapshot
 	) {
@@ -188,12 +190,14 @@ export class PhaserScene extends Phaser.Scene {
 			return
 		}
 
-		tiles.forEach((tile) => {
+		const moveTasks = tiles.map((tile) =>
 			this.animateMovingToCurrentPosition(tile, gridSnapshot)
-		})
+		)
+
+		await Promise.all(moveTasks)
 	}
 
-	private animateMovingToCurrentPosition(
+	private async animateMovingToCurrentPosition(
 		tileInfo: TileInfoForRender,
 		gridSnapshot: GridSnapshot
 	) {
@@ -231,7 +235,7 @@ export class PhaserScene extends Phaser.Scene {
 			resolve()
 		}
 
-		return new Promise<void>((resolve) => {
+		await new Promise<void>((resolve) => {
 			const moveTween = this.tweens.add({
 				targets: tileSprite,
 				x,
@@ -268,12 +272,16 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Removing
 
-	removeTile(tileId: string) {
+	async removeTile(tileId: string) {
 		const tileSprite = this.tilesMap.get(tileId)
 		if (tileSprite) {
-			this.animateRemoving(tileSprite).then(() => tileSprite.destroy())
+			await this.animateRemoving(tileSprite).then(() => {
+				tileSprite.destroy()
+				this.tilesMap.delete(tileId)
+			})
 		}
 		this.tilesMap.delete(tileId)
+		await Promise.resolve()
 	}
 
 	private animateRemoving(tileSprite: Phaser.GameObjects.Sprite) {

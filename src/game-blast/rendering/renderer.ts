@@ -21,18 +21,18 @@ export type Renderer = {
 		tilesInfo: ReadonlyArray<TileInfoForRender>
 		gridSnapshot: GridSnapshot
 		isAppearOnDefaultPosition?: boolean
-	}): void
+	}): Promise<void>
 	resize(
 		tilesInfo: ReadonlyArray<TileInfoForRender>,
 		gridSnapshot: GridSnapshot
 	): void
 	clearTiles(): void
-	removeTile(id: string): void
+	removeTile(id: string): Promise<void>
 	moveTiles({
 		tilesInfo,
 		gridSnapshot,
 	}: {
 		tilesInfo: ReadonlyArray<TileInfoForRender>
 		gridSnapshot: GridSnapshot
-	}): void
+	}): Promise<void>
 }

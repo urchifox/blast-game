@@ -64,21 +64,21 @@ export class PhaserRenderer implements Renderer {
 		this.scene.clearTiles()
 	}
 
-	removeTile(id: string) {
-		this.scene.removeTile(id)
+	async removeTile(id: string) {
+		await this.scene.removeTile(id)
 	}
 
-	moveTiles({
+	async moveTiles({
 		tilesInfo,
 		gridSnapshot,
 	}: {
 		tilesInfo: ReadonlyArray<TileInfoForRender>
 		gridSnapshot: GridSnapshot
 	}) {
-		this.scene.moveTiles(tilesInfo, gridSnapshot)
+		await this.scene.moveTiles(tilesInfo, gridSnapshot)
 	}
 
-	renderTiles({
+	async renderTiles({
 		tilesInfo,
 		gridSnapshot,
 		isAppearOnDefaultPosition,
@@ -90,7 +90,11 @@ export class PhaserRenderer implements Renderer {
 		const { gridWidth, gridHeight } = gridSnapshot
 		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
 
-		this.scene.renderTiles(tilesInfo, gridSnapshot, isAppearOnDefaultPosition)
+		await this.scene.renderTiles(
+			tilesInfo,
+			gridSnapshot,
+			isAppearOnDefaultPosition
+		)
 	}
 
 	private setCanvasSizes({
