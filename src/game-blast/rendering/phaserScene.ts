@@ -20,6 +20,14 @@ const TILE_REMOVE_DURATION_MS = 300
 
 export class PhaserScene extends Phaser.Scene {
 	private readonly tilesMap = new Map<string, Phaser.GameObjects.Sprite>()
+	private readonly appearingTweens = new Map<
+		Phaser.GameObjects.Sprite,
+		Phaser.Tweens.Tween
+	>()
+	private readonly movingTweens = new Map<
+		Phaser.GameObjects.Sprite,
+		Phaser.Tweens.Tween
+	>()
 	private isReady = false
 	private onReadyCallbacks: Array<() => void> = []
 	private onTileClick: OnTileClickHandler | null = null
@@ -145,16 +153,22 @@ export class PhaserScene extends Phaser.Scene {
 		const targetScaleY = tileSprite.scaleY
 		tileSprite.setScale(0)
 		tileSprite.setAlpha(0)
-		return new Promise((resolve) => {
-			this.tweens.add({
+		const onTweenComplete = (resolve: () => void) => {
+			this.appearingTweens.delete(tileSprite)
+			resolve()
+		}
+		return new Promise<void>((resolve) => {
+			const appearingTween = this.tweens.add({
 				targets: tileSprite,
 				alpha: 1,
 				scaleX: targetScaleX,
 				scaleY: targetScaleY,
 				duration: TILE_APPEAR_DURATION_MS,
 				ease: "Quad.easeOut",
-				onComplete: resolve,
+				onComplete: () => onTweenComplete(resolve),
+				onStop: () => onTweenComplete(resolve),
 			})
+			this.appearingTweens.set(tileSprite, appearingTween)
 		})
 	}
 
@@ -188,6 +202,12 @@ export class PhaserScene extends Phaser.Scene {
 			tileInfo,
 			gridSnapshot
 		)
+
+		/* Prevent false moving upwards */
+		if (tileSprite.y > y) {
+			return
+		}
+
 		const distance = Phaser.Math.Distance.Between(
 			tileSprite.x,
 			tileSprite.y,
@@ -197,24 +217,38 @@ export class PhaserScene extends Phaser.Scene {
 		const moveDuration = this.getMoveDuration({ distance, tileHeight })
 		const bounceHeight = tileHeight * TILE_BOUNCE_HEIGHT_RATIO
 
-		this.tweens.killTweensOf(tileSprite)
-		tileSprite.setDepth(zIndex)
+		const currentMovingTween = this.movingTweens.get(tileSprite)
+		currentMovingTween?.stop()
 
-		this.tweens.add({
-			targets: tileSprite,
-			x,
-			y,
-			duration: moveDuration,
-			ease: "Quad.easeIn",
-			onComplete: () => {
-				this.tweens.add({
-					targets: tileSprite,
-					y: y - bounceHeight,
-					duration: TILE_BOUNCE_DURATION_MS / 2,
-					ease: "Sine.easeOut",
-					yoyo: true,
-				})
-			},
+		const onTweenComplete = (resolve: () => void) => {
+			tileSprite.setDepth(zIndex)
+			this.movingTweens.delete(tileSprite)
+			resolve()
+		}
+
+		return new Promise<void>((resolve) => {
+			const moveTween = this.tweens.add({
+				targets: tileSprite,
+				x,
+				y,
+				duration: moveDuration,
+				ease: "Quad.easeIn",
+				onComplete: () => {
+					this.movingTweens.delete(tileSprite)
+					const bounceTween = this.tweens.add({
+						targets: tileSprite,
+						y: y - bounceHeight,
+						duration: TILE_BOUNCE_DURATION_MS / 2,
+						ease: "Sine.easeOut",
+						yoyo: true,
+						onComplete: () => onTweenComplete(resolve),
+						onStop: () => onTweenComplete(resolve),
+					})
+					this.movingTweens.set(tileSprite, bounceTween)
+				},
+				onStop: () => onTweenComplete(resolve),
+			})
+			this.movingTweens.set(tileSprite, moveTween)
 		})
 	}
 
@@ -225,25 +259,23 @@ export class PhaserScene extends Phaser.Scene {
 	removeTile(tileId: string) {
 		const tileSprite = this.tilesMap.get(tileId)
 		if (tileSprite) {
-			this.animateRemoving(tileSprite).then(() => {
-				tileSprite.destroy()
-			})
+			this.animateRemoving(tileSprite).then(() => tileSprite.destroy())
 		}
 		this.tilesMap.delete(tileId)
 	}
 
 	private animateRemoving(tileSprite: Phaser.GameObjects.Sprite) {
 		return new Promise<void>((resolve) => {
-			this.tweens.killTweensOf(tileSprite)
+			const appearingTween = this.appearingTweens.get(tileSprite)
+			appearingTween?.stop()
+
 			this.tweens.add({
 				targets: tileSprite,
 				scale: 0,
 				alpha: 0,
 				duration: TILE_REMOVE_DURATION_MS,
 				ease: "Quad.easeOut",
-				onComplete: () => {
-					resolve()
-				},
+				onComplete: () => resolve(),
 			})
 		})
 	}
@@ -252,8 +284,11 @@ export class PhaserScene extends Phaser.Scene {
 
 	clearTiles() {
 		this.tilesMap.forEach((tileSprite) => {
+			this.tweens.killTweensOf(tileSprite)
 			tileSprite.destroy()
 		})
+		this.appearingTweens.clear()
+		this.movingTweens.clear()
 		this.tilesMap.clear()
 	}
 
