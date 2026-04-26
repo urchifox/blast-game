@@ -52,6 +52,13 @@ export class PhaserScene extends Phaser.Scene {
 		})
 	}
 
+	clearTiles() {
+		this.tilesMap.forEach((tileSprite) => {
+			tileSprite.destroy()
+		})
+		this.tilesMap.clear()
+	}
+
 	onReady(callback: () => void) {
 		if (this.isReady) {
 			callback()

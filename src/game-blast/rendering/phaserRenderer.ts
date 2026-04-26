@@ -53,6 +53,10 @@ export class PhaserRenderer implements Renderer {
 		this.scene.resize(gridSnapshot)
 	}
 
+	clearTiles() {
+		this.scene.clearTiles()
+	}
+
 	renderTiles({
 		tiles,
 		gridSnapshot,

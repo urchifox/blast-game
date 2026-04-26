@@ -17,4 +17,5 @@ export type Renderer = {
 		gridSnapshot: GridSnapshot
 	}): void
 	resize(gridSnapshot: GridSnapshot): void
+	clearTiles(): void
 }

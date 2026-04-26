@@ -4,7 +4,7 @@ import { GridSnapshot } from "./grid"
 import { Tile } from "./tile"
 
 export class Field {
-	private readonly tiles: Array<Tile> = []
+	private tiles: Array<Tile> = []
 
 	private readonly getFieldSnapshot: () => GridSnapshot
 	constructor({ getFieldSnapshot }: { getFieldSnapshot: () => GridSnapshot }) {
@@ -25,5 +25,9 @@ export class Field {
 
 	getTiles(): Array<Tile> {
 		return this.tiles
+	}
+
+	clearTiles() {
+		this.tiles = []
 	}
 }

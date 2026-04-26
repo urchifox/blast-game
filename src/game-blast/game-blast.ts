@@ -68,4 +68,9 @@ export class GameBlast {
 		})
 		this.toggleContainerFullSizeMode(false)
 	}
+
+	clearLevel() {
+		this.field.clearTiles()
+		this.renderer.clearTiles()
+	}
 }
