@@ -8,6 +8,8 @@ import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
 export class GameView extends View {
 	private gameBlast?: GameBlast
 	private gameContainer?: HTMLElement
+	private movesCounter?: HTMLElement
+	private scoreCounter?: HTMLElement
 
 	constructor() {
 		super("game-blast")
@@ -17,6 +19,9 @@ export class GameView extends View {
 		super.mount()
 
 		this.gameContainer = queryElement("#canvas-container")
+		this.movesCounter = queryElement("#movements-counter-text")
+		this.scoreCounter = queryElement("#points-counter-result")
+
 		const renderer = new PhaserRenderer({
 			container: this.gameContainer,
 		})
@@ -25,6 +30,8 @@ export class GameView extends View {
 			renderer,
 			toggleContainerFullSizeMode:
 				this.toggleGameContainerFullSizeMode.bind(this),
+			updateMovesCounter: this.updateMovesCounter.bind(this),
+			updateScoreCounter: this.updateScoreCounter.bind(this),
 		})
 		await this.gameBlast.init()
 	}
@@ -39,5 +46,32 @@ export class GameView extends View {
 			"game-blast-container__canvas-container--fullsize",
 			isFullSize
 		)
+	}
+
+	private updateMovesCounter({
+		movesNumber,
+		movesLimit,
+	}: {
+		movesNumber: number
+		movesLimit: number
+	}) {
+		if (this.movesCounter === undefined) {
+			return
+		}
+		const movesLeft = movesLimit - movesNumber
+		this.movesCounter.textContent = movesLeft.toString()
+	}
+
+	private updateScoreCounter({
+		score,
+		goalScore,
+	}: {
+		score: number
+		goalScore: number
+	}) {
+		if (this.scoreCounter === undefined) {
+			return
+		}
+		this.scoreCounter.textContent = `${score}/${goalScore}`
 	}
 }
