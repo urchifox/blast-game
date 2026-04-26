@@ -142,9 +142,11 @@ export class PhaserScene extends Phaser.Scene {
 		const targetScaleX = tileSprite.scaleX
 		const targetScaleY = tileSprite.scaleY
 		tileSprite.setScale(0)
+		tileSprite.setAlpha(0)
 		return new Promise((resolve) => {
 			this.tweens.add({
 				targets: tileSprite,
+				alpha: 1,
 				scaleX: targetScaleX,
 				scaleY: targetScaleY,
 				duration: TILE_APPEAR_DURATION_MS,
