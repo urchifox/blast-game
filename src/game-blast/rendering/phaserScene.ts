@@ -146,7 +146,7 @@ export class PhaserScene extends Phaser.Scene {
 
 		await this.animateAppear(tileSprite)
 		if (isAppearOnDefaultPosition) {
-			this.animateMovingToCurrentPosition(tileInfo, gridSnapshot)
+			await this.animateMovingToCurrentPosition(tileInfo, gridSnapshot)
 		}
 	}
 
