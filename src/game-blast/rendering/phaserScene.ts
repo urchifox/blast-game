@@ -155,10 +155,14 @@ export class PhaserScene extends Phaser.Scene {
 		tileSprite.setAlpha(0)
 		const onTweenComplete = (resolve: () => void) => {
 			this.appearingTweens.delete(tileSprite)
+			tileSprite.setInteractive({ useHandCursor: true })
 			resolve()
 		}
 		return new Promise<void>((resolve) => {
 			const appearingTween = this.tweens.add({
+				onStart: () => {
+					tileSprite.disableInteractive()
+				},
 				targets: tileSprite,
 				alpha: 1,
 				scaleX: targetScaleX,
@@ -233,8 +237,12 @@ export class PhaserScene extends Phaser.Scene {
 				y,
 				duration: moveDuration,
 				ease: "Quad.easeIn",
+				onStart: () => {
+					tileSprite.disableInteractive()
+				},
 				onComplete: () => {
 					this.movingTweens.delete(tileSprite)
+					tileSprite.setInteractive({ useHandCursor: true })
 					const bounceTween = this.tweens.add({
 						targets: tileSprite,
 						y: y - bounceHeight,
@@ -246,7 +254,10 @@ export class PhaserScene extends Phaser.Scene {
 					})
 					this.movingTweens.set(tileSprite, bounceTween)
 				},
-				onStop: () => onTweenComplete(resolve),
+				onStop: () => {
+					tileSprite.setInteractive({ useHandCursor: true })
+					onTweenComplete(resolve)
+				},
 			})
 			this.movingTweens.set(tileSprite, moveTween)
 		})
@@ -270,6 +281,9 @@ export class PhaserScene extends Phaser.Scene {
 			appearingTween?.stop()
 
 			this.tweens.add({
+				onStart: () => {
+					tileSprite.disableInteractive()
+				},
 				targets: tileSprite,
 				scale: 0,
 				alpha: 0,
