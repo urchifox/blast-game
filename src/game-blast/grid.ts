@@ -156,7 +156,7 @@ export class Grid {
 			neighbourPositions.push({ row: row - 1, column })
 		}
 		// lower
-		if (row < (this.rows ?? 0)) {
+		if (row < (this.rows ?? 0) - 1) {
 			neighbourPositions.push({ row: row + 1, column })
 		}
 		// left
@@ -164,7 +164,7 @@ export class Grid {
 			neighbourPositions.push({ row, column: column - 1 })
 		}
 		// right
-		if (column < (this.columns ?? 0)) {
+		if (column < (this.columns ?? 0) - 1) {
 			neighbourPositions.push({ row, column: column + 1 })
 		}
 
