@@ -13,5 +13,14 @@ export function getRandomNumber({
 	max: number
 	step?: number
 }): number {
-	return min + Math.floor(Math.random() * ((max - min) / step + 1)) * step
+	if (step <= 0) {
+		throw new Error("Step must be greater than 0")
+	}
+
+	if (max < min) {
+		throw new Error("Max must be greater than or equal to min")
+	}
+
+	const stepsCount = Math.floor((max - min) / step)
+	return min + Math.floor(Math.random() * (stepsCount + 1)) * step
 }
