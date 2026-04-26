@@ -1,5 +1,12 @@
 import { getElementInnerSize } from "../helpers/dom"
-import { DEFAULT_COLUMNS, DEFAULT_ROWS } from "./config"
+import {
+	BASE_SCORE,
+	DEFAULT_AVG_COMBO,
+	DEFAULT_COLUMNS,
+	DEFAULT_GOAL_SCORE,
+	DEFAULT_ROWS,
+	GROWTH_EXPONENT,
+} from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
 import { Renderer, TileInfoForRender } from "./rendering/renderer"
@@ -14,18 +21,56 @@ export class GameBlast {
 	private readonly handleWindowResize = this.onResize.bind(this)
 	private readonly blockedTileIds = new Set<string>()
 
+	private movesNumber = 0
+	private movesLimit = 0
+	private readonly updateMovesCounter: ({
+		movesNumber,
+		movesLimit,
+	}: {
+		movesNumber: number
+		movesLimit: number
+	}) => void
+
+	private score = 0
+	private goalScore = 0
+	private readonly updateScoreCounter: ({
+		score,
+		goalScore,
+	}: {
+		score: number
+		goalScore: number
+	}) => void
+
 	constructor({
 		container,
 		renderer,
 		toggleContainerFullSizeMode,
+		updateMovesCounter,
+		updateScoreCounter,
 	}: {
 		container: HTMLElement
 		renderer: Renderer
 		toggleContainerFullSizeMode: (isFullSize: boolean) => void
+		updateMovesCounter: ({
+			movesNumber,
+			movesLimit,
+		}: {
+			movesNumber: number
+			movesLimit: number
+		}) => void
+		updateScoreCounter: ({
+			score,
+			goalScore,
+		}: {
+			score: number
+			goalScore: number
+		}) => void
 	}) {
 		this.container = container
 		this.renderer = renderer
 		this.toggleContainerFullSizeMode = toggleContainerFullSizeMode
+		this.updateMovesCounter = updateMovesCounter
+		this.updateScoreCounter = updateScoreCounter
 
 		const getContainerSize = () =>
 			getElementInnerSize({ element: this.container })
@@ -63,6 +108,18 @@ export class GameBlast {
 		const columns = DEFAULT_COLUMNS
 		const rows = DEFAULT_ROWS
 
+		this.goalScore = DEFAULT_GOAL_SCORE
+		this.updateScoreCounter({
+			score: this.score,
+			goalScore: this.goalScore,
+		})
+
+		this.movesLimit = this.estimateMoves(this.goalScore)
+		this.updateMovesCounter({
+			movesNumber: this.movesNumber,
+			movesLimit: this.movesLimit,
+		})
+
 		this.toggleContainerFullSizeMode(true)
 		this.grid.createGrid(columns, rows)
 		this.field.generateTiles()
@@ -73,9 +130,24 @@ export class GameBlast {
 		this.toggleContainerFullSizeMode(false)
 	}
 
+	estimateMoves(targetScore: number): number {
+		if (targetScore <= 0) {
+			return 0
+		}
+
+		const avgScorePerMove =
+			BASE_SCORE * Math.pow(DEFAULT_AVG_COMBO, GROWTH_EXPONENT)
+
+		const moves = targetScore / avgScorePerMove
+
+		return Math.ceil(moves)
+	}
+
 	clearLevel() {
 		this.field.clearTiles()
 		this.renderer.clearTiles()
+		this.movesNumber = 0
+		this.score = 0
 	}
 
 	async onTileClick(id: string) {
@@ -127,6 +199,9 @@ export class GameBlast {
 			this.renderer.removeTile(removedTileId)
 		}
 
+		this.updateScore(tilesToRemove.size)
+		this.updateMoves()
+
 		const gridSnapshot = this.grid.getSnapshot()
 		const { movedTiles, newTiles } =
 			this.field.fillEmptyPositions(positionsToRemove)
@@ -172,5 +247,47 @@ export class GameBlast {
 		for (const blockedTileId of temporaryblockedTilesIds) {
 			this.blockedTileIds.delete(blockedTileId)
 		}
+
+		this.checkGameEnd()
+	}
+
+	private updateMoves() {
+		this.movesNumber++
+		this.updateMovesCounter({
+			movesNumber: this.movesNumber,
+			movesLimit: this.movesLimit,
+		})
+	}
+
+	/** Uses power scale formula */
+	private updateScore(tilesToRemove: number) {
+		const points = Math.round(
+			BASE_SCORE * Math.pow(tilesToRemove, GROWTH_EXPONENT)
+		)
+		this.score += points
+		this.updateScoreCounter({
+			score: this.score,
+			goalScore: this.goalScore,
+		})
+	}
+
+	private checkGameEnd() {
+		if (this.score >= this.goalScore) {
+			this.win()
+		} else if (this.movesNumber >= this.movesLimit) {
+			this.lose()
+		}
+	}
+
+	private win() {
+		alert("You win!")
+		this.clearLevel()
+		this.generateLevel()
+	}
+
+	private lose() {
+		alert("You lose!")
+		this.clearLevel()
+		this.generateLevel()
 	}
 }

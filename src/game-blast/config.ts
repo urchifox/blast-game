@@ -1,5 +1,12 @@
+/** k in power scale formula */
+export const BASE_SCORE = 5
+/** p in power scale formula */
+export const GROWTH_EXPONENT = 1.5
+
 export const DEFAULT_COLUMNS = 9
 export const DEFAULT_ROWS = 9
+export const DEFAULT_GOAL_SCORE = 500
+export const DEFAULT_AVG_COMBO = 4
 
 export const GAP_X = 0
 export const GAP_Y = -0.1
