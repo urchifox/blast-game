@@ -5,6 +5,7 @@ import {
 	GAP_Y,
 	MAX_TILE_HEIGHT,
 } from "./config"
+import { TilePosition } from "./tile"
 
 export type GridSnapshot = {
 	readonly rows: number
@@ -145,4 +146,28 @@ export class Grid {
 	}
 
 	// #endregion
+
+	getNeighbourPositions(position: TilePosition): TilePosition[] {
+		const { row, column } = position
+		const neighbourPositions: TilePosition[] = []
+
+		// upper
+		if (row > 0) {
+			neighbourPositions.push({ row: row - 1, column })
+		}
+		// lower
+		if (row < (this.rows ?? 0)) {
+			neighbourPositions.push({ row: row + 1, column })
+		}
+		// left
+		if (column > 0) {
+			neighbourPositions.push({ row, column: column - 1 })
+		}
+		// right
+		if (column < (this.columns ?? 0)) {
+			neighbourPositions.push({ row, column: column + 1 })
+		}
+
+		return neighbourPositions
+	}
 }

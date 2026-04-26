@@ -13,6 +13,7 @@ export class PhaserScene extends Phaser.Scene {
 	private readonly tilesMap = new Map<Tile, Phaser.GameObjects.Sprite>()
 	private isReady = false
 	private onReadyCallbacks: Array<() => void> = []
+	private onTileClick: ((tile: Tile) => void) | null = null
 
 	constructor() {
 		super(SCENE_KEY)
@@ -68,6 +69,10 @@ export class PhaserScene extends Phaser.Scene {
 		this.onReadyCallbacks.push(callback)
 	}
 
+	setOnTileClick(onTileClick: (tile: Tile) => void) {
+		this.onTileClick = onTileClick
+	}
+
 	private renderTile(tile: Tile, gridSnapshot: GridSnapshot) {
 		const { x, y, zIndex, tileWidth, tileHeight, imageKey } =
 			this.getTileVisualProperties(tile, gridSnapshot)
@@ -79,6 +84,17 @@ export class PhaserScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 
 		this.tilesMap.set(tile, tileSprite)
+		tileSprite.on("pointerdown", () => {
+			this.onTileClick?.(tile)
+		})
+	}
+
+	removeTile(tile: Tile) {
+		const tileSprite = this.tilesMap.get(tile)
+		if (tileSprite) {
+			tileSprite.destroy()
+		}
+		this.tilesMap.delete(tile)
 	}
 
 	private updateTile(

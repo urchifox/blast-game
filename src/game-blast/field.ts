@@ -1,10 +1,11 @@
 import { pickRandomItem } from "../helpers/random"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
-import { Tile } from "./tile"
+import { stringifyTilePosition } from "./helpers"
+import { Tile, TilePosition, TilePositionString } from "./tile"
 
 export class Field {
-	private tiles: Array<Tile> = []
+	private tilesMap = new Map<TilePositionString, Tile>()
 
 	private readonly getFieldSnapshot: () => GridSnapshot
 	constructor({ getFieldSnapshot }: { getFieldSnapshot: () => GridSnapshot }) {
@@ -18,16 +19,28 @@ export class Field {
 			for (let column = 0; column < columns; column++) {
 				const kind = pickRandomItem(TILES_KINDS_NORMAL)
 				const position = { row, column }
-				this.tiles.push(new Tile({ kind, position }))
+				const tile = new Tile({ kind, position })
+				const positionString = stringifyTilePosition(position)
+				this.tilesMap.set(positionString, tile)
 			}
 		}
 	}
 
 	getTiles(): Array<Tile> {
-		return this.tiles
+		return Array.from(this.tilesMap.values())
 	}
 
 	clearTiles() {
-		this.tiles = []
+		this.tilesMap.clear()
+	}
+
+	getTile(position: TilePosition) {
+		const positionString = stringifyTilePosition(position)
+		return this.tilesMap.get(positionString)
+	}
+
+	removeTile(position: TilePosition) {
+		const positionString = stringifyTilePosition(position)
+		this.tilesMap.delete(positionString)
 	}
 }

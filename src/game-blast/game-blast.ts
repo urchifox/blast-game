@@ -3,6 +3,7 @@ import { DEFAULT_COLUMNS, DEFAULT_ROWS } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
 import { Renderer } from "./rendering/renderer"
+import { Tile, TilePosition } from "./tile"
 
 export class GameBlast {
 	private readonly container: HTMLElement
@@ -39,6 +40,7 @@ export class GameBlast {
 	}
 
 	async init() {
+		this.renderer.setOnTileClick(this.onTileClick.bind(this))
 		await this.renderer.init()
 		this.generateLevel()
 	}
@@ -72,5 +74,38 @@ export class GameBlast {
 	clearLevel() {
 		this.field.clearTiles()
 		this.renderer.clearTiles()
+	}
+
+	onTileClick(tile: Tile) {
+		const position = tile.getPosition()
+		const kind = tile.getKind()
+
+		const tilesToRemove = new Set<Tile>([tile])
+		const positionsToRemove = new Set<TilePosition>([position])
+
+		for (const tileToRemove of tilesToRemove) {
+			const neighborPositions = this.grid.getNeighbourPositions(
+				tileToRemove.getPosition()
+			)
+			for (const neighborPosition of neighborPositions) {
+				if (positionsToRemove.has(neighborPosition)) {
+					continue
+				}
+				const neighborTile = this.field.getTile(neighborPosition)
+				if (neighborTile !== undefined && neighborTile.getKind() === kind) {
+					tilesToRemove.add(neighborTile)
+					positionsToRemove.add(neighborPosition)
+				}
+			}
+		}
+
+		if (tilesToRemove.size === 1) {
+			return
+		}
+
+		for (const tile of tilesToRemove) {
+			this.field.removeTile(tile.getPosition())
+			this.renderer.removeTile(tile)
+		}
 	}
 }

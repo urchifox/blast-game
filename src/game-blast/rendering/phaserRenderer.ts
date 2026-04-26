@@ -44,6 +44,10 @@ export class PhaserRenderer implements Renderer {
 		await this.readyPromise
 	}
 
+	setOnTileClick(onTileClick: (tile: Tile) => void) {
+		this.scene.setOnTileClick(onTileClick)
+	}
+
 	destroy() {
 		this.game.destroy(true)
 	}
@@ -55,6 +59,10 @@ export class PhaserRenderer implements Renderer {
 
 	clearTiles() {
 		this.scene.clearTiles()
+	}
+
+	removeTile(tile: Tile) {
+		this.scene.removeTile(tile)
 	}
 
 	renderTiles({
