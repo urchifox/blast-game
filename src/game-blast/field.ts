@@ -1,6 +1,7 @@
 import { pickRandomItem } from "../helpers/random"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
+import { TileInfoForRender } from "./rendering/renderer"
 import { Tile, TilePosition } from "./tile"
 
 export class Field {
@@ -27,6 +28,14 @@ export class Field {
 
 	getTiles(): Array<Tile> {
 		return this.tilesByColumns.flat().filter((tile) => tile !== undefined)
+	}
+
+	getTilesInfo(): Array<TileInfoForRender> {
+		return this.getTiles().map((tile) => tile.getInfoForRender())
+	}
+
+	getTileById(id: string) {
+		return this.getTiles().find((tile) => tile?.getId() === id)
 	}
 
 	clearTiles() {

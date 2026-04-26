@@ -1,12 +1,12 @@
 {
   "type": "module",
   "browserslist": [
-		"last 2 versions",
-		"not dead",
-		"not op_mini all",
-		"not and_uc > 0",
-		"not < 0.2%"
-	],
+    "last 2 versions",
+    "not dead",
+    "not op_mini all",
+    "not and_uc > 0",
+    "not < 0.2%"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -p tsconfig.json && vite build",
@@ -19,6 +19,7 @@
     "format:check": "prettier . --check"
   },
   "dependencies": {
+    "nanoid": "5.1.9",
     "phaser": "3.90.0"
   },
   "devDependencies": {

@@ -1,25 +1,36 @@
 import { GridSnapshot } from "../grid"
-import { Tile } from "../tile"
+
+export type TileInfoForRender = {
+	id: string
+	image: string
+	row: number
+	column: number
+}
+
+export type OnTileClickHandler = (id: string) => void
 
 export type Renderer = {
 	init(): Promise<void>
 	destroy(): void
-	setOnTileClick(onTileClick: (tile: Tile) => void): void
+	setOnTileClick(handler: OnTileClickHandler): void
 	renderTiles({
-		tiles,
+		tilesInfo,
 		gridSnapshot,
 	}: {
-		tiles: ReadonlyArray<Tile>
+		tilesInfo: ReadonlyArray<TileInfoForRender>
 		gridSnapshot: GridSnapshot
 	}): void
-	resize(gridSnapshot: GridSnapshot): void
+	resize(
+		tilesInfo: ReadonlyArray<TileInfoForRender>,
+		gridSnapshot: GridSnapshot
+	): void
 	clearTiles(): void
-	removeTile(tile: Tile): void
+	removeTile(id: string): void
 	moveTiles({
-		tiles,
+		tilesInfo,
 		gridSnapshot,
 	}: {
-		tiles: ReadonlyArray<Tile>
+		tilesInfo: ReadonlyArray<TileInfoForRender>
 		gridSnapshot: GridSnapshot
 	}): void
 }

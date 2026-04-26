@@ -1,5 +1,7 @@
+import { nanoid } from "nanoid"
 import { TILES_KINDS_NORMAL } from "./config"
 import { postitionSeparatorString } from "./helpers"
+import { TileInfoForRender } from "./rendering/renderer"
 
 export type TileKind = (typeof TILES_KINDS_NORMAL)[number]
 export type TilePosition = {
@@ -10,20 +12,39 @@ export type TilePositionString =
 	`number${typeof postitionSeparatorString}number`
 
 export class Tile {
+	private readonly id: string = nanoid()
 	private readonly kind: TileKind
 	private readonly position: TilePosition
+	private readonly image: string
 
 	constructor({ kind, position }: { kind: TileKind; position: TilePosition }) {
 		this.kind = kind
 		this.position = position
+		this.image = `tile-${kind}`
+	}
+	getId(): string {
+		return this.id
 	}
 
 	getKind(): TileKind {
 		return this.kind
 	}
 
+	getImage(): string {
+		return this.image
+	}
+
 	getPosition(): TilePosition {
 		return this.position
+	}
+
+	getInfoForRender(): TileInfoForRender {
+		return {
+			id: this.id,
+			image: this.image,
+			row: this.position.row,
+			column: this.position.column,
+		}
 	}
 
 	setPosition(position: TilePosition) {

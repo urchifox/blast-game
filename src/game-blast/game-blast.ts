@@ -54,7 +54,8 @@ export class GameBlast {
 		this.toggleContainerFullSizeMode(true)
 		const snapshot = this.grid.updateGridSizes()
 		this.toggleContainerFullSizeMode(false)
-		this.renderer.resize(snapshot)
+		const tilesInfo = this.field.getTilesInfo()
+		this.renderer.resize(tilesInfo, snapshot)
 	}
 
 	generateLevel() {
@@ -65,7 +66,7 @@ export class GameBlast {
 		this.grid.createGrid(columns, rows)
 		this.field.generateTiles()
 		this.renderer.renderTiles({
-			tiles: this.field.getTiles(),
+			tilesInfo: this.field.getTilesInfo(),
 			gridSnapshot: this.grid.getSnapshot(),
 		})
 		this.toggleContainerFullSizeMode(false)
@@ -76,7 +77,12 @@ export class GameBlast {
 		this.renderer.clearTiles()
 	}
 
-	onTileClick(tile: Tile) {
+	onTileClick(id: string) {
+		const tile = this.field.getTileById(id)
+		if (tile === undefined) {
+			return
+		}
+
 		const position = tile.getPosition()
 		const kind = tile.getKind()
 
@@ -105,19 +111,19 @@ export class GameBlast {
 
 		for (const tile of tilesToRemove) {
 			this.field.removeTile(tile.getPosition())
-			this.renderer.removeTile(tile)
+			this.renderer.removeTile(tile.getId())
 		}
 
 		const gridSnapshot = this.grid.getSnapshot()
 		const { movedTiles, newTiles } =
 			this.field.fillEmptyPositions(positionsToRemove)
 		this.renderer.moveTiles({
-			tiles: Array.from(movedTiles),
+			tilesInfo: Array.from(movedTiles).map((tile) => tile.getInfoForRender()),
 			gridSnapshot,
 		})
 
 		this.renderer.renderTiles({
-			tiles: Array.from(newTiles),
+			tilesInfo: Array.from(newTiles).map((tile) => tile.getInfoForRender()),
 			gridSnapshot,
 		})
 	}

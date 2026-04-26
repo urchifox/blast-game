@@ -2,8 +2,7 @@ import Phaser from "phaser"
 
 import { GridSnapshot } from "../grid"
 import { PhaserScene } from "./phaserScene"
-import { Tile } from "../tile"
-import { Renderer } from "./renderer"
+import { OnTileClickHandler, Renderer, TileInfoForRender } from "./renderer"
 
 export class PhaserRenderer implements Renderer {
 	private readonly container: HTMLElement
@@ -44,7 +43,7 @@ export class PhaserRenderer implements Renderer {
 		await this.readyPromise
 	}
 
-	setOnTileClick(onTileClick: (tile: Tile) => void) {
+	setOnTileClick(onTileClick: OnTileClickHandler) {
 		this.scene.setOnTileClick(onTileClick)
 	}
 
@@ -52,45 +51,44 @@ export class PhaserRenderer implements Renderer {
 		this.game.destroy(true)
 	}
 
-	resize(gridSnapshot: GridSnapshot) {
-		this.updateContainerSizes(gridSnapshot)
-		this.scene.resize(gridSnapshot)
+	resize(
+		tilesInfo: ReadonlyArray<TileInfoForRender>,
+		gridSnapshot: GridSnapshot
+	) {
+		const { gridWidth, gridHeight } = gridSnapshot
+		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
+		this.scene.resize(tilesInfo, gridSnapshot)
 	}
 
 	clearTiles() {
 		this.scene.clearTiles()
 	}
 
-	removeTile(tile: Tile) {
-		this.scene.removeTile(tile)
+	removeTile(id: string) {
+		this.scene.removeTile(id)
 	}
 
 	moveTiles({
-		tiles,
+		tilesInfo,
 		gridSnapshot,
 	}: {
-		tiles: ReadonlyArray<Tile>
+		tilesInfo: ReadonlyArray<TileInfoForRender>
 		gridSnapshot: GridSnapshot
 	}) {
-		this.scene.moveTiles(tiles, gridSnapshot)
+		this.scene.moveTiles(tilesInfo, gridSnapshot)
 	}
 
 	renderTiles({
-		tiles,
+		tilesInfo,
 		gridSnapshot,
 	}: {
-		tiles: ReadonlyArray<Tile>
+		tilesInfo: ReadonlyArray<TileInfoForRender>
 		gridSnapshot: GridSnapshot
 	}) {
 		const { gridWidth, gridHeight } = gridSnapshot
 		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
 
-		this.scene.renderTiles(tiles, gridSnapshot)
-	}
-
-	private updateContainerSizes(gridSnapshot: GridSnapshot) {
-		const { gridWidth, gridHeight } = gridSnapshot
-		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
+		this.scene.renderTiles(tilesInfo, gridSnapshot)
 	}
 
 	private setCanvasSizes({
