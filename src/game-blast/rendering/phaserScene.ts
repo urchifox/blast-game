@@ -223,6 +223,7 @@ export class PhaserScene extends Phaser.Scene {
 
 		const currentMovingTween = this.movingTweens.get(tileSprite)
 		currentMovingTween?.stop()
+		this.movingTweens.delete(tileSprite)
 
 		const onTweenComplete = (resolve: () => void) => {
 			tileSprite.setDepth(zIndex)
@@ -279,6 +280,7 @@ export class PhaserScene extends Phaser.Scene {
 		return new Promise<void>((resolve) => {
 			const appearingTween = this.appearingTweens.get(tileSprite)
 			appearingTween?.stop()
+			this.appearingTweens.delete(tileSprite)
 
 			this.tweens.add({
 				onStart: () => {
