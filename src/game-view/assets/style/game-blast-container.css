@@ -21,3 +21,21 @@
 	grid-template-columns: 1fr;
 	justify-items: center;
 }
+
+.game-blast-container__canvas-container {
+	align-self: center;
+	justify-self: center;
+
+	width: fit-content;
+	height: fit-content;
+}
+
+.game-blast-container__canvas-container--fullsize {
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+}
+
+.game-blast-container__canvas-container--fullsize canvas {
+	display: none;
+}
