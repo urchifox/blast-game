@@ -275,7 +275,6 @@ export class PhaserScene extends Phaser.Scene {
 				this.tilesMap.delete(tileId)
 			})
 		}
-		this.tilesMap.delete(tileId)
 		await Promise.resolve()
 	}
 
