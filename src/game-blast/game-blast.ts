@@ -12,6 +12,7 @@ export class GameBlast {
 	private readonly field: Field
 	private readonly toggleContainerFullSizeMode: (isFullSize: boolean) => void
 	private readonly handleWindowResize = this.onResize.bind(this)
+	private readonly blockedTileIds = new Set<string>()
 
 	constructor({
 		container,
@@ -77,7 +78,11 @@ export class GameBlast {
 		this.renderer.clearTiles()
 	}
 
-	onTileClick(id: string) {
+	async onTileClick(id: string) {
+		if (this.blockedTileIds.has(id)) {
+			return
+		}
+
 		const tile = this.field.getTileById(id)
 		if (tile === undefined) {
 			return
@@ -98,7 +103,11 @@ export class GameBlast {
 					continue
 				}
 				const neighborTile = this.field.getTile(neighborPosition)
-				if (neighborTile !== undefined && neighborTile.getKind() === kind) {
+				if (
+					neighborTile !== undefined &&
+					neighborTile.getKind() === kind &&
+					!this.blockedTileIds.has(neighborTile.getId())
+				) {
 					tilesToRemove.add(neighborTile)
 					positionsToRemove.add(neighborPosition)
 				}
@@ -109,15 +118,32 @@ export class GameBlast {
 			return
 		}
 
+		const currentBlockedTileIds = new Set<string>()
+
 		for (const tile of tilesToRemove) {
+			const removedTileId = tile.getId()
+			currentBlockedTileIds.add(removedTileId)
+			this.blockedTileIds.add(removedTileId)
 			this.field.removeTile(tile.getPosition())
-			this.renderer.removeTile(tile.getId())
+			this.renderer.removeTile(removedTileId)
 		}
 
 		const gridSnapshot = this.grid.getSnapshot()
 		const { movedTiles, newTiles } =
 			this.field.fillEmptyPositions(positionsToRemove)
-		this.renderer.moveTiles({
+
+		for (const movedTile of movedTiles) {
+			const movedTileId = movedTile.getId()
+			currentBlockedTileIds.add(movedTileId)
+			this.blockedTileIds.add(movedTileId)
+		}
+		for (const newTile of newTiles) {
+			const newTileId = newTile.getId()
+			currentBlockedTileIds.add(newTileId)
+			this.blockedTileIds.add(newTileId)
+		}
+
+		await this.renderer.moveTiles({
 			tilesInfo: Array.from(movedTiles).map((tile) => tile.getInfoForRender()),
 			gridSnapshot,
 		})
@@ -130,14 +156,22 @@ export class GameBlast {
 			newTilesInfoByColumns.set(column, tilesInfo)
 		}
 
+		const renderTasks: Array<Promise<void>> = []
 		for (const [_, tilesInfo] of newTilesInfoByColumns) {
 			tilesInfo.sort((a, b) => b.row - a.row)
 
-			this.renderer.renderTiles({
-				tilesInfo,
-				gridSnapshot,
-				isAppearOnDefaultPosition: true,
-			})
+			renderTasks.push(
+				this.renderer.renderTiles({
+					tilesInfo,
+					gridSnapshot,
+					isAppearOnDefaultPosition: true,
+				})
+			)
+		}
+
+		await Promise.all(renderTasks)
+		for (const blockedTileId of currentBlockedTileIds) {
+			this.blockedTileIds.delete(blockedTileId)
 		}
 	}
 }
