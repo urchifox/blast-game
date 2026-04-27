@@ -129,6 +129,7 @@ export class GameBlast {
 		this.field.clearTiles()
 		this.movesNumber = 0
 		this.score = 0
+		this.isGameEnded = false
 	}
 
 	onResize() {
