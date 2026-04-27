@@ -13,7 +13,19 @@ import {
 import { Field } from "./field"
 import { Grid } from "./grid"
 import { Renderer } from "./rendering/renderer"
-import { Tile, TilePosition, TileSnapshot } from "./tile"
+import {
+	isTileKindSpecial,
+	Tile,
+	TileKindSpecial,
+	TilePosition,
+	TileSnapshot,
+} from "./tile"
+
+type TileClickHandler = (tile: Tile) => TileClickHandlerResult
+type TileClickHandlerResult = {
+	removedTiles: Set<Tile>
+	removedPositions: Set<TilePosition>
+}
 
 export class GameBlast {
 	private readonly container: HTMLElement
@@ -199,19 +211,38 @@ export class GameBlast {
 			return
 		}
 
-		const { tilesToRemove, positionsToRemove } =
-			this.getSameKindNeighbourTiles(tile)
-		if (tilesToRemove.size === 1) {
+		const kind = tile.getKind()
+		const { removedTiles, removedPositions } = isTileKindSpecial(kind)
+			? this.specialTileHandler[kind](tile)
+			: this.onNormalTileClick(tile)
+
+		if (removedTiles.size < 1) {
 			return
 		}
 
-		this.removeTiles(tilesToRemove)
-		this.updateScore(tilesToRemove.size)
+		this.updateScore(removedTiles.size)
 		this.updateMoves()
 
-		await this.fillEmptyPositions(positionsToRemove)
+		await this.fillEmptyPositions(removedPositions)
 
 		this.checkGameEnd()
+	}
+
+	// #region Normal tile handlers
+
+	private onNormalTileClick(tile: Tile): TileClickHandlerResult {
+		const { tilesToRemove, positionsToRemove } =
+			this.getSameKindNeighbourTiles(tile)
+		if (tilesToRemove.size === 1) {
+			return {
+				removedTiles: new Set<Tile>(),
+				removedPositions: new Set<TilePosition>(),
+			}
+		}
+
+		this.removeTiles(tilesToRemove)
+
+		return { removedTiles: tilesToRemove, removedPositions: positionsToRemove }
 	}
 
 	private getSameKindNeighbourTiles(tile: Tile) {
@@ -243,6 +274,47 @@ export class GameBlast {
 
 		return { tilesToRemove, positionsToRemove }
 	}
+
+	// #endregion
+
+	// #region Special tile handlers
+
+	private specialTileHandler: Record<TileKindSpecial, TileClickHandler> = {
+		bomb: this.onBombTileClick.bind(this),
+		dynamite: this.onDynamiteTileClick.bind(this),
+		"rocket-column": this.onRocketColumnTileClick.bind(this),
+		"rocket-row": this.onRocketRowTileClick.bind(this),
+	}
+
+	private onBombTileClick(_tile: Tile): TileClickHandlerResult {
+		return {
+			removedTiles: new Set<Tile>(),
+			removedPositions: new Set<TilePosition>(),
+		}
+	}
+
+	private onDynamiteTileClick(_tile: Tile): TileClickHandlerResult {
+		return {
+			removedTiles: new Set<Tile>(),
+			removedPositions: new Set<TilePosition>(),
+		}
+	}
+
+	private onRocketColumnTileClick(_tile: Tile): TileClickHandlerResult {
+		return {
+			removedTiles: new Set<Tile>(),
+			removedPositions: new Set<TilePosition>(),
+		}
+	}
+
+	private onRocketRowTileClick(_tile: Tile): TileClickHandlerResult {
+		return {
+			removedTiles: new Set<Tile>(),
+			removedPositions: new Set<TilePosition>(),
+		}
+	}
+
+	// #endregion
 
 	private removeTiles(tiles: Set<Tile>) {
 		for (const tile of tiles) {

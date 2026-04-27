@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid"
-import { TILES_KINDS_NORMAL } from "./config"
+import { TILES_KINDS_NORMAL, TILES_KINDS_SPECIAL } from "./config"
 
 export type TileSnapshot = {
 	id: string
@@ -7,7 +7,22 @@ export type TileSnapshot = {
 	row: number
 	column: number
 }
-export type TileKind = (typeof TILES_KINDS_NORMAL)[number]
+
+export type TileKindNormal = (typeof TILES_KINDS_NORMAL)[number]
+export type TileKindSpecial = (typeof TILES_KINDS_SPECIAL)[number]
+export type TileKind = TileKindNormal | TileKindSpecial
+
+const TILES_KINDS_NORMAL_SET = new Set<TileKindNormal>(TILES_KINDS_NORMAL)
+const TILES_KINDS_SPECIAL_SET = new Set<TileKindSpecial>(TILES_KINDS_SPECIAL)
+
+export function isTileKindNormal(kind: TileKind): kind is TileKindNormal {
+	return TILES_KINDS_NORMAL_SET.has(kind as TileKindNormal)
+}
+
+export function isTileKindSpecial(kind: TileKind): kind is TileKindSpecial {
+	return TILES_KINDS_SPECIAL_SET.has(kind as TileKindSpecial)
+}
+
 export type TilePosition = {
 	row: number
 	column: number
