@@ -8,6 +8,7 @@ import {
 	MAX_AVG_COMBO,
 	MAX_GOAL_SCORE,
 	MIN_AVG_COMBO,
+	MIN_COMBO_SIZE,
 	MIN_GOAL_SCORE,
 } from "./config"
 import { Field } from "./field"
@@ -216,7 +217,7 @@ export class GameBlast {
 			? this.specialTileHandler[kind](tile)
 			: this.onNormalTileClick(tile)
 
-		if (removedTiles.size < 1) {
+		if (removedTiles.size === 0) {
 			return
 		}
 
@@ -233,7 +234,7 @@ export class GameBlast {
 	private onNormalTileClick(tile: Tile): TileClickHandlerResult {
 		const { tilesToRemove, positionsToRemove } =
 			this.getSameKindNeighbourTiles(tile)
-		if (tilesToRemove.size === 1) {
+		if (tilesToRemove.size < MIN_COMBO_SIZE) {
 			return {
 				removedTiles: new Set<Tile>(),
 				removedPositions: new Set<TilePosition>(),

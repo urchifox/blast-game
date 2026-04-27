@@ -33,3 +33,5 @@ export const TILES_KINDS_SPECIAL = [
 	"rockets-column",
 	"rockets-row",
 ] as const
+
+export const MIN_COMBO_SIZE = 2
