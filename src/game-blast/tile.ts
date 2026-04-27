@@ -1,7 +1,12 @@
 import { nanoid } from "nanoid"
 import { TILES_KINDS_NORMAL } from "./config"
-import { TileInfoForRender } from "./rendering/renderer"
 
+export type TileSnapshot = {
+	id: string
+	image: string
+	row: number
+	column: number
+}
 export type TileKind = (typeof TILES_KINDS_NORMAL)[number]
 export type TilePosition = {
 	row: number
@@ -35,7 +40,7 @@ export class Tile {
 		return { ...this.position }
 	}
 
-	getInfoForRender(): TileInfoForRender {
+	getSnapshot(): TileSnapshot {
 		return {
 			id: this.id,
 			image: this.image,

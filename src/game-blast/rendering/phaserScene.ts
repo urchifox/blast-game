@@ -1,7 +1,8 @@
 import Phaser from "phaser"
 
 import { GridSnapshot } from "../grid"
-import { OnTileClickHandler, TileInfoForRender } from "./renderer"
+import { OnTileClickHandler } from "./renderer"
+import { TileSnapshot } from "../tile"
 import { wait } from "../../helpers/time"
 
 export const SCENE_KEY = "blast"
@@ -74,25 +75,25 @@ export class PhaserScene extends Phaser.Scene {
 	// #region Resizing
 
 	resize(
-		tilesInfo: ReadonlyArray<TileInfoForRender>,
+		tilesSnapshots: ReadonlyArray<TileSnapshot>,
 		gridSnapshot: GridSnapshot
 	) {
-		for (const tileInfo of tilesInfo) {
-			const tileSprite = this.tilesMap.get(tileInfo.id)
+		for (const tileSnapshot of tilesSnapshots) {
+			const tileSprite = this.tilesMap.get(tileSnapshot.id)
 			if (tileSprite === undefined) {
 				continue
 			}
-			this.updateTile(tileInfo, tileSprite, gridSnapshot)
+			this.updateTile(tileSnapshot, tileSprite, gridSnapshot)
 		}
 	}
 
 	private updateTile(
-		tileInfo: TileInfoForRender,
+		tileSnapshot: TileSnapshot,
 		tileSprite: Phaser.GameObjects.Sprite,
 		gridSnapshot: GridSnapshot
 	) {
 		const { x, y, zIndex, tileWidth, tileHeight } =
-			this.getTileVisualProperties(tileInfo, gridSnapshot)
+			this.getTileVisualProperties(tileSnapshot, gridSnapshot)
 		tileSprite.setPosition(x, y)
 		tileSprite.setDepth(zIndex)
 		tileSprite.setDisplaySize(tileWidth, tileHeight)
@@ -103,7 +104,7 @@ export class PhaserScene extends Phaser.Scene {
 	// #region Rendering
 
 	async renderTiles(
-		tiles: ReadonlyArray<TileInfoForRender>,
+		tiles: ReadonlyArray<TileSnapshot>,
 		gridSnapshot: GridSnapshot,
 		isAppearOnDefaultPosition?: boolean
 	) {
@@ -127,12 +128,12 @@ export class PhaserScene extends Phaser.Scene {
 	}
 
 	private async renderTile(
-		tileInfo: TileInfoForRender,
+		tileSnapshot: TileSnapshot,
 		gridSnapshot: GridSnapshot,
 		isAppearOnDefaultPosition?: boolean
 	) {
 		const { x, y, zIndex, tileWidth, tileHeight, imageKey } =
-			this.getTileVisualProperties(tileInfo, gridSnapshot)
+			this.getTileVisualProperties(tileSnapshot, gridSnapshot)
 
 		const tileSprite = this.add
 			.sprite(x, isAppearOnDefaultPosition ? 0 + tileHeight / 2 : y, imageKey)
@@ -140,13 +141,13 @@ export class PhaserScene extends Phaser.Scene {
 			.setDisplaySize(tileWidth, tileHeight)
 			.setInteractive({ useHandCursor: true })
 
-		const id = tileInfo.id
+		const id = tileSnapshot.id
 		this.tilesMap.set(id, tileSprite)
 		tileSprite.on("pointerdown", () => this.onTileClick?.(id))
 
 		await this.animateAppear(tileSprite)
 		if (isAppearOnDefaultPosition) {
-			await this.animateMovingToCurrentPosition(tileInfo, gridSnapshot)
+			await this.animateMovingToCurrentPosition(tileSnapshot, gridSnapshot)
 		}
 	}
 
@@ -183,7 +184,7 @@ export class PhaserScene extends Phaser.Scene {
 	// #region Moving
 
 	async moveTiles(
-		tiles: ReadonlyArray<TileInfoForRender>,
+		tiles: ReadonlyArray<TileSnapshot>,
 		gridSnapshot: GridSnapshot
 	) {
 		if (!this.isReady) {
@@ -198,16 +199,16 @@ export class PhaserScene extends Phaser.Scene {
 	}
 
 	private async animateMovingToCurrentPosition(
-		tileInfo: TileInfoForRender,
+		tileSnapshot: TileSnapshot,
 		gridSnapshot: GridSnapshot
 	) {
-		const tileSprite = this.tilesMap.get(tileInfo.id)
+		const tileSprite = this.tilesMap.get(tileSnapshot.id)
 		if (!tileSprite) {
 			return
 		}
 
 		const { x, y, zIndex, tileHeight } = this.getTileVisualProperties(
-			tileInfo,
+			tileSnapshot,
 			gridSnapshot
 		)
 
@@ -314,10 +315,10 @@ export class PhaserScene extends Phaser.Scene {
 	// #region Helpers
 
 	private getTileVisualProperties(
-		tileInfo: TileInfoForRender,
+		tileSnapshot: TileSnapshot,
 		gridSnapshot: GridSnapshot
 	) {
-		const { column, row, image } = tileInfo
+		const { column, row, image } = tileSnapshot
 		const { tileWidth, tileHeight, tileGapX, tileGapY, rows } = gridSnapshot
 		const x = column * (tileWidth + tileGapX) + tileWidth / 2
 		const y = row * (tileHeight + tileGapY) + tileHeight / 2

@@ -12,8 +12,8 @@ import {
 } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
-import { Renderer, TileInfoForRender } from "./rendering/renderer"
-import { Tile, TilePosition } from "./tile"
+import { Renderer } from "./rendering/renderer"
+import { Tile, TilePosition, TileSnapshot } from "./tile"
 
 export class GameBlast {
 	private readonly container: HTMLElement
@@ -119,8 +119,8 @@ export class GameBlast {
 		this.toggleContainerFullSizeMode(true)
 		const snapshot = this.grid.updateGridSizes()
 		this.toggleContainerFullSizeMode(false)
-		const tilesInfo = this.field.getTilesInfo()
-		this.renderer.resize(tilesInfo, snapshot)
+		const tilesSnapshots = this.field.getTilesSnapshots()
+		this.renderer.resize(tilesSnapshots, snapshot)
 	}
 
 	// #region Level creation
@@ -154,7 +154,7 @@ export class GameBlast {
 		this.grid.createGrid(this.columns, this.rows)
 		this.field.generateTiles()
 		this.renderer.renderTiles({
-			tilesInfo: this.field.getTilesInfo(),
+			tilesSnapshots: this.field.getTilesSnapshots(),
 			gridSnapshot: this.grid.getSnapshot(),
 		})
 		this.toggleContainerFullSizeMode(false)
@@ -272,25 +272,25 @@ export class GameBlast {
 		const gridSnapshot = this.grid.getSnapshot()
 
 		await this.renderer.moveTiles({
-			tilesInfo: Array.from(movedTiles).map((tile) => tile.getInfoForRender()),
+			tilesSnapshots: Array.from(movedTiles).map((tile) => tile.getSnapshot()),
 			gridSnapshot,
 		})
 
-		const newTilesInfoByColumns = new Map<number, Array<TileInfoForRender>>()
+		const newTilesSnapshotsByColumns = new Map<number, Array<TileSnapshot>>()
 		for (const tile of newTiles) {
 			const column = tile.getPosition().column
-			const tilesInfo = newTilesInfoByColumns.get(column) || []
-			tilesInfo.push(tile.getInfoForRender())
-			newTilesInfoByColumns.set(column, tilesInfo)
+			const tilesSnapshots = newTilesSnapshotsByColumns.get(column) || []
+			tilesSnapshots.push(tile.getSnapshot())
+			newTilesSnapshotsByColumns.set(column, tilesSnapshots)
 		}
 
 		const renderTasks: Array<Promise<void>> = []
-		for (const [_, tilesInfo] of newTilesInfoByColumns) {
-			tilesInfo.sort((a, b) => b.row - a.row)
+		for (const [_, tilesSnapshots] of newTilesSnapshotsByColumns) {
+			tilesSnapshots.sort((a, b) => b.row - a.row)
 
 			renderTasks.push(
 				this.renderer.renderTiles({
-					tilesInfo,
+					tilesSnapshots: tilesSnapshots,
 					gridSnapshot,
 					isAppearOnDefaultPosition: true,
 				})
