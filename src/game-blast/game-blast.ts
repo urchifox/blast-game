@@ -1,5 +1,6 @@
 import { getElementInnerSize } from "../helpers/dom"
 import { getRandomNumber, pickRandomItem } from "../helpers/random"
+import { wait } from "../helpers/time"
 import {
 	BASE_SCORE,
 	BOMB_RADIUS,
@@ -14,6 +15,7 @@ import {
 } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
+import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./rendering/phaserScene"
 import { Renderer } from "./rendering/renderer"
 import {
 	isTileKindSpecial,
@@ -24,10 +26,10 @@ import {
 } from "./tile"
 
 type TileClickHandler = (tile: Tile) => TileClickHandlerResult
-type TileClickHandlerResult = {
+type TileClickHandlerResult = Promise<{
 	removedTiles: Set<Tile>
 	removedPositions: Set<TilePosition>
-}
+}>
 
 export class GameBlast {
 	private readonly container: HTMLElement
@@ -215,8 +217,8 @@ export class GameBlast {
 
 		const kind = tile.getKind()
 		const { removedTiles, removedPositions } = isTileKindSpecial(kind)
-			? this.specialTileHandler[kind](tile)
-			: this.onNormalTileClick(tile)
+			? await this.specialTileHandler[kind](tile)
+			: await this.onNormalTileClick(tile)
 
 		if (removedTiles.size === 0) {
 			return
@@ -232,7 +234,7 @@ export class GameBlast {
 
 	// #region Normal tile handlers
 
-	private onNormalTileClick(tile: Tile): TileClickHandlerResult {
+	private async onNormalTileClick(tile: Tile): TileClickHandlerResult {
 		const { tilesToRemove, positionsToRemove } =
 			this.getSameKindNeighbourTiles(tile)
 		if (tilesToRemove.size < MIN_COMBO_SIZE) {
@@ -242,7 +244,7 @@ export class GameBlast {
 			}
 		}
 
-		this.removeTiles(tilesToRemove)
+		await this.removeTiles(tilesToRemove)
 		this.maybeAddComboPrize(tilesToRemove.size, tile.getPosition())
 
 		return { removedTiles: tilesToRemove, removedPositions: positionsToRemove }
@@ -336,7 +338,7 @@ export class GameBlast {
 		"rockets-row": this.onRocketRowTileClick.bind(this),
 	}
 
-	private onBombTileClick(tile: Tile): TileClickHandlerResult {
+	private async onBombTileClick(tile: Tile): TileClickHandlerResult {
 		const { tiles, positions } = this.field.getTilesInRadius(
 			tile.getPosition(),
 			BOMB_RADIUS
@@ -347,14 +349,14 @@ export class GameBlast {
 				removedPositions: new Set<TilePosition>(),
 			}
 		}
-		this.removeTiles(tiles)
+		await this.removeTilesFromCenter(tiles, tile.getPosition())
 		return {
 			removedTiles: tiles,
 			removedPositions: positions,
 		}
 	}
 
-	private onDynamiteTileClick(_tile: Tile): TileClickHandlerResult {
+	private async onDynamiteTileClick(tile: Tile): TileClickHandlerResult {
 		const tiles = new Set(this.field.getTiles())
 		const positions = new Set(this.field.getPositions())
 		if (tiles.size === 0) {
@@ -363,14 +365,14 @@ export class GameBlast {
 				removedPositions: new Set<TilePosition>(),
 			}
 		}
-		this.removeTiles(tiles)
+		await this.removeTilesFromCenter(tiles, tile.getPosition())
 		return {
 			removedTiles: tiles,
 			removedPositions: positions,
 		}
 	}
 
-	private onRocketColumnTileClick(tile: Tile): TileClickHandlerResult {
+	private async onRocketColumnTileClick(tile: Tile): TileClickHandlerResult {
 		const { tiles, positions } = this.field.getTilesInColumn(
 			tile.getPosition().column
 		)
@@ -380,14 +382,14 @@ export class GameBlast {
 				removedPositions: new Set<TilePosition>(),
 			}
 		}
-		this.removeTiles(tiles)
+		await this.removeTilesFromCenter(tiles, tile.getPosition())
 		return {
 			removedTiles: tiles,
 			removedPositions: positions,
 		}
 	}
 
-	private onRocketRowTileClick(tile: Tile): TileClickHandlerResult {
+	private async onRocketRowTileClick(tile: Tile): TileClickHandlerResult {
 		const { tiles, positions } = this.field.getTilesInRow(
 			tile.getPosition().row
 		)
@@ -397,7 +399,7 @@ export class GameBlast {
 				removedPositions: new Set<TilePosition>(),
 			}
 		}
-		this.removeTiles(tiles)
+		await this.removeTilesFromCenter(tiles, tile.getPosition())
 		return {
 			removedTiles: tiles,
 			removedPositions: positions,
@@ -406,12 +408,36 @@ export class GameBlast {
 
 	// #endregion
 
-	private removeTiles(tiles: Set<Tile>) {
+	private async removeTiles(tiles: Set<Tile>) {
 		for (const tile of tiles) {
 			const removedTileId = tile.getId()
 			this.blockedTileIds.add(removedTileId)
 			this.field.removeTile(tile.getPosition())
 			this.renderer.removeTile(removedTileId)
+		}
+		await wait(TILE_DELAY_BETWEEN_REMOVALS_MS)
+	}
+
+	private async removeTilesFromCenter(
+		tiles: Set<Tile>,
+		centerPosition: TilePosition
+	) {
+		const { column: centerColumn, row: centerRow } = centerPosition
+		const groupedTiles = new Map<number, Set<Tile>>()
+		for (const tile of tiles) {
+			const distance = Math.max(
+				Math.abs(tile.getPosition().column - centerColumn),
+				Math.abs(tile.getPosition().row - centerRow)
+			)
+			const tiles = groupedTiles.get(distance) || new Set<Tile>()
+			tiles.add(tile)
+			groupedTiles.set(distance, tiles)
+		}
+		const sortedGroupedTiles = Array.from(groupedTiles.entries()).sort(
+			(a, b) => a[0] - b[0]
+		)
+		for (const [_, tiles] of sortedGroupedTiles) {
+			await this.removeTiles(tiles)
 		}
 	}
 

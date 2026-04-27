@@ -18,6 +18,7 @@ const TILE_BOUNCE_DURATION_MS = 150
 const TILE_BOUNCE_HEIGHT_RATIO = 0.05
 const TILE_APPEAR_DURATION_MS = 150
 const TILE_REMOVE_DURATION_MS = 150
+export const TILE_DELAY_BETWEEN_REMOVALS_MS = TILE_REMOVE_DURATION_MS / 4
 
 export class PhaserScene extends Phaser.Scene {
 	private readonly tilesMap = new Map<string, Phaser.GameObjects.Sprite>()
