@@ -44,12 +44,17 @@ export class GameBlast {
 		goalScore: number
 	}) => void
 
+	private readonly openWinModal: () => void
+	private readonly openLossModal: () => void
+
 	constructor({
 		container,
 		renderer,
 		toggleContainerFullSizeMode,
 		updateMovesCounter,
 		updateScoreCounter,
+		openWinModal,
+		openLossModal,
 	}: {
 		container: HTMLElement
 		renderer: Renderer
@@ -68,12 +73,16 @@ export class GameBlast {
 			score: number
 			goalScore: number
 		}) => void
+		openWinModal: () => void
+		openLossModal: () => void
 	}) {
 		this.container = container
 		this.renderer = renderer
 		this.toggleContainerFullSizeMode = toggleContainerFullSizeMode
 		this.updateMovesCounter = updateMovesCounter
 		this.updateScoreCounter = updateScoreCounter
+		this.openWinModal = openWinModal
+		this.openLossModal = openLossModal
 
 		const getContainerSize = () =>
 			getElementInnerSize({ element: this.container })
@@ -287,13 +296,19 @@ export class GameBlast {
 	}
 
 	private win() {
-		alert("You win!")
+		this.openWinModal()
+	}
+
+	private lose() {
+		this.openLossModal()
+	}
+
+	restart() {
 		this.clearLevel()
 		this.generateLevel()
 	}
 
-	private lose() {
-		alert("You lose!")
+	startNewLevel() {
 		this.clearLevel()
 		this.generateLevel()
 	}

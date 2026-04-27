@@ -1,8 +1,10 @@
 import "./assets/style/game-blast-container.css"
+import "./assets/style/win-modal.css"
+import "./assets/style/loss-modal.css"
 
 import { View } from "../view/view"
 import { GameBlast } from "../game-blast/game-blast"
-import { queryElement } from "../helpers/dom"
+import { isHtmlElement, queryElement } from "../helpers/dom"
 import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
 
 export class GameView extends View {
@@ -10,6 +12,8 @@ export class GameView extends View {
 	private gameContainer?: HTMLElement
 	private movesCounter?: HTMLElement
 	private scoreCounter?: HTMLElement
+	private winModal?: HTMLDialogElement
+	private lossModal?: HTMLDialogElement
 
 	constructor() {
 		super("game-blast")
@@ -21,6 +25,10 @@ export class GameView extends View {
 		this.gameContainer = queryElement("#canvas-container")
 		this.movesCounter = queryElement("#movements-counter-text")
 		this.scoreCounter = queryElement("#points-counter-result")
+		this.winModal = queryElement<HTMLDialogElement>("#win-modal")
+		this.lossModal = queryElement<HTMLDialogElement>("#loss-modal")
+		this.setWinModalListeners()
+		this.setLossModalListeners()
 
 		const renderer = new PhaserRenderer({
 			container: this.gameContainer,
@@ -32,6 +40,8 @@ export class GameView extends View {
 				this.toggleGameContainerFullSizeMode.bind(this),
 			updateMovesCounter: this.updateMovesCounter.bind(this),
 			updateScoreCounter: this.updateScoreCounter.bind(this),
+			openWinModal: this.openWinModal.bind(this),
+			openLossModal: this.openLossModal.bind(this),
 		})
 		await this.gameBlast.init()
 	}
@@ -74,4 +84,96 @@ export class GameView extends View {
 		}
 		this.scoreCounter.textContent = `${score}/${goalScore}`
 	}
+
+	// #region Win Modal
+
+	private setWinModalListeners() {
+		this.winModal?.addEventListener("click", this.onWinModalClick.bind(this))
+		this.winModal?.addEventListener("cancel", (event: Event) =>
+			event.preventDefault()
+		)
+		this.winModal?.addEventListener("keydown", (event: KeyboardEvent) => {
+			if (event.key === "Escape") {
+				event.preventDefault()
+			}
+		})
+	}
+
+	private openWinModal() {
+		this.winModal?.showModal()
+	}
+
+	private onWinModalClick(event: Event) {
+		event.preventDefault()
+		const target = event.target
+		if (!isHtmlElement(target)) {
+			return
+		}
+		if (target.id === "win-modal-button") {
+			this.onWinModalButtonClick()
+			return
+		}
+		if (target.closest(".win-modal__wrapper")) {
+			return
+		}
+		this.onWinModalBackdropClick()
+	}
+
+	private onWinModalButtonClick() {
+		this.gameBlast?.startNewLevel()
+		this.winModal?.close()
+	}
+
+	private onWinModalBackdropClick() {
+		this.gameBlast?.startNewLevel()
+		this.winModal?.close()
+	}
+
+	// #endregion
+
+	// #region Loss Modal
+
+	private setLossModalListeners() {
+		this.lossModal?.addEventListener("click", this.onLossModalClick.bind(this))
+		this.lossModal?.addEventListener("cancel", (event: Event) =>
+			event.preventDefault()
+		)
+		this.lossModal?.addEventListener("keydown", (event: KeyboardEvent) => {
+			if (event.key === "Escape") {
+				event.preventDefault()
+			}
+		})
+	}
+
+	private openLossModal() {
+		this.lossModal?.showModal()
+	}
+
+	private onLossModalClick(event: Event) {
+		event.preventDefault()
+		const target = event.target
+		if (!isHtmlElement(target)) {
+			return
+		}
+		if (target.id === "loss-modal-button") {
+			this.onLossModalButtonClick()
+			return
+		}
+		if (target.closest(".loss-modal__wrapper")) {
+			return
+		}
+		this.onLossModalBackdropClick()
+	}
+
+	private onLossModalButtonClick() {
+		this.gameBlast?.restart()
+		this.lossModal?.close()
+	}
+
+	private onLossModalBackdropClick() {
+		this.gameBlast?.restart()
+		this.lossModal?.close()
+	}
+
+	// #endregion
 }

@@ -1,0 +1,53 @@
+.win-modal {
+	border: none;
+	padding: 0;
+
+	background-color: transparent;
+}
+
+.win-modal::backdrop {
+	background-color: rgba(0, 0, 0, 0.3);
+}
+
+.win-modal__wrapper {
+	padding: 40px 55px 50px 55px;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+
+	border-image-source: url("../img/modal-bg.png");
+	border-image-slice: 97 111 125 111 fill;
+	border-image-width: 36px 41px 46px 41px;
+	border-image-repeat: stretch;
+}
+
+.win-modal__title {
+	margin: 0;
+
+	font-size: 30px;
+	font-weight: 900;
+	color: #ffffff;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.win-modal__button {
+	padding: 0;
+	border: none;
+
+	background-color: transparent;
+
+	font-family: inherit;
+	font-weight: inherit;
+	text-transform: uppercase;
+	text-decoration: underline;
+	font-size: 18px;
+	font-weight: 900;
+	color: #ffffff;
+	cursor: pointer;
+
+	outline: none;
+}
