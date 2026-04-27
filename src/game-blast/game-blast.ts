@@ -334,7 +334,17 @@ export class GameBlast {
 			this.win()
 		} else if (this.movesNumber >= this.movesLimit) {
 			this.lose()
+		} else if (!this.isPossibleToMakeMove()) {
+			this.lose()
 		}
+	}
+
+	private isPossibleToMakeMove() {
+		const tiles = this.field.getTiles()
+		return tiles.some((tile) => {
+			const { tilesToRemove } = this.getSameKindNeighbourTiles(tile)
+			return tilesToRemove.size > 1
+		})
 	}
 
 	private win() {
