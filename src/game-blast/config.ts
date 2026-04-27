@@ -30,6 +30,6 @@ export const TILES_KINDS_NORMAL = [
 export const TILES_KINDS_SPECIAL = [
 	"bomb",
 	"dynamite",
-	"rocket-column",
-	"rocket-row",
+	"rockets-column",
+	"rockets-row",
 ] as const

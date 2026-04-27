@@ -282,8 +282,8 @@ export class GameBlast {
 	private specialTileHandler: Record<TileKindSpecial, TileClickHandler> = {
 		bomb: this.onBombTileClick.bind(this),
 		dynamite: this.onDynamiteTileClick.bind(this),
-		"rocket-column": this.onRocketColumnTileClick.bind(this),
-		"rocket-row": this.onRocketRowTileClick.bind(this),
+		"rockets-column": this.onRocketColumnTileClick.bind(this),
+		"rockets-row": this.onRocketRowTileClick.bind(this),
 	}
 
 	private onBombTileClick(_tile: Tile): TileClickHandlerResult {
