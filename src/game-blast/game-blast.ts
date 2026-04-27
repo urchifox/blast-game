@@ -2,6 +2,7 @@ import { getElementInnerSize } from "../helpers/dom"
 import { getRandomNumber, pickRandomItem } from "../helpers/random"
 import {
 	BASE_SCORE,
+	BOMB_RADIUS,
 	DEFAULT_COLUMNS,
 	DEFAULT_ROWS,
 	GROWTH_EXPONENT,
@@ -335,31 +336,71 @@ export class GameBlast {
 		"rockets-row": this.onRocketRowTileClick.bind(this),
 	}
 
-	private onBombTileClick(_tile: Tile): TileClickHandlerResult {
+	private onBombTileClick(tile: Tile): TileClickHandlerResult {
+		const { tiles, positions } = this.field.getTilesInRadius(
+			tile.getPosition(),
+			BOMB_RADIUS
+		)
+		if (tiles.size === 0) {
+			return {
+				removedTiles: new Set<Tile>(),
+				removedPositions: new Set<TilePosition>(),
+			}
+		}
+		this.removeTiles(tiles)
 		return {
-			removedTiles: new Set<Tile>(),
-			removedPositions: new Set<TilePosition>(),
+			removedTiles: tiles,
+			removedPositions: positions,
 		}
 	}
 
 	private onDynamiteTileClick(_tile: Tile): TileClickHandlerResult {
+		const tiles = new Set(this.field.getTiles())
+		const positions = new Set(this.field.getPositions())
+		if (tiles.size === 0) {
+			return {
+				removedTiles: new Set<Tile>(),
+				removedPositions: new Set<TilePosition>(),
+			}
+		}
+		this.removeTiles(tiles)
 		return {
-			removedTiles: new Set<Tile>(),
-			removedPositions: new Set<TilePosition>(),
+			removedTiles: tiles,
+			removedPositions: positions,
 		}
 	}
 
-	private onRocketColumnTileClick(_tile: Tile): TileClickHandlerResult {
+	private onRocketColumnTileClick(tile: Tile): TileClickHandlerResult {
+		const { tiles, positions } = this.field.getTilesInColumn(
+			tile.getPosition().column
+		)
+		if (tiles.size === 0) {
+			return {
+				removedTiles: new Set<Tile>(),
+				removedPositions: new Set<TilePosition>(),
+			}
+		}
+		this.removeTiles(tiles)
 		return {
-			removedTiles: new Set<Tile>(),
-			removedPositions: new Set<TilePosition>(),
+			removedTiles: tiles,
+			removedPositions: positions,
 		}
 	}
 
-	private onRocketRowTileClick(_tile: Tile): TileClickHandlerResult {
+	private onRocketRowTileClick(tile: Tile): TileClickHandlerResult {
+		const { tiles, positions } = this.field.getTilesInRow(
+			tile.getPosition().row
+		)
+		if (tiles.size === 0) {
+			return {
+				removedTiles: new Set<Tile>(),
+				removedPositions: new Set<TilePosition>(),
+			}
+		}
+		this.removeTiles(tiles)
 		return {
-			removedTiles: new Set<Tile>(),
-			removedPositions: new Set<TilePosition>(),
+			removedTiles: tiles,
+			removedPositions: positions,
 		}
 	}
 
