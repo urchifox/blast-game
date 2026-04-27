@@ -193,6 +193,22 @@ export class GameBlast {
 			return
 		}
 
+		const { tilesToRemove, positionsToRemove } =
+			this.getSameKindNeighbourTiles(tile)
+		if (tilesToRemove.size === 1) {
+			return
+		}
+
+		this.removeTiles(tilesToRemove)
+		this.updateScore(tilesToRemove.size)
+		this.updateMoves()
+
+		await this.fillEmptyPositions(positionsToRemove)
+
+		this.checkGameEnd()
+	}
+
+	private getSameKindNeighbourTiles(tile: Tile) {
 		const position = tile.getPosition()
 		const kind = tile.getKind()
 
@@ -219,25 +235,22 @@ export class GameBlast {
 			}
 		}
 
-		if (tilesToRemove.size === 1) {
-			return
-		}
+		return { tilesToRemove, positionsToRemove }
+	}
 
-		const temporaryblockedTilesIds = new Set<string>()
-
-		for (const tile of tilesToRemove) {
+	private removeTiles(tiles: Set<Tile>) {
+		for (const tile of tiles) {
 			const removedTileId = tile.getId()
 			this.blockedTileIds.add(removedTileId)
 			this.field.removeTile(tile.getPosition())
 			this.renderer.removeTile(removedTileId)
 		}
+	}
 
-		this.updateScore(tilesToRemove.size)
-		this.updateMoves()
+	private async fillEmptyPositions(positions: Set<TilePosition>) {
+		const { movedTiles, newTiles } = this.field.fillEmptyPositions(positions)
 
-		const gridSnapshot = this.grid.getSnapshot()
-		const { movedTiles, newTiles } =
-			this.field.fillEmptyPositions(positionsToRemove)
+		const temporaryblockedTilesIds = new Set<string>()
 
 		for (const movedTile of movedTiles) {
 			const movedTileId = movedTile.getId()
@@ -249,6 +262,8 @@ export class GameBlast {
 			temporaryblockedTilesIds.add(newTileId)
 			this.blockedTileIds.add(newTileId)
 		}
+
+		const gridSnapshot = this.grid.getSnapshot()
 
 		await this.renderer.moveTiles({
 			tilesInfo: Array.from(movedTiles).map((tile) => tile.getInfoForRender()),
@@ -280,8 +295,6 @@ export class GameBlast {
 		for (const blockedTileId of temporaryblockedTilesIds) {
 			this.blockedTileIds.delete(blockedTileId)
 		}
-
-		this.checkGameEnd()
 	}
 
 	// #endregion
