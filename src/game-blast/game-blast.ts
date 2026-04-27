@@ -86,15 +86,13 @@ export class GameBlast {
 		this.openWinModal = openWinModal
 		this.openLossModal = openLossModal
 
-		const getContainerSize = () =>
-			getElementInnerSize({ element: this.container })
 		this.grid = new Grid({
-			getContainerSize,
+			getContainerSize: () => getElementInnerSize({ element: this.container }),
 		})
 
-		const getFieldSnapshot = this.grid.getSnapshot.bind(this.grid)
-
-		this.field = new Field({ getFieldSnapshot })
+		this.field = new Field({
+			getFieldSnapshot: this.grid.getSnapshot.bind(this.grid),
+		})
 	}
 
 	async init() {
@@ -108,6 +106,13 @@ export class GameBlast {
 		this.renderer.destroy()
 	}
 
+	private clearLevel() {
+		this.field.clearTiles()
+		this.renderer.clearTiles()
+		this.movesNumber = 0
+		this.score = 0
+	}
+
 	onResize() {
 		this.toggleContainerFullSizeMode(true)
 		const snapshot = this.grid.updateGridSizes()
@@ -115,6 +120,8 @@ export class GameBlast {
 		const tilesInfo = this.field.getTilesInfo()
 		this.renderer.resize(tilesInfo, snapshot)
 	}
+
+	// #region Level creation
 
 	startNewLevel() {
 		this.clearLevel()
@@ -159,27 +166,24 @@ export class GameBlast {
 		})
 	}
 
+	/** Based on average score per move */
 	private estimateMoves(targetScore: number): number {
 		if (targetScore <= 0) {
 			return 0
 		}
 
 		const avgCombo = getRandomNumber({ min: MIN_AVG_COMBO, max: MAX_AVG_COMBO })
-		const avgScorePerMove = BASE_SCORE * Math.pow(avgCombo, GROWTH_EXPONENT)
-
+		const avgScorePerMove = this.getPoints(avgCombo)
 		const moves = targetScore / avgScorePerMove
 
 		return Math.ceil(moves)
 	}
 
-	private clearLevel() {
-		this.field.clearTiles()
-		this.renderer.clearTiles()
-		this.movesNumber = 0
-		this.score = 0
-	}
+	// #endregion
 
-	async onTileClick(id: string) {
+	// #region Tile interaction
+
+	private async onTileClick(id: string) {
 		if (this.blockedTileIds.has(id)) {
 			return
 		}
@@ -280,6 +284,10 @@ export class GameBlast {
 		this.checkGameEnd()
 	}
 
+	// #endregion
+
+	// #region Progress
+
 	private updateMoves() {
 		this.movesNumber++
 		this.updateMovesCounter({
@@ -289,16 +297,24 @@ export class GameBlast {
 	}
 
 	/** Uses power scale formula */
-	private updateScore(tilesToRemove: number) {
-		const points = Math.round(
-			BASE_SCORE * Math.pow(tilesToRemove, GROWTH_EXPONENT)
+	private getPoints(removedTilesNumber: number) {
+		return Math.round(
+			BASE_SCORE * Math.pow(removedTilesNumber, GROWTH_EXPONENT)
 		)
+	}
+
+	private updateScore(removedTilesNumber: number) {
+		const points = this.getPoints(removedTilesNumber)
 		this.score += points
 		this.updateScoreCounter({
 			score: this.score,
 			goalScore: this.goalScore,
 		})
 	}
+
+	// #endregion
+
+	// #region Game End
 
 	private checkGameEnd() {
 		if (this.score >= this.goalScore) {
@@ -315,4 +331,6 @@ export class GameBlast {
 	private lose() {
 		this.openLossModal()
 	}
+
+	// #endregion
 }
