@@ -5,6 +5,12 @@
 	background-color: transparent;
 }
 
+.win-modal--opening,
+.win-modal--closing {
+	overflow: visible;
+	pointer-events: none;
+}
+
 .win-modal::backdrop {
 	background-color: rgba(0, 0, 0, 0.3);
 }
@@ -22,6 +28,44 @@
 	border-image-slice: 97 111 125 111 fill;
 	border-image-width: 36px 41px 46px 41px;
 	border-image-repeat: stretch;
+}
+
+.win-modal--opening .win-modal__wrapper {
+	animation: win-modal-appear 900ms cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+@keyframes win-modal-appear {
+	0% {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+	70% {
+		opacity: 1;
+		transform: scale(1.2);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.win-modal--closing .win-modal__wrapper {
+	animation: win-modal-close 600ms cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+@keyframes win-modal-close {
+	0% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	70% {
+		opacity: 1;
+		transform: scale(1.2);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(0.5);
+	}
 }
 
 .win-modal__title {

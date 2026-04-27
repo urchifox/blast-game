@@ -13,7 +13,9 @@ export class GameView extends View {
 	private movesCounter?: HTMLElement
 	private scoreCounter?: HTMLElement
 	private winModal?: HTMLDialogElement
+	private winModalWrapper?: HTMLElement
 	private lossModal?: HTMLDialogElement
+	private lossModalWrapper?: HTMLElement
 
 	constructor() {
 		super("game-blast")
@@ -26,7 +28,9 @@ export class GameView extends View {
 		this.movesCounter = queryElement("#movements-counter-text")
 		this.scoreCounter = queryElement("#points-counter-result")
 		this.winModal = queryElement<HTMLDialogElement>("#win-modal")
+		this.winModalWrapper = queryElement(".win-modal__wrapper", this.winModal)
 		this.lossModal = queryElement<HTMLDialogElement>("#loss-modal")
+		this.lossModalWrapper = queryElement(".loss-modal__wrapper", this.lossModal)
 
 		this.gameBlast = new GameBlast({
 			container: this.gameContainer,
@@ -111,8 +115,19 @@ export class GameView extends View {
 		})
 	}
 
-	private openWinModal() {
+	private async openWinModal() {
 		this.winModal?.showModal()
+		this.winModal?.classList.add("win-modal--opening")
+		await new Promise<void>((resolve) => {
+			this.winModalWrapper?.addEventListener(
+				"animationend",
+				() => {
+					this.winModal?.classList.remove("win-modal--opening")
+					resolve()
+				},
+				{ once: true }
+			)
+		})
 	}
 
 	private onWinModalClick(event: Event) {
@@ -133,11 +148,27 @@ export class GameView extends View {
 
 	private onWinModalButtonClick() {
 		this.gameBlast?.startNewLevel()
-		this.winModal?.close()
+		this.closeWinModal()
 	}
 
 	private onWinModalBackdropClick() {
 		this.gameBlast?.startNewLevel()
+		this.closeWinModal()
+	}
+
+	private async closeWinModal() {
+		this.winModal?.classList.add("win-modal--closing")
+		await new Promise<void>((resolve) => {
+			this.winModalWrapper?.addEventListener(
+				"animationend",
+				() => {
+					this.winModal?.classList.remove("win-modal--closing")
+					resolve()
+				},
+				{ once: true }
+			)
+		})
+
 		this.winModal?.close()
 	}
 
@@ -157,8 +188,19 @@ export class GameView extends View {
 		})
 	}
 
-	private openLossModal() {
+	private async openLossModal() {
 		this.lossModal?.showModal()
+		this.lossModal?.classList.add("loss-modal--opening")
+		await new Promise<void>((resolve) => {
+			this.lossModalWrapper?.addEventListener(
+				"animationend",
+				() => {
+					this.lossModal?.classList.remove("loss-modal--opening")
+					resolve()
+				},
+				{ once: true }
+			)
+		})
 	}
 
 	private onLossModalClick(event: Event) {
@@ -179,11 +221,27 @@ export class GameView extends View {
 
 	private onLossModalButtonClick() {
 		this.gameBlast?.restartLevel()
-		this.lossModal?.close()
+		this.closeLossModal()
 	}
 
 	private onLossModalBackdropClick() {
 		this.gameBlast?.restartLevel()
+		this.closeLossModal()
+	}
+
+	private async closeLossModal() {
+		this.lossModal?.classList.add("loss-modal--closing")
+		await new Promise<void>((resolve) => {
+			this.lossModalWrapper?.addEventListener(
+				"animationend",
+				() => {
+					this.lossModal?.classList.remove("loss-modal--closing")
+					resolve()
+				},
+				{ once: true }
+			)
+		})
+
 		this.lossModal?.close()
 	}
 
