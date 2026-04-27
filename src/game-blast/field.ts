@@ -1,7 +1,7 @@
 import { pickRandomItem } from "../helpers/random"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
-import { Tile, TilePosition, TileSnapshot } from "./tile"
+import { Tile, TileKind, TilePosition, TileSnapshot } from "./tile"
 
 export class Field {
 	private tilesByColumns: Array<Array<Tile | undefined>> = []
@@ -87,5 +87,17 @@ export class Field {
 		}
 
 		return { movedTiles, newTiles }
+	}
+
+	addTile({ kind, position }: { kind: TileKind; position: TilePosition }) {
+		const tile = new Tile({ kind, position })
+		const column = this.tilesByColumns[position.column]
+		const isPositionEmpty = column[position.row] === undefined
+		if (isPositionEmpty) {
+			column[position.row] = tile
+		} else {
+			column.unshift(tile)
+		}
+		return tile
 	}
 }

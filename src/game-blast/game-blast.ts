@@ -1,5 +1,5 @@
 import { getElementInnerSize } from "../helpers/dom"
-import { getRandomNumber } from "../helpers/random"
+import { getRandomNumber, pickRandomItem } from "../helpers/random"
 import {
 	BASE_SCORE,
 	DEFAULT_COLUMNS,
@@ -241,6 +241,7 @@ export class GameBlast {
 		}
 
 		this.removeTiles(tilesToRemove)
+		this.maybeAddComboPrize(tilesToRemove.size, tile.getPosition())
 
 		return { removedTiles: tilesToRemove, removedPositions: positionsToRemove }
 	}
@@ -274,6 +275,53 @@ export class GameBlast {
 
 		return { tilesToRemove, positionsToRemove }
 	}
+
+	private maybeAddComboPrize(comboSize: number, position: TilePosition) {
+		const closestRewardableComboSize = this.rewardableComboSizesSorted.find(
+			(value, index, array) => {
+				const currentValue = parseInt(value)
+				const isCurrentValueLess = currentValue <= comboSize
+				if (!isCurrentValueLess) {
+					return false
+				}
+				const isLastValue = index === array.length - 1
+				if (isLastValue) {
+					return true
+				}
+				const nextValue = parseInt(array[index + 1])
+				const isNextValueGreater = nextValue > comboSize
+				return isNextValueGreater
+			}
+		)
+		if (closestRewardableComboSize === undefined) {
+			return
+		}
+
+		const rewards = this.rewardsForCombo[parseInt(closestRewardableComboSize)]
+		if (rewards === undefined) {
+			return
+		}
+
+		const reward = pickRandomItem(rewards)
+		const newTile = this.field.addTile({
+			kind: reward,
+			position,
+		})
+		this.renderer.renderTiles({
+			tilesSnapshots: [newTile.getSnapshot()],
+			gridSnapshot: this.grid.getSnapshot(),
+		})
+	}
+
+	private rewardsForCombo: Record<number, Array<TileKindSpecial>> = {
+		4: ["rockets-column", "rockets-row"],
+		6: ["bomb"],
+		8: ["dynamite"],
+	}
+
+	private rewardableComboSizesSorted = Object.keys(this.rewardsForCombo).sort(
+		(key1, key2) => parseInt(key1) - parseInt(key2)
+	)
 
 	// #endregion
 
