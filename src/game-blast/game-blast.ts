@@ -49,6 +49,8 @@ export class GameBlast {
 	private readonly openWinModal: () => void
 	private readonly openLossModal: () => void
 
+	private isGameEnded = false
+
 	constructor({
 		container,
 		renderer,
@@ -184,6 +186,10 @@ export class GameBlast {
 	// #region Tile interaction
 
 	private async onTileClick(id: string) {
+		if (this.isGameEnded) {
+			return
+		}
+
 		if (this.blockedTileIds.has(id)) {
 			return
 		}
@@ -330,6 +336,10 @@ export class GameBlast {
 	// #region Game End
 
 	private checkGameEnd() {
+		if (this.isGameEnded) {
+			return
+		}
+
 		if (this.score >= this.goalScore) {
 			this.win()
 		} else if (this.movesNumber >= this.movesLimit) {
@@ -348,10 +358,20 @@ export class GameBlast {
 	}
 
 	private win() {
+		if (this.isGameEnded) {
+			return
+		}
+
+		this.isGameEnded = true
 		this.openWinModal()
 	}
 
 	private lose() {
+		if (this.isGameEnded) {
+			return
+		}
+
+		this.isGameEnded = true
 		this.openLossModal()
 	}
 
