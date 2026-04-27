@@ -27,16 +27,12 @@ export class GameView extends View {
 		this.scoreCounter = queryElement("#points-counter-result")
 		this.winModal = queryElement<HTMLDialogElement>("#win-modal")
 		this.lossModal = queryElement<HTMLDialogElement>("#loss-modal")
-		this.setWinModalListeners()
-		this.setLossModalListeners()
-		window.addEventListener("resize", this.handleWindowResize)
 
-		const renderer = new PhaserRenderer({
-			container: this.gameContainer,
-		})
 		this.gameBlast = new GameBlast({
 			container: this.gameContainer,
-			renderer,
+			renderer: new PhaserRenderer({
+				container: this.gameContainer,
+			}),
 			toggleContainerFullSizeMode:
 				this.toggleGameContainerFullSizeMode.bind(this),
 			updateMovesCounter: this.updateMovesCounter.bind(this),
@@ -44,7 +40,16 @@ export class GameView extends View {
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
 		})
+
+		this.setListeners()
+
 		await this.gameBlast.init()
+	}
+
+	private setListeners() {
+		this.setWinModalListeners()
+		this.setLossModalListeners()
+		window.addEventListener("resize", this.handleWindowResize)
 	}
 
 	override unmount() {
