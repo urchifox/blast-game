@@ -7,8 +7,8 @@
 			name="viewport"
 			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 		/>
-		<script type="module" crossorigin src="/blast-game/assets/index-gN96bk9W.js"></script>
-		<link rel="stylesheet" crossorigin href="/blast-game/assets/index-BQnLy6FS.css">
+		<script type="module" crossorigin src="/blast-game/assets/index-BKbHOJ8t.js"></script>
+		<link rel="stylesheet" crossorigin href="/blast-game/assets/index-CH6ImWeu.css">
 	</head>
 	<body>
 		<div id="app"></div>
@@ -60,5 +60,23 @@
 				</ul>
 			</div>
 		</div>
+
+		<dialog class="win-modal" id="win-modal">
+			<div class="win-modal__wrapper">
+				<h2 class="win-modal__title">Ты выиграл!</h2>
+				<button class="win-modal__button" id="win-modal-button" type="button">
+					Новый уровень
+				</button>
+			</div>
+		</dialog>
+
+		<dialog class="loss-modal" id="loss-modal">
+			<div class="loss-modal__wrapper">
+				<h2 class="loss-modal__title">Ты проиграл :(</h2>
+				<button class="loss-modal__button" id="loss-modal-button" type="button">
+					Попробовать снова
+				</button>
+			</div>
+		</dialog>
 	</section>
 </template>
