@@ -29,6 +29,7 @@ export class GameView extends View {
 		this.lossModal = queryElement<HTMLDialogElement>("#loss-modal")
 		this.setWinModalListeners()
 		this.setLossModalListeners()
+		window.addEventListener("resize", this.handleWindowResize)
 
 		const renderer = new PhaserRenderer({
 			container: this.gameContainer,
@@ -49,6 +50,12 @@ export class GameView extends View {
 	override unmount() {
 		super.unmount()
 		this.gameBlast?.destroy()
+		window.removeEventListener("resize", this.handleWindowResize)
+	}
+
+	private handleWindowResize = this.onResize.bind(this)
+	private onResize() {
+		this.gameBlast?.onResize()
 	}
 
 	private toggleGameContainerFullSizeMode(isFullSize: boolean) {

@@ -21,7 +21,6 @@ export class GameBlast {
 	private readonly grid: Grid
 	private readonly field: Field
 	private readonly toggleContainerFullSizeMode: (isFullSize: boolean) => void
-	private readonly handleWindowResize = this.onResize.bind(this)
 	private readonly blockedTileIds = new Set<string>()
 
 	private columns = 0
@@ -96,8 +95,6 @@ export class GameBlast {
 		const getFieldSnapshot = this.grid.getSnapshot.bind(this.grid)
 
 		this.field = new Field({ getFieldSnapshot })
-
-		window.addEventListener("resize", this.handleWindowResize)
 	}
 
 	async init() {
@@ -107,12 +104,11 @@ export class GameBlast {
 	}
 
 	destroy() {
-		window.removeEventListener("resize", this.handleWindowResize)
 		this.clearLevel()
 		this.renderer.destroy()
 	}
 
-	private onResize() {
+	onResize() {
 		this.toggleContainerFullSizeMode(true)
 		const snapshot = this.grid.updateGridSizes()
 		this.toggleContainerFullSizeMode(false)
