@@ -108,9 +108,9 @@ export class GameBlast {
 		this.renderer.destroy()
 	}
 
-	private clearLevel() {
+	private async clearLevel() {
+		await this.renderer.clearTiles()
 		this.field.clearTiles()
-		this.renderer.clearTiles()
 		this.movesNumber = 0
 		this.score = 0
 	}
@@ -125,14 +125,14 @@ export class GameBlast {
 
 	// #region Level creation
 
-	startNewLevel() {
-		this.clearLevel()
+	async startNewLevel() {
+		await this.clearLevel()
 		this.generateLevelData()
 		this.createLevel()
 	}
 
-	restartLevel() {
-		this.clearLevel()
+	async restartLevel() {
+		await this.clearLevel()
 		this.createLevel()
 	}
 

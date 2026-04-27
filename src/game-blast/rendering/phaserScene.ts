@@ -300,11 +300,12 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #endregion
 
-	clearTiles() {
-		this.tilesMap.forEach((tileSprite) => {
-			this.tweens.killTweensOf(tileSprite)
-			tileSprite.destroy()
-		})
+	async clearTiles() {
+		const removeTasks = Array.from(this.tilesMap.entries()).map(
+			([id, tileSprite]) =>
+				this.removeTile(id).then(() => this.tweens.killTweensOf(tileSprite))
+		)
+		await Promise.all(removeTasks)
 		this.appearingTweens.clear()
 		this.movingTweens.clear()
 		this.tilesMap.clear()

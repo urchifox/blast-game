@@ -60,8 +60,8 @@ export class PhaserRenderer implements Renderer {
 		this.scene.resize(tilesInfo, gridSnapshot)
 	}
 
-	clearTiles() {
-		this.scene.clearTiles()
+	async clearTiles() {
+		await this.scene.clearTiles()
 	}
 
 	async removeTile(id: string) {

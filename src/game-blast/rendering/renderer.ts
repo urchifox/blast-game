@@ -26,7 +26,7 @@ export type Renderer = {
 		tilesInfo: ReadonlyArray<TileInfoForRender>,
 		gridSnapshot: GridSnapshot
 	): void
-	clearTiles(): void
+	clearTiles(): Promise<void>
 	removeTile(id: string): Promise<void>
 	moveTiles({
 		tilesInfo,
