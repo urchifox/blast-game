@@ -1,19 +1,35 @@
 import { getElementInnerSize } from "../helpers/dom"
-import { getRandomNumber } from "../helpers/random"
+import { getRandomNumber, pickRandomItem } from "../helpers/random"
+import { wait } from "../helpers/time"
 import {
 	BASE_SCORE,
+	BOMB_RADIUS,
 	DEFAULT_COLUMNS,
 	DEFAULT_ROWS,
 	GROWTH_EXPONENT,
 	MAX_AVG_COMBO,
 	MAX_GOAL_SCORE,
 	MIN_AVG_COMBO,
+	MIN_COMBO_SIZE,
 	MIN_GOAL_SCORE,
 } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
-import { Renderer, TileInfoForRender } from "./rendering/renderer"
-import { Tile, TilePosition } from "./tile"
+import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./rendering/phaserScene"
+import { Renderer } from "./rendering/renderer"
+import {
+	isTileKindSpecial,
+	Tile,
+	TileKindSpecial,
+	TilePosition,
+	TileSnapshot,
+} from "./tile"
+
+type TileClickHandler = (tile: Tile) => TileClickHandlerResult
+type TileClickHandlerResult = Promise<{
+	removedTiles: Set<Tile>
+	removedPositions: Set<TilePosition>
+}>
 
 export class GameBlast {
 	private readonly container: HTMLElement
@@ -113,14 +129,15 @@ export class GameBlast {
 		this.field.clearTiles()
 		this.movesNumber = 0
 		this.score = 0
+		this.isGameEnded = false
 	}
 
 	onResize() {
 		this.toggleContainerFullSizeMode(true)
 		const snapshot = this.grid.updateGridSizes()
 		this.toggleContainerFullSizeMode(false)
-		const tilesInfo = this.field.getTilesInfo()
-		this.renderer.resize(tilesInfo, snapshot)
+		const tilesSnapshots = this.field.getTilesSnapshots()
+		this.renderer.resize(tilesSnapshots, snapshot)
 	}
 
 	// #region Level creation
@@ -154,7 +171,7 @@ export class GameBlast {
 		this.grid.createGrid(this.columns, this.rows)
 		this.field.generateTiles()
 		this.renderer.renderTiles({
-			tilesInfo: this.field.getTilesInfo(),
+			tilesSnapshots: this.field.getTilesSnapshots(),
 			gridSnapshot: this.grid.getSnapshot(),
 		})
 		this.toggleContainerFullSizeMode(false)
@@ -199,19 +216,39 @@ export class GameBlast {
 			return
 		}
 
-		const { tilesToRemove, positionsToRemove } =
-			this.getSameKindNeighbourTiles(tile)
-		if (tilesToRemove.size === 1) {
+		const kind = tile.getKind()
+		const { removedTiles, removedPositions } = isTileKindSpecial(kind)
+			? await this.specialTileHandler[kind](tile)
+			: await this.onNormalTileClick(tile)
+
+		if (removedTiles.size === 0) {
 			return
 		}
 
-		this.removeTiles(tilesToRemove)
-		this.updateScore(tilesToRemove.size)
+		this.updateScore(removedTiles.size)
 		this.updateMoves()
 
-		await this.fillEmptyPositions(positionsToRemove)
+		await this.fillEmptyPositions(removedPositions)
 
 		this.checkGameEnd()
+	}
+
+	// #region Normal tile handlers
+
+	private async onNormalTileClick(tile: Tile): TileClickHandlerResult {
+		const { tilesToRemove, positionsToRemove } =
+			this.getSameKindNeighbourTiles(tile)
+		if (tilesToRemove.size < MIN_COMBO_SIZE) {
+			return {
+				removedTiles: new Set<Tile>(),
+				removedPositions: new Set<TilePosition>(),
+			}
+		}
+
+		await this.removeTiles(tilesToRemove)
+		this.maybeAddComboPrize(tilesToRemove.size, tile.getPosition())
+
+		return { removedTiles: tilesToRemove, removedPositions: positionsToRemove }
 	}
 
 	private getSameKindNeighbourTiles(tile: Tile) {
@@ -244,12 +281,164 @@ export class GameBlast {
 		return { tilesToRemove, positionsToRemove }
 	}
 
-	private removeTiles(tiles: Set<Tile>) {
+	private maybeAddComboPrize(comboSize: number, position: TilePosition) {
+		const closestRewardableComboSize = this.rewardableComboSizesSorted.find(
+			(value, index, array) => {
+				const currentValue = parseInt(value)
+				const isCurrentValueLess = currentValue <= comboSize
+				if (!isCurrentValueLess) {
+					return false
+				}
+				const isLastValue = index === array.length - 1
+				if (isLastValue) {
+					return true
+				}
+				const nextValue = parseInt(array[index + 1])
+				const isNextValueGreater = nextValue > comboSize
+				return isNextValueGreater
+			}
+		)
+		if (closestRewardableComboSize === undefined) {
+			return
+		}
+
+		const rewards = this.rewardsForCombo[parseInt(closestRewardableComboSize)]
+		if (rewards === undefined) {
+			return
+		}
+
+		const reward = pickRandomItem(rewards)
+		const newTile = this.field.addTile({
+			kind: reward,
+			position,
+		})
+		this.renderer.renderTiles({
+			tilesSnapshots: [newTile.getSnapshot()],
+			gridSnapshot: this.grid.getSnapshot(),
+		})
+	}
+
+	private rewardsForCombo: Record<number, Array<TileKindSpecial>> = {
+		4: ["rockets-column", "rockets-row"],
+		6: ["bomb"],
+		8: ["dynamite"],
+	}
+
+	private rewardableComboSizesSorted = Object.keys(this.rewardsForCombo).sort(
+		(key1, key2) => parseInt(key1) - parseInt(key2)
+	)
+
+	// #endregion
+
+	// #region Special tile handlers
+
+	private specialTileHandler: Record<TileKindSpecial, TileClickHandler> = {
+		bomb: this.onBombTileClick.bind(this),
+		dynamite: this.onDynamiteTileClick.bind(this),
+		"rockets-column": this.onRocketColumnTileClick.bind(this),
+		"rockets-row": this.onRocketRowTileClick.bind(this),
+	}
+
+	private async onBombTileClick(tile: Tile): TileClickHandlerResult {
+		const { tiles, positions } = this.field.getTilesInRadius(
+			tile.getPosition(),
+			BOMB_RADIUS
+		)
+		if (tiles.size === 0) {
+			return {
+				removedTiles: new Set<Tile>(),
+				removedPositions: new Set<TilePosition>(),
+			}
+		}
+		await this.removeTilesFromCenter(tiles, tile.getPosition())
+		return {
+			removedTiles: tiles,
+			removedPositions: positions,
+		}
+	}
+
+	private async onDynamiteTileClick(tile: Tile): TileClickHandlerResult {
+		const tiles = new Set(this.field.getTiles())
+		const positions = new Set(this.field.getPositions())
+		if (tiles.size === 0) {
+			return {
+				removedTiles: new Set<Tile>(),
+				removedPositions: new Set<TilePosition>(),
+			}
+		}
+		await this.removeTilesFromCenter(tiles, tile.getPosition())
+		return {
+			removedTiles: tiles,
+			removedPositions: positions,
+		}
+	}
+
+	private async onRocketColumnTileClick(tile: Tile): TileClickHandlerResult {
+		const { tiles, positions } = this.field.getTilesInColumn(
+			tile.getPosition().column
+		)
+		if (tiles.size === 0) {
+			return {
+				removedTiles: new Set<Tile>(),
+				removedPositions: new Set<TilePosition>(),
+			}
+		}
+		await this.removeTilesFromCenter(tiles, tile.getPosition())
+		return {
+			removedTiles: tiles,
+			removedPositions: positions,
+		}
+	}
+
+	private async onRocketRowTileClick(tile: Tile): TileClickHandlerResult {
+		const { tiles, positions } = this.field.getTilesInRow(
+			tile.getPosition().row
+		)
+		if (tiles.size === 0) {
+			return {
+				removedTiles: new Set<Tile>(),
+				removedPositions: new Set<TilePosition>(),
+			}
+		}
+		await this.removeTilesFromCenter(tiles, tile.getPosition())
+		return {
+			removedTiles: tiles,
+			removedPositions: positions,
+		}
+	}
+
+	// #endregion
+
+	private async removeTiles(tiles: Set<Tile>) {
 		for (const tile of tiles) {
 			const removedTileId = tile.getId()
 			this.blockedTileIds.add(removedTileId)
 			this.field.removeTile(tile.getPosition())
 			this.renderer.removeTile(removedTileId)
+		}
+		await wait(TILE_DELAY_BETWEEN_REMOVALS_MS)
+	}
+
+	private async removeTilesFromCenter(
+		tiles: Set<Tile>,
+		centerPosition: TilePosition
+	) {
+		const { column: centerColumn, row: centerRow } = centerPosition
+		const groupedTiles = new Map<number, Set<Tile>>()
+		for (const tile of tiles) {
+			const distance = Math.max(
+				Math.abs(tile.getPosition().column - centerColumn),
+				Math.abs(tile.getPosition().row - centerRow)
+			)
+			const tiles = groupedTiles.get(distance) || new Set<Tile>()
+			tiles.add(tile)
+			groupedTiles.set(distance, tiles)
+		}
+		const sortedGroupedTiles = Array.from(groupedTiles.entries()).sort(
+			(a, b) => a[0] - b[0]
+		)
+		for (const [_, tiles] of sortedGroupedTiles) {
+			await this.removeTiles(tiles)
 		}
 	}
 
@@ -272,25 +461,25 @@ export class GameBlast {
 		const gridSnapshot = this.grid.getSnapshot()
 
 		await this.renderer.moveTiles({
-			tilesInfo: Array.from(movedTiles).map((tile) => tile.getInfoForRender()),
+			tilesSnapshots: Array.from(movedTiles).map((tile) => tile.getSnapshot()),
 			gridSnapshot,
 		})
 
-		const newTilesInfoByColumns = new Map<number, Array<TileInfoForRender>>()
+		const newTilesSnapshotsByColumns = new Map<number, Array<TileSnapshot>>()
 		for (const tile of newTiles) {
 			const column = tile.getPosition().column
-			const tilesInfo = newTilesInfoByColumns.get(column) || []
-			tilesInfo.push(tile.getInfoForRender())
-			newTilesInfoByColumns.set(column, tilesInfo)
+			const tilesSnapshots = newTilesSnapshotsByColumns.get(column) || []
+			tilesSnapshots.push(tile.getSnapshot())
+			newTilesSnapshotsByColumns.set(column, tilesSnapshots)
 		}
 
 		const renderTasks: Array<Promise<void>> = []
-		for (const [_, tilesInfo] of newTilesInfoByColumns) {
-			tilesInfo.sort((a, b) => b.row - a.row)
+		for (const [_, tilesSnapshots] of newTilesSnapshotsByColumns) {
+			tilesSnapshots.sort((a, b) => b.row - a.row)
 
 			renderTasks.push(
 				this.renderer.renderTiles({
-					tilesInfo,
+					tilesSnapshots: tilesSnapshots,
 					gridSnapshot,
 					isAppearOnDefaultPosition: true,
 				})

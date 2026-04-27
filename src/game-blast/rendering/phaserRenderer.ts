@@ -2,7 +2,8 @@ import Phaser from "phaser"
 
 import { GridSnapshot } from "../grid"
 import { PhaserScene } from "./phaserScene"
-import { OnTileClickHandler, Renderer, TileInfoForRender } from "./renderer"
+import { OnTileClickHandler, Renderer } from "./renderer"
+import { TileSnapshot } from "../tile"
 
 export class PhaserRenderer implements Renderer {
 	private readonly container: HTMLElement
@@ -52,12 +53,12 @@ export class PhaserRenderer implements Renderer {
 	}
 
 	resize(
-		tilesInfo: ReadonlyArray<TileInfoForRender>,
+		tilesSnapshots: ReadonlyArray<TileSnapshot>,
 		gridSnapshot: GridSnapshot
 	) {
 		const { gridWidth, gridHeight } = gridSnapshot
 		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
-		this.scene.resize(tilesInfo, gridSnapshot)
+		this.scene.resize(tilesSnapshots, gridSnapshot)
 	}
 
 	async clearTiles() {
@@ -69,21 +70,21 @@ export class PhaserRenderer implements Renderer {
 	}
 
 	async moveTiles({
-		tilesInfo,
+		tilesSnapshots,
 		gridSnapshot,
 	}: {
-		tilesInfo: ReadonlyArray<TileInfoForRender>
+		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
 	}) {
-		await this.scene.moveTiles(tilesInfo, gridSnapshot)
+		await this.scene.moveTiles(tilesSnapshots, gridSnapshot)
 	}
 
 	async renderTiles({
-		tilesInfo,
+		tilesSnapshots,
 		gridSnapshot,
 		isAppearOnDefaultPosition,
 	}: {
-		tilesInfo: ReadonlyArray<TileInfoForRender>
+		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
 		isAppearOnDefaultPosition?: boolean
 	}) {
@@ -91,7 +92,7 @@ export class PhaserRenderer implements Renderer {
 		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
 
 		await this.scene.renderTiles(
-			tilesInfo,
+			tilesSnapshots,
 			gridSnapshot,
 			isAppearOnDefaultPosition
 		)

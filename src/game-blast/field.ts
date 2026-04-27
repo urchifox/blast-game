@@ -1,8 +1,7 @@
 import { pickRandomItem } from "../helpers/random"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
-import { TileInfoForRender } from "./rendering/renderer"
-import { Tile, TilePosition } from "./tile"
+import { Tile, TileKind, TilePosition, TileSnapshot } from "./tile"
 
 export class Field {
 	private tilesByColumns: Array<Array<Tile | undefined>> = []
@@ -30,8 +29,12 @@ export class Field {
 		return this.tilesByColumns.flat().filter((tile) => tile !== undefined)
 	}
 
-	getTilesInfo(): Array<TileInfoForRender> {
-		return this.getTiles().map((tile) => tile.getInfoForRender())
+	getPositions(): Array<TilePosition> {
+		return this.getTiles().map((tile) => tile.getPosition())
+	}
+
+	getTilesSnapshots(): Array<TileSnapshot> {
+		return this.getTiles().map((tile) => tile.getSnapshot())
 	}
 
 	getTileById(id: string) {
@@ -88,5 +91,73 @@ export class Field {
 		}
 
 		return { movedTiles, newTiles }
+	}
+
+	addTile({ kind, position }: { kind: TileKind; position: TilePosition }) {
+		const tile = new Tile({ kind, position })
+		const column = this.tilesByColumns[position.column]
+		const isPositionEmpty = column[position.row] === undefined
+		if (isPositionEmpty) {
+			column[position.row] = tile
+		} else {
+			column.unshift(tile)
+		}
+		return tile
+	}
+
+	getTilesInColumn(column: number) {
+		const tilesInColumn = this.tilesByColumns[column]
+		const tiles = new Set<Tile>()
+		const positions = new Set<TilePosition>()
+
+		for (const tile of tilesInColumn) {
+			if (tile === undefined) {
+				continue
+			}
+			tiles.add(tile)
+			positions.add(tile.getPosition())
+		}
+
+		return { tiles, positions }
+	}
+
+	getTilesInRow(row: number) {
+		const tiles = new Set<Tile>()
+		const positions = new Set<TilePosition>()
+
+		for (const tile of this.getTiles()) {
+			if (tile === undefined || tile.getPosition().row !== row) {
+				continue
+			}
+			tiles.add(tile)
+			positions.add(tile.getPosition())
+		}
+
+		return { tiles, positions }
+	}
+
+	getTilesInRadius(position: TilePosition, radius: number) {
+		const { columns, rows } = this.getFieldSnapshot()
+		const { column: centerColumn, row: centerRow } = position
+		const minColumn = Math.max(0, centerColumn - radius)
+		const maxColumn = Math.min(columns - 1, centerColumn + radius)
+		const minRow = Math.max(0, centerRow - radius)
+		const maxRow = Math.min(rows - 1, centerRow + radius)
+
+		const tiles = new Set<Tile>()
+		const positions = new Set<TilePosition>()
+
+		for (let column = minColumn; column <= maxColumn; column++) {
+			for (let row = minRow; row <= maxRow; row++) {
+				const tile = this.getTile({ column, row })
+				if (tile === undefined) {
+					continue
+				}
+				tiles.add(tile)
+				positions.add({ column, row })
+			}
+		}
+
+		return { tiles, positions }
 	}
 }

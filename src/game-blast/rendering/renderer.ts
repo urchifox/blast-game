@@ -1,11 +1,5 @@
 import { GridSnapshot } from "../grid"
-
-export type TileInfoForRender = {
-	id: string
-	image: string
-	row: number
-	column: number
-}
+import { TileSnapshot } from "../tile"
 
 export type OnTileClickHandler = (id: string) => void
 
@@ -14,25 +8,25 @@ export type Renderer = {
 	destroy(): void
 	setOnTileClick(handler: OnTileClickHandler): void
 	renderTiles({
-		tilesInfo,
+		tilesSnapshots,
 		gridSnapshot,
 		isAppearOnDefaultPosition,
 	}: {
-		tilesInfo: ReadonlyArray<TileInfoForRender>
+		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
 		isAppearOnDefaultPosition?: boolean
 	}): Promise<void>
 	resize(
-		tilesInfo: ReadonlyArray<TileInfoForRender>,
+		tilesSnapshots: ReadonlyArray<TileSnapshot>,
 		gridSnapshot: GridSnapshot
 	): void
 	clearTiles(): Promise<void>
 	removeTile(id: string): Promise<void>
 	moveTiles({
-		tilesInfo,
+		tilesSnapshots,
 		gridSnapshot,
 	}: {
-		tilesInfo: ReadonlyArray<TileInfoForRender>
+		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
 	}): Promise<void>
 }
