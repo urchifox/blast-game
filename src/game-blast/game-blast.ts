@@ -21,8 +21,10 @@ export class GameBlast {
 	private readonly grid: Grid
 	private readonly field: Field
 	private readonly toggleContainerFullSizeMode: (isFullSize: boolean) => void
-	private readonly handleWindowResize = this.onResize.bind(this)
 	private readonly blockedTileIds = new Set<string>()
+
+	private columns = 0
+	private rows = 0
 
 	private movesNumber = 0
 	private movesLimit = 0
@@ -44,12 +46,19 @@ export class GameBlast {
 		goalScore: number
 	}) => void
 
+	private readonly openWinModal: () => void
+	private readonly openLossModal: () => void
+
+	private isGameEnded = false
+
 	constructor({
 		container,
 		renderer,
 		toggleContainerFullSizeMode,
 		updateMovesCounter,
 		updateScoreCounter,
+		openWinModal,
+		openLossModal,
 	}: {
 		container: HTMLElement
 		renderer: Renderer
@@ -68,38 +77,45 @@ export class GameBlast {
 			score: number
 			goalScore: number
 		}) => void
+		openWinModal: () => void
+		openLossModal: () => void
 	}) {
 		this.container = container
 		this.renderer = renderer
 		this.toggleContainerFullSizeMode = toggleContainerFullSizeMode
 		this.updateMovesCounter = updateMovesCounter
 		this.updateScoreCounter = updateScoreCounter
+		this.openWinModal = openWinModal
+		this.openLossModal = openLossModal
 
-		const getContainerSize = () =>
-			getElementInnerSize({ element: this.container })
 		this.grid = new Grid({
-			getContainerSize,
+			getContainerSize: () => getElementInnerSize({ element: this.container }),
 		})
 
-		const getFieldSnapshot = this.grid.getSnapshot.bind(this.grid)
-
-		this.field = new Field({ getFieldSnapshot })
-
-		window.addEventListener("resize", this.handleWindowResize)
+		this.field = new Field({
+			getFieldSnapshot: this.grid.getSnapshot.bind(this.grid),
+		})
 	}
 
 	async init() {
 		this.renderer.setOnTileClick(this.onTileClick.bind(this))
 		await this.renderer.init()
-		this.generateLevel()
+		this.startNewLevel()
 	}
 
 	destroy() {
-		window.removeEventListener("resize", this.handleWindowResize)
+		this.clearLevel()
 		this.renderer.destroy()
 	}
 
-	private onResize() {
+	private async clearLevel() {
+		await this.renderer.clearTiles()
+		this.field.clearTiles()
+		this.movesNumber = 0
+		this.score = 0
+	}
+
+	onResize() {
 		this.toggleContainerFullSizeMode(true)
 		const snapshot = this.grid.updateGridSizes()
 		this.toggleContainerFullSizeMode(false)
@@ -107,57 +123,73 @@ export class GameBlast {
 		this.renderer.resize(tilesInfo, snapshot)
 	}
 
-	generateLevel() {
-		const columns = DEFAULT_COLUMNS
-		const rows = DEFAULT_ROWS
+	// #region Level creation
+
+	async startNewLevel() {
+		await this.clearLevel()
+		this.generateLevelData()
+		this.createLevel()
+	}
+
+	async restartLevel() {
+		await this.clearLevel()
+		this.createLevel()
+	}
+
+	private generateLevelData() {
+		this.columns = DEFAULT_COLUMNS
+		this.rows = DEFAULT_ROWS
 
 		this.goalScore = getRandomNumber({
 			min: MIN_GOAL_SCORE,
 			max: MAX_GOAL_SCORE,
 			step: 100,
 		})
-		this.updateScoreCounter({
-			score: this.score,
-			goalScore: this.goalScore,
-		})
 
 		this.movesLimit = this.estimateMoves(this.goalScore)
-		this.updateMovesCounter({
-			movesNumber: this.movesNumber,
-			movesLimit: this.movesLimit,
-		})
+	}
 
+	private createLevel() {
 		this.toggleContainerFullSizeMode(true)
-		this.grid.createGrid(columns, rows)
+		this.grid.createGrid(this.columns, this.rows)
 		this.field.generateTiles()
 		this.renderer.renderTiles({
 			tilesInfo: this.field.getTilesInfo(),
 			gridSnapshot: this.grid.getSnapshot(),
 		})
 		this.toggleContainerFullSizeMode(false)
+		this.updateMovesCounter({
+			movesNumber: this.movesNumber,
+			movesLimit: this.movesLimit,
+		})
+		this.updateScoreCounter({
+			score: this.score,
+			goalScore: this.goalScore,
+		})
 	}
 
-	estimateMoves(targetScore: number): number {
+	/** Based on average score per move */
+	private estimateMoves(targetScore: number): number {
 		if (targetScore <= 0) {
 			return 0
 		}
 
 		const avgCombo = getRandomNumber({ min: MIN_AVG_COMBO, max: MAX_AVG_COMBO })
-		const avgScorePerMove = BASE_SCORE * Math.pow(avgCombo, GROWTH_EXPONENT)
-
+		const avgScorePerMove = this.getPoints(avgCombo)
 		const moves = targetScore / avgScorePerMove
 
 		return Math.ceil(moves)
 	}
 
-	clearLevel() {
-		this.field.clearTiles()
-		this.renderer.clearTiles()
-		this.movesNumber = 0
-		this.score = 0
-	}
+	// #endregion
 
-	async onTileClick(id: string) {
+	// #region Tile interaction
+
+	private async onTileClick(id: string) {
+		if (this.isGameEnded) {
+			return
+		}
+
 		if (this.blockedTileIds.has(id)) {
 			return
 		}
@@ -167,6 +199,22 @@ export class GameBlast {
 			return
 		}
 
+		const { tilesToRemove, positionsToRemove } =
+			this.getSameKindNeighbourTiles(tile)
+		if (tilesToRemove.size === 1) {
+			return
+		}
+
+		this.removeTiles(tilesToRemove)
+		this.updateScore(tilesToRemove.size)
+		this.updateMoves()
+
+		await this.fillEmptyPositions(positionsToRemove)
+
+		this.checkGameEnd()
+	}
+
+	private getSameKindNeighbourTiles(tile: Tile) {
 		const position = tile.getPosition()
 		const kind = tile.getKind()
 
@@ -193,25 +241,22 @@ export class GameBlast {
 			}
 		}
 
-		if (tilesToRemove.size === 1) {
-			return
-		}
+		return { tilesToRemove, positionsToRemove }
+	}
 
-		const temporaryblockedTilesIds = new Set<string>()
-
-		for (const tile of tilesToRemove) {
+	private removeTiles(tiles: Set<Tile>) {
+		for (const tile of tiles) {
 			const removedTileId = tile.getId()
 			this.blockedTileIds.add(removedTileId)
 			this.field.removeTile(tile.getPosition())
 			this.renderer.removeTile(removedTileId)
 		}
+	}
 
-		this.updateScore(tilesToRemove.size)
-		this.updateMoves()
+	private async fillEmptyPositions(positions: Set<TilePosition>) {
+		const { movedTiles, newTiles } = this.field.fillEmptyPositions(positions)
 
-		const gridSnapshot = this.grid.getSnapshot()
-		const { movedTiles, newTiles } =
-			this.field.fillEmptyPositions(positionsToRemove)
+		const temporaryblockedTilesIds = new Set<string>()
 
 		for (const movedTile of movedTiles) {
 			const movedTileId = movedTile.getId()
@@ -223,6 +268,8 @@ export class GameBlast {
 			temporaryblockedTilesIds.add(newTileId)
 			this.blockedTileIds.add(newTileId)
 		}
+
+		const gridSnapshot = this.grid.getSnapshot()
 
 		await this.renderer.moveTiles({
 			tilesInfo: Array.from(movedTiles).map((tile) => tile.getInfoForRender()),
@@ -254,9 +301,11 @@ export class GameBlast {
 		for (const blockedTileId of temporaryblockedTilesIds) {
 			this.blockedTileIds.delete(blockedTileId)
 		}
-
-		this.checkGameEnd()
 	}
+
+	// #endregion
+
+	// #region Progress
 
 	private updateMoves() {
 		this.movesNumber++
@@ -267,10 +316,14 @@ export class GameBlast {
 	}
 
 	/** Uses power scale formula */
-	private updateScore(tilesToRemove: number) {
-		const points = Math.round(
-			BASE_SCORE * Math.pow(tilesToRemove, GROWTH_EXPONENT)
+	private getPoints(removedTilesNumber: number) {
+		return Math.round(
+			BASE_SCORE * Math.pow(removedTilesNumber, GROWTH_EXPONENT)
 		)
+	}
+
+	private updateScore(removedTilesNumber: number) {
+		const points = this.getPoints(removedTilesNumber)
 		this.score += points
 		this.updateScoreCounter({
 			score: this.score,
@@ -278,23 +331,49 @@ export class GameBlast {
 		})
 	}
 
+	// #endregion
+
+	// #region Game End
+
 	private checkGameEnd() {
+		if (this.isGameEnded) {
+			return
+		}
+
 		if (this.score >= this.goalScore) {
 			this.win()
 		} else if (this.movesNumber >= this.movesLimit) {
 			this.lose()
+		} else if (!this.isPossibleToMakeMove()) {
+			this.lose()
 		}
 	}
 
+	private isPossibleToMakeMove() {
+		const tiles = this.field.getTiles()
+		return tiles.some((tile) => {
+			const { tilesToRemove } = this.getSameKindNeighbourTiles(tile)
+			return tilesToRemove.size > 1
+		})
+	}
+
 	private win() {
-		alert("You win!")
-		this.clearLevel()
-		this.generateLevel()
+		if (this.isGameEnded) {
+			return
+		}
+
+		this.isGameEnded = true
+		this.openWinModal()
 	}
 
 	private lose() {
-		alert("You lose!")
-		this.clearLevel()
-		this.generateLevel()
+		if (this.isGameEnded) {
+			return
+		}
+
+		this.isGameEnded = true
+		this.openLossModal()
 	}
+
+	// #endregion
 }

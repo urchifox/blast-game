@@ -1,0 +1,97 @@
+.loss-modal {
+	border: none;
+	padding: 0;
+
+	background-color: transparent;
+}
+
+.loss-modal--opening,
+.loss-modal--closing {
+	overflow: visible;
+	pointer-events: none;
+}
+
+.loss-modal::backdrop {
+	background-color: rgba(0, 0, 0, 0.3);
+}
+
+.loss-modal__wrapper {
+	padding: 40px 55px 50px 55px;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+
+	border-image-source: url("../img/modal-bg.png");
+	border-image-slice: 97 111 125 111 fill;
+	border-image-width: 36px 41px 46px 41px;
+	border-image-repeat: stretch;
+}
+
+.loss-modal--opening .loss-modal__wrapper {
+	animation: loss-modal-appear 900ms cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+@keyframes loss-modal-appear {
+	0% {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+	70% {
+		opacity: 1;
+		transform: scale(1.2);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.loss-modal--closing .loss-modal__wrapper {
+	animation: loss-modal-close 600ms cubic-bezier(0.22, 0.9, 0.24, 1) both;
+}
+
+@keyframes loss-modal-close {
+	0% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	70% {
+		opacity: 1;
+		transform: scale(1.2);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+}
+
+.loss-modal__title {
+	margin: 0;
+
+	font-size: 30px;
+	font-weight: 900;
+	color: #ffffff;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.loss-modal__button {
+	padding: 0;
+	border: none;
+
+	background-color: transparent;
+
+	font-family: inherit;
+	font-weight: inherit;
+	text-transform: uppercase;
+	text-decoration: underline;
+	font-size: 18px;
+	font-weight: 900;
+	color: #ffffff;
+	cursor: pointer;
+
+	outline: none;
+}
