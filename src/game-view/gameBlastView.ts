@@ -166,12 +166,12 @@ export class GameView extends View {
 	}
 
 	private onLossModalButtonClick() {
-		this.gameBlast?.restart()
+		this.gameBlast?.restartLevel()
 		this.lossModal?.close()
 	}
 
 	private onLossModalBackdropClick() {
-		this.gameBlast?.restart()
+		this.gameBlast?.restartLevel()
 		this.lossModal?.close()
 	}
 

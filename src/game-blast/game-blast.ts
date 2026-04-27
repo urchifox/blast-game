@@ -24,6 +24,9 @@ export class GameBlast {
 	private readonly handleWindowResize = this.onResize.bind(this)
 	private readonly blockedTileIds = new Set<string>()
 
+	private columns = 0
+	private rows = 0
+
 	private movesNumber = 0
 	private movesLimit = 0
 	private readonly updateMovesCounter: ({
@@ -100,11 +103,12 @@ export class GameBlast {
 	async init() {
 		this.renderer.setOnTileClick(this.onTileClick.bind(this))
 		await this.renderer.init()
-		this.generateLevel()
+		this.startNewLevel()
 	}
 
 	destroy() {
 		window.removeEventListener("resize", this.handleWindowResize)
+		this.clearLevel()
 		this.renderer.destroy()
 	}
 
@@ -116,37 +120,50 @@ export class GameBlast {
 		this.renderer.resize(tilesInfo, snapshot)
 	}
 
-	generateLevel() {
-		const columns = DEFAULT_COLUMNS
-		const rows = DEFAULT_ROWS
+	startNewLevel() {
+		this.clearLevel()
+		this.generateLevelData()
+		this.createLevel()
+	}
+
+	restartLevel() {
+		this.clearLevel()
+		this.createLevel()
+	}
+
+	private generateLevelData() {
+		this.columns = DEFAULT_COLUMNS
+		this.rows = DEFAULT_ROWS
 
 		this.goalScore = getRandomNumber({
 			min: MIN_GOAL_SCORE,
 			max: MAX_GOAL_SCORE,
 			step: 100,
 		})
-		this.updateScoreCounter({
-			score: this.score,
-			goalScore: this.goalScore,
-		})
 
 		this.movesLimit = this.estimateMoves(this.goalScore)
-		this.updateMovesCounter({
-			movesNumber: this.movesNumber,
-			movesLimit: this.movesLimit,
-		})
+	}
 
+	private createLevel() {
 		this.toggleContainerFullSizeMode(true)
-		this.grid.createGrid(columns, rows)
+		this.grid.createGrid(this.columns, this.rows)
 		this.field.generateTiles()
 		this.renderer.renderTiles({
 			tilesInfo: this.field.getTilesInfo(),
 			gridSnapshot: this.grid.getSnapshot(),
 		})
 		this.toggleContainerFullSizeMode(false)
+		this.updateMovesCounter({
+			movesNumber: this.movesNumber,
+			movesLimit: this.movesLimit,
+		})
+		this.updateScoreCounter({
+			score: this.score,
+			goalScore: this.goalScore,
+		})
 	}
 
-	estimateMoves(targetScore: number): number {
+	private estimateMoves(targetScore: number): number {
 		if (targetScore <= 0) {
 			return 0
 		}
@@ -159,7 +176,7 @@ export class GameBlast {
 		return Math.ceil(moves)
 	}
 
-	clearLevel() {
+	private clearLevel() {
 		this.field.clearTiles()
 		this.renderer.clearTiles()
 		this.movesNumber = 0
@@ -301,15 +318,5 @@ export class GameBlast {
 
 	private lose() {
 		this.openLossModal()
-	}
-
-	restart() {
-		this.clearLevel()
-		this.generateLevel()
-	}
-
-	startNewLevel() {
-		this.clearLevel()
-		this.generateLevel()
 	}
 }
