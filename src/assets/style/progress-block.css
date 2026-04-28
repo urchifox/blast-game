@@ -1,9 +1,10 @@
 .progress-block {
+	margin: -3px -8px -14px -8px;
+
 	padding: 22px 30px 31px 34px;
-	min-width: 323px;
 
 	display: grid;
-	grid-template-columns: auto 1fr;
+	grid-template-columns: minmax(auto, 65px) 1fr;
 	grid-template-rows: auto;
 	align-items: center;
 	justify-content: center;

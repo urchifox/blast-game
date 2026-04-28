@@ -1,7 +1,7 @@
 .booster {
+	margin: -8px -13px -17px -13px;
 	border: none;
 	padding: 20px 14px 19px 15px;
-	min-width: 116px;
 
 	display: grid;
 	grid-template-columns: 1fr;
