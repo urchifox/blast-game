@@ -37,3 +37,12 @@ export const TILES_KINDS_SPECIAL = [
 export const MIN_COMBO_SIZE = 2
 
 export const BOMB_RADIUS = 2
+
+/** tile heights per second */
+export const TILE_MOVE_SPEED = 10
+export const MIN_TILE_MOVE_DURATION_MS = 10
+export const TILE_BOUNCE_DURATION_MS = 150
+export const TILE_BOUNCE_HEIGHT_RATIO = 0.05
+export const TILE_APPEAR_DURATION_MS = 150
+export const TILE_REMOVE_DURATION_MS = 150
+export const TILE_DELAY_BETWEEN_REMOVALS_MS = TILE_REMOVE_DURATION_MS / 4

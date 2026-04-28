@@ -12,10 +12,10 @@ import {
 	MIN_AVG_COMBO,
 	MIN_COMBO_SIZE,
 	MIN_GOAL_SCORE,
+	TILE_DELAY_BETWEEN_REMOVALS_MS,
 } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
-import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./rendering/phaserScene"
 import { Renderer } from "./rendering/renderer"
 import {
 	isTileKindSpecial,
