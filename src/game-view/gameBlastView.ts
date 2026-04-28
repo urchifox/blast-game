@@ -4,7 +4,11 @@ import "./assets/style/loss-modal.css"
 
 import { View } from "../view/view"
 import { GameBlast } from "../game-blast/gameBlast"
-import { isHtmlElement, queryElement } from "../helpers/dom"
+import {
+	getElementInnerSize,
+	isHtmlElement,
+	queryElement,
+} from "../helpers/dom"
 import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
 
 export class GameView extends View {
@@ -33,7 +37,6 @@ export class GameView extends View {
 		this.lossModalWrapper = queryElement(".loss-modal__wrapper", this.lossModal)
 
 		this.gameBlast = new GameBlast({
-			container: this.gameContainer,
 			renderer: new PhaserRenderer({
 				container: this.gameContainer,
 			}),
@@ -43,6 +46,7 @@ export class GameView extends View {
 			updateScoreCounter: this.updateScoreCounter.bind(this),
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
+			getContainerSize: this.getGameContainerSize.bind(this),
 		})
 
 		this.setListeners()
@@ -99,6 +103,13 @@ export class GameView extends View {
 			return
 		}
 		this.scoreCounter.textContent = `${score}/${goalScore}`
+	}
+
+	private getGameContainerSize() {
+		if (this.gameContainer === undefined) {
+			return { width: 0, height: 0 }
+		}
+		return getElementInnerSize({ element: this.gameContainer })
 	}
 
 	// #region Win Modal
