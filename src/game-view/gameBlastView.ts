@@ -3,7 +3,7 @@ import "./assets/style/win-modal.css"
 import "./assets/style/loss-modal.css"
 
 import { View } from "../view/view"
-import { GameBlast } from "../game-blast/game-blast"
+import { GameBlast } from "../game-blast/gameBlast"
 import { isHtmlElement, queryElement } from "../helpers/dom"
 import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
 
