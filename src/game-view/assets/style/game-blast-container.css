@@ -12,14 +12,21 @@
 }
 
 .game-blast-container__content {
-	padding-top: 11px;
-	padding-bottom: 4px;
+	padding-top: 14px;
+	padding-bottom: 22px;
 	height: 100%;
 
 	display: grid;
 	grid-template-rows: auto 1fr auto;
 	grid-template-columns: 1fr;
 	justify-items: center;
+	gap: 15px;
+
+	overflow: hidden;
+}
+
+.game-blast-container__progress-block {
+	min-width: min(323px, 100%);
 }
 
 .game-blast-container__canvas-container {
@@ -38,4 +45,8 @@
 
 .game-blast-container__canvas-container--fullsize canvas {
 	display: none;
+}
+
+.game-blast-container__boosters-container {
+	width: 100%;
 }

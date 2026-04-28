@@ -1,4 +1,3 @@
-import { getElementInnerSize } from "../helpers/dom"
 import { getRandomNumber, pickRandomItem } from "../helpers/random"
 import { wait } from "../helpers/time"
 import {
@@ -12,10 +11,10 @@ import {
 	MIN_AVG_COMBO,
 	MIN_COMBO_SIZE,
 	MIN_GOAL_SCORE,
+	TILE_DELAY_BETWEEN_REMOVALS_MS,
 } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
-import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./rendering/phaserScene"
 import { Renderer } from "./rendering/renderer"
 import {
 	isTileKindSpecial,
@@ -32,7 +31,6 @@ type TileClickHandlerResult = Promise<{
 }>
 
 export class GameBlast {
-	private readonly container: HTMLElement
 	private readonly renderer: Renderer
 	private readonly grid: Grid
 	private readonly field: Field
@@ -68,15 +66,14 @@ export class GameBlast {
 	private isGameEnded = false
 
 	constructor({
-		container,
 		renderer,
 		toggleContainerFullSizeMode,
 		updateMovesCounter,
 		updateScoreCounter,
 		openWinModal,
 		openLossModal,
+		getContainerSize,
 	}: {
-		container: HTMLElement
 		renderer: Renderer
 		toggleContainerFullSizeMode: (isFullSize: boolean) => void
 		updateMovesCounter: ({
@@ -95,8 +92,11 @@ export class GameBlast {
 		}) => void
 		openWinModal: () => void
 		openLossModal: () => void
+		getContainerSize: () => {
+			width: number
+			height: number
+		}
 	}) {
-		this.container = container
 		this.renderer = renderer
 		this.toggleContainerFullSizeMode = toggleContainerFullSizeMode
 		this.updateMovesCounter = updateMovesCounter
@@ -104,9 +104,7 @@ export class GameBlast {
 		this.openWinModal = openWinModal
 		this.openLossModal = openLossModal
 
-		this.grid = new Grid({
-			getContainerSize: () => getElementInnerSize({ element: this.container }),
-		})
+		this.grid = new Grid({ getContainerSize })
 
 		this.field = new Field({
 			getFieldSnapshot: this.grid.getSnapshot.bind(this.grid),

@@ -23,7 +23,7 @@ export abstract class View {
 		this.element = element
 	}
 
-	mount() {
+	mount(): void | Promise<void> {
 		this.appRoot.appendChild(this.element)
 	}
 

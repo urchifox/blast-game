@@ -3,14 +3,14 @@ import { View, ViewConstructor } from "./view"
 class ViewManager {
 	private currentView: View | null = null
 
-	init(view: ViewConstructor) {
-		this.openView(view)
+	async init(view: ViewConstructor) {
+		await this.openView(view)
 	}
 
-	openView(view: ViewConstructor) {
+	async openView(view: ViewConstructor) {
 		this.currentView?.unmount()
 		const newView = new view()
-        newView.mount()
+		await newView.mount()
 		this.currentView = newView
 	}
 }

@@ -2,8 +2,7 @@
 	aspect-ratio: 1;
 	margin: -10px;
 
-	width: 84px;
-	height: auto;
+	padding: 15px;
 
 	display: flex;
 	align-items: center;
