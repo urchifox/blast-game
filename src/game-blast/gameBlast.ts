@@ -248,7 +248,7 @@ export class GameBlast {
 
 		await this.fillEmptyPositions(removedPositions)
 
-		this.checkGameEnd()
+		await this.checkGameEnd()
 	}
 
 	// #region Normal tile handlers
