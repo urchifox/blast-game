@@ -29,4 +29,8 @@ export type Renderer = {
 		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
 	}): Promise<void>
+	shuffleTiles(props: {
+		tilesSnapshots: ReadonlyArray<TileSnapshot>
+		gridSnapshot: GridSnapshot
+	}): Promise<void>
 }

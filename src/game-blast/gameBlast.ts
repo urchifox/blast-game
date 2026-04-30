@@ -8,6 +8,7 @@ import {
 	GROWTH_EXPONENT,
 	MAX_AVG_COMBO,
 	MAX_GOAL_SCORE,
+	MAX_SHUFFLE_ATTEMPTS,
 	MIN_AVG_COMBO,
 	MIN_COMBO_SIZE,
 	MIN_GOAL_SCORE,
@@ -34,11 +35,18 @@ export class GameBlast {
 	private readonly renderer: Renderer
 	private readonly grid: Grid
 	private readonly field: Field
-	private readonly toggleContainerFullSizeMode: (isFullSize: boolean) => void
+	private readonly setGameContainerSize: (
+		sizes: {
+			width: number
+			height: number
+		} | null
+	) => void
 	private readonly blockedTileIds = new Set<string>()
 
 	private columns = 0
 	private rows = 0
+
+	private shuffleAttempts = 0
 
 	private movesNumber = 0
 	private movesLimit = 0
@@ -67,7 +75,7 @@ export class GameBlast {
 
 	constructor({
 		renderer,
-		toggleContainerFullSizeMode,
+		setGameContainerSize,
 		updateMovesCounter,
 		updateScoreCounter,
 		openWinModal,
@@ -75,7 +83,12 @@ export class GameBlast {
 		getContainerSize,
 	}: {
 		renderer: Renderer
-		toggleContainerFullSizeMode: (isFullSize: boolean) => void
+		setGameContainerSize: (
+			sizes: {
+				width: number
+				height: number
+			} | null
+		) => void
 		updateMovesCounter: ({
 			movesNumber,
 			movesLimit,
@@ -98,7 +111,7 @@ export class GameBlast {
 		}
 	}) {
 		this.renderer = renderer
-		this.toggleContainerFullSizeMode = toggleContainerFullSizeMode
+		this.setGameContainerSize = setGameContainerSize
 		this.updateMovesCounter = updateMovesCounter
 		this.updateScoreCounter = updateScoreCounter
 		this.openWinModal = openWinModal
@@ -131,9 +144,12 @@ export class GameBlast {
 	}
 
 	onResize() {
-		this.toggleContainerFullSizeMode(true)
+		this.setGameContainerSize(null)
 		const snapshot = this.grid.updateGridSizes()
-		this.toggleContainerFullSizeMode(false)
+		this.setGameContainerSize({
+			width: snapshot.gridWidth,
+			height: snapshot.gridHeight,
+		})
 		const tilesSnapshots = this.field.getTilesSnapshots()
 		this.renderer.resize(tilesSnapshots, snapshot)
 	}
@@ -165,14 +181,18 @@ export class GameBlast {
 	}
 
 	private createLevel() {
-		this.toggleContainerFullSizeMode(true)
+		this.setGameContainerSize(null)
 		this.grid.createGrid(this.columns, this.rows)
 		this.field.generateTiles()
+		const gridSnapshot = this.grid.getSnapshot()
+		this.setGameContainerSize({
+			width: gridSnapshot.gridWidth,
+			height: gridSnapshot.gridHeight,
+		})
 		this.renderer.renderTiles({
 			tilesSnapshots: this.field.getTilesSnapshots(),
-			gridSnapshot: this.grid.getSnapshot(),
+			gridSnapshot: gridSnapshot,
 		})
-		this.toggleContainerFullSizeMode(false)
 		this.updateMovesCounter({
 			movesNumber: this.movesNumber,
 			movesLimit: this.movesLimit,
@@ -228,7 +248,7 @@ export class GameBlast {
 
 		await this.fillEmptyPositions(removedPositions)
 
-		this.checkGameEnd()
+		await this.checkGameEnd()
 	}
 
 	// #region Normal tile handlers
@@ -492,6 +512,19 @@ export class GameBlast {
 
 	// #endregion
 
+	// #region Shuffle filed
+
+	private async shuffleField() {
+		this.field.shuffle()
+		const tiles = this.field.getTiles()
+		await this.renderer.shuffleTiles({
+			tilesSnapshots: Array.from(tiles).map((tile) => tile.getSnapshot()),
+			gridSnapshot: this.grid.getSnapshot(),
+		})
+	}
+
+	// #endregion
+
 	// #region Progress
 
 	private updateMoves() {
@@ -522,7 +555,7 @@ export class GameBlast {
 
 	// #region Game End
 
-	private checkGameEnd() {
+	private async checkGameEnd() {
 		if (this.isGameEnded) {
 			return
 		}
@@ -531,14 +564,37 @@ export class GameBlast {
 			this.win()
 		} else if (this.movesNumber >= this.movesLimit) {
 			this.lose()
-		} else if (!this.isPossibleToMakeMove()) {
+		}
+
+		const isPossibleToMakeMove = this.isPossibleToMakeMove()
+		if (isPossibleToMakeMove) {
+			return
+		}
+
+		if (this.shuffleAttempts >= MAX_SHUFFLE_ATTEMPTS) {
 			this.lose()
+			return
+		}
+
+		this.shuffleAttempts++
+		let attempts = 0
+		while (!this.isPossibleToMakeMove()) {
+			await this.shuffleField()
+			attempts++
+			// Prevent infinite loop
+			if (attempts >= 100) {
+				this.lose()
+				return
+			}
 		}
 	}
 
 	private isPossibleToMakeMove() {
 		const tiles = this.field.getTiles()
 		return tiles.some((tile) => {
+			if (isTileKindSpecial(tile.getKind())) {
+				return true
+			}
 			const { tilesToRemove } = this.getSameKindNeighbourTiles(tile)
 			return tilesToRemove.size > 1
 		})

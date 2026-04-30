@@ -11,7 +11,9 @@ import {
 	TILE_REMOVE_DURATION_MS,
 	MIN_TILE_MOVE_DURATION_MS,
 	TILE_MOVE_SPEED,
+	TILE_SHUFFLE_DURATION_MS,
 } from "../config"
+import { easeInOutBack } from "../../helpers/animation"
 
 export const SCENE_KEY = "blast"
 const tileTextureModules = import.meta.glob("../assets/img/*.png", {
@@ -33,8 +35,21 @@ export class PhaserScene extends Phaser.Scene {
 	private onReadyCallbacks: Array<() => void> = []
 	private onTileClick: OnTileClickHandler | null = null
 
-	constructor() {
+	private offsetX = 0
+	private offsetY = 0
+
+	private readonly getContainerOffset: () => {
+		offsetX: number
+		offsetY: number
+	}
+
+	constructor({
+		getContainerOffset,
+	}: {
+		getContainerOffset: () => { offsetX: number; offsetY: number }
+	}) {
 		super(SCENE_KEY)
+		this.getContainerOffset = getContainerOffset
 	}
 
 	// #region Initialization
@@ -136,7 +151,11 @@ export class PhaserScene extends Phaser.Scene {
 			this.getTileVisualProperties(tileSnapshot, gridSnapshot)
 
 		const tileSprite = this.add
-			.sprite(x, isAppearOnDefaultPosition ? 0 + tileHeight / 2 : y, imageKey)
+			.sprite(
+				x,
+				isAppearOnDefaultPosition ? this.offsetY + tileHeight / 2 : y,
+				imageKey
+			)
 			.setDepth(zIndex)
 			.setDisplaySize(tileWidth, tileHeight)
 			.setInteractive({ useHandCursor: true })
@@ -301,6 +320,75 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #endregion
 
+	// #region Shuffling
+
+	async shuffleTiles(
+		tilesSnapshots: ReadonlyArray<TileSnapshot>,
+		gridSnapshot: GridSnapshot
+	) {
+		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
+			this.animateShiffling(tileSnapshot, gridSnapshot)
+		)
+		await Promise.all(shuffleTasks)
+	}
+
+	private async animateShiffling(
+		tileSnapshot: TileSnapshot,
+		gridSnapshot: GridSnapshot
+	) {
+		const tileSprite = this.tilesMap.get(tileSnapshot.id)
+		if (!tileSprite) {
+			return
+		}
+
+		const { x, y, zIndex } = this.getTileVisualProperties(
+			tileSnapshot,
+			gridSnapshot
+		)
+
+		const currentMovingTween = this.movingTweens.get(tileSprite)
+		currentMovingTween?.stop()
+		this.movingTweens.delete(tileSprite)
+
+		const onTweenComplete = (resolve: () => void) => {
+			tileSprite.setDepth(zIndex)
+			this.movingTweens.delete(tileSprite)
+			tileSprite.setInteractive({ useHandCursor: true })
+
+			resolve()
+		}
+
+		await new Promise<void>((resolve) => {
+			const targetScaleX = tileSprite.scaleX
+			const targetScaleY = tileSprite.scaleY
+			const scale = 1.05
+			this.tweens.add({
+				targets: tileSprite,
+				scaleX: targetScaleX * scale,
+				scaleY: targetScaleY * scale,
+				duration: TILE_SHUFFLE_DURATION_MS / 2,
+				ease: "Cubic.easeInOut",
+				onStart: () => tileSprite.disableInteractive(),
+				onComplete: () => onTweenComplete(resolve),
+				onStop: () => onTweenComplete(resolve),
+				yoyo: true,
+			})
+			const moveTween = this.tweens.add({
+				targets: tileSprite,
+				x,
+				y,
+				duration: TILE_SHUFFLE_DURATION_MS,
+				ease: easeInOutBack,
+				onStart: () => tileSprite.disableInteractive(),
+				onComplete: () => onTweenComplete(resolve),
+				onStop: () => onTweenComplete(resolve),
+			})
+			this.movingTweens.set(tileSprite, moveTween)
+		})
+	}
+
+	// #endregion
+
 	async clearTiles() {
 		const removeTasks = Array.from(this.tilesMap.entries()).map(
 			([id, tileSprite]) =>
@@ -314,14 +402,20 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Helpers
 
+	setOffsets() {
+		const { offsetX, offsetY } = this.getContainerOffset()
+		this.offsetX = offsetX
+		this.offsetY = offsetY
+	}
+
 	private getTileVisualProperties(
 		tileSnapshot: TileSnapshot,
 		gridSnapshot: GridSnapshot
 	) {
 		const { column, row, image } = tileSnapshot
 		const { tileWidth, tileHeight, tileGapX, tileGapY, rows } = gridSnapshot
-		const x = column * (tileWidth + tileGapX) + tileWidth / 2
-		const y = row * (tileHeight + tileGapY) + tileHeight / 2
+		const x = column * (tileWidth + tileGapX) + tileWidth / 2 + this.offsetX
+		const y = row * (tileHeight + tileGapY) + tileHeight / 2 + this.offsetY
 		const zIndex = rows - row
 		const imageKey = image
 
