@@ -11,7 +11,9 @@ import {
 	TILE_REMOVE_DURATION_MS,
 	MIN_TILE_MOVE_DURATION_MS,
 	TILE_MOVE_SPEED,
+	TILE_SHUFFLE_DURATION_MS,
 } from "../config"
+import { easeInOutBack } from "../../helpers/animation"
 
 export const SCENE_KEY = "blast"
 const tileTextureModules = import.meta.glob("../assets/img/*.png", {
@@ -296,6 +298,75 @@ export class PhaserScene extends Phaser.Scene {
 				ease: "Quad.easeOut",
 				onComplete: () => resolve(),
 			})
+		})
+	}
+
+	// #endregion
+
+	// #region Shuffling
+
+	async shuffleTiles(
+		tilesSnapshots: ReadonlyArray<TileSnapshot>,
+		gridSnapshot: GridSnapshot
+	) {
+		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
+			this.animateShiffling(tileSnapshot, gridSnapshot)
+		)
+		await Promise.all(shuffleTasks)
+	}
+
+	private async animateShiffling(
+		tileSnapshot: TileSnapshot,
+		gridSnapshot: GridSnapshot
+	) {
+		const tileSprite = this.tilesMap.get(tileSnapshot.id)
+		if (!tileSprite) {
+			return
+		}
+
+		const { x, y, zIndex } = this.getTileVisualProperties(
+			tileSnapshot,
+			gridSnapshot
+		)
+
+		const currentMovingTween = this.movingTweens.get(tileSprite)
+		currentMovingTween?.stop()
+		this.movingTweens.delete(tileSprite)
+
+		const onTweenComplete = (resolve: () => void) => {
+			tileSprite.setDepth(zIndex)
+			this.movingTweens.delete(tileSprite)
+			tileSprite.setInteractive({ useHandCursor: true })
+
+			resolve()
+		}
+
+		await new Promise<void>((resolve) => {
+			const targetScaleX = tileSprite.scaleX
+			const targetScaleY = tileSprite.scaleY
+			const scale = 1.05
+			this.tweens.add({
+				targets: tileSprite,
+				scaleX: targetScaleX * scale,
+				scaleY: targetScaleY * scale,
+				duration: TILE_SHUFFLE_DURATION_MS / 2,
+				ease: "Cubic.easeInOut",
+				onStart: () => tileSprite.disableInteractive(),
+				onComplete: () => onTweenComplete(resolve),
+				onStop: () => onTweenComplete(resolve),
+				yoyo: true,
+			})
+			const moveTween = this.tweens.add({
+				targets: tileSprite,
+				x,
+				y,
+				duration: TILE_SHUFFLE_DURATION_MS,
+				ease: easeInOutBack,
+				onStart: () => tileSprite.disableInteractive(),
+				onComplete: () => onTweenComplete(resolve),
+				onStop: () => onTweenComplete(resolve),
+			})
+			this.movingTweens.set(tileSprite, moveTween)
 		})
 	}
 

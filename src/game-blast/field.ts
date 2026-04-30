@@ -1,3 +1,4 @@
+import { shuffle } from "../helpers/array"
 import { pickRandomItem } from "../helpers/random"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
@@ -29,8 +30,8 @@ export class Field {
 		return this.tilesByColumns.flat().filter((tile) => tile !== undefined)
 	}
 
-	getPositions(): Array<TilePosition> {
-		return this.getTiles().map((tile) => tile.getPosition())
+	getPositions(tiles?: Array<Tile>): Array<TilePosition> {
+		return (tiles ?? this.getTiles()).map((tile) => tile.getPosition())
 	}
 
 	getTilesSnapshots(): Array<TileSnapshot> {
@@ -159,5 +160,22 @@ export class Field {
 		}
 
 		return { tiles, positions }
+	}
+
+	shuffle() {
+		const tiles = this.getTiles()
+		const positions = this.getPositions(tiles)
+		const shuffledPositions = shuffle(positions)
+		for (const [index, tile] of tiles.entries()) {
+			const position = shuffledPositions[index]
+			tile.setPosition(position)
+		}
+		const { columns } = this.getFieldSnapshot()
+		this.tilesByColumns = Array.from({ length: columns }, () => [])
+
+		for (const tile of tiles) {
+			const { column, row } = tile.getPosition()
+			this.tilesByColumns[column][row] = tile
+		}
 	}
 }

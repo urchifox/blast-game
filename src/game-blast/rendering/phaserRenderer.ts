@@ -98,6 +98,13 @@ export class PhaserRenderer implements Renderer {
 		)
 	}
 
+	async shuffleTiles(props: {
+		tilesSnapshots: ReadonlyArray<TileSnapshot>
+		gridSnapshot: GridSnapshot
+	}) {
+		await this.scene.shuffleTiles(props.tilesSnapshots, props.gridSnapshot)
+	}
+
 	private setCanvasSizes({
 		width,
 		height,

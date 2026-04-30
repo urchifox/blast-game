@@ -8,6 +8,7 @@ import {
 	GROWTH_EXPONENT,
 	MAX_AVG_COMBO,
 	MAX_GOAL_SCORE,
+	MAX_SHUFFLE_ATTEMPTS,
 	MIN_AVG_COMBO,
 	MIN_COMBO_SIZE,
 	MIN_GOAL_SCORE,
@@ -39,6 +40,8 @@ export class GameBlast {
 
 	private columns = 0
 	private rows = 0
+
+	private shuffleAttempts = 0
 
 	private movesNumber = 0
 	private movesLimit = 0
@@ -492,6 +495,19 @@ export class GameBlast {
 
 	// #endregion
 
+	// #region Shuffle filed
+
+	private async shuffleField() {
+		this.field.shuffle()
+		const tiles = this.field.getTiles()
+		await this.renderer.shuffleTiles({
+			tilesSnapshots: Array.from(tiles).map((tile) => tile.getSnapshot()),
+			gridSnapshot: this.grid.getSnapshot(),
+		})
+	}
+
+	// #endregion
+
 	// #region Progress
 
 	private updateMoves() {
@@ -522,7 +538,7 @@ export class GameBlast {
 
 	// #region Game End
 
-	private checkGameEnd() {
+	private async checkGameEnd() {
 		if (this.isGameEnded) {
 			return
 		}
@@ -531,14 +547,37 @@ export class GameBlast {
 			this.win()
 		} else if (this.movesNumber >= this.movesLimit) {
 			this.lose()
-		} else if (!this.isPossibleToMakeMove()) {
+		}
+
+		const isPossibleToMakeMove = this.isPossibleToMakeMove()
+		if (isPossibleToMakeMove) {
+			return
+		}
+
+		if (this.shuffleAttempts >= MAX_SHUFFLE_ATTEMPTS) {
 			this.lose()
+			return
+		}
+
+		this.shuffleAttempts++
+		let attempts = 0
+		while (!this.isPossibleToMakeMove()) {
+			await this.shuffleField()
+			attempts++
+			// Prevent infinite loop
+			if (attempts >= 100) {
+				this.lose()
+				return
+			}
 		}
 	}
 
 	private isPossibleToMakeMove() {
 		const tiles = this.field.getTiles()
 		return tiles.some((tile) => {
+			if (isTileKindSpecial(tile.getKind())) {
+				return true
+			}
 			const { tilesToRemove } = this.getSameKindNeighbourTiles(tile)
 			return tilesToRemove.size > 1
 		})
