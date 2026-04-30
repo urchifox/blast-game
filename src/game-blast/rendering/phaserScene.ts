@@ -35,8 +35,21 @@ export class PhaserScene extends Phaser.Scene {
 	private onReadyCallbacks: Array<() => void> = []
 	private onTileClick: OnTileClickHandler | null = null
 
-	constructor() {
+	private offsetX = 0
+	private offsetY = 0
+
+	private readonly getContainerOffset: () => {
+		offsetX: number
+		offsetY: number
+	}
+
+	constructor({
+		getContainerOffset,
+	}: {
+		getContainerOffset: () => { offsetX: number; offsetY: number }
+	}) {
 		super(SCENE_KEY)
+		this.getContainerOffset = getContainerOffset
 	}
 
 	// #region Initialization
@@ -138,7 +151,11 @@ export class PhaserScene extends Phaser.Scene {
 			this.getTileVisualProperties(tileSnapshot, gridSnapshot)
 
 		const tileSprite = this.add
-			.sprite(x, isAppearOnDefaultPosition ? 0 + tileHeight / 2 : y, imageKey)
+			.sprite(
+				x,
+				isAppearOnDefaultPosition ? this.offsetY + tileHeight / 2 : y,
+				imageKey
+			)
 			.setDepth(zIndex)
 			.setDisplaySize(tileWidth, tileHeight)
 			.setInteractive({ useHandCursor: true })
@@ -385,14 +402,20 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Helpers
 
+	setOffsets() {
+		const { offsetX, offsetY } = this.getContainerOffset()
+		this.offsetX = offsetX
+		this.offsetY = offsetY
+	}
+
 	private getTileVisualProperties(
 		tileSnapshot: TileSnapshot,
 		gridSnapshot: GridSnapshot
 	) {
 		const { column, row, image } = tileSnapshot
 		const { tileWidth, tileHeight, tileGapX, tileGapY, rows } = gridSnapshot
-		const x = column * (tileWidth + tileGapX) + tileWidth / 2
-		const y = row * (tileHeight + tileGapY) + tileHeight / 2
+		const x = column * (tileWidth + tileGapX) + tileWidth / 2 + this.offsetX
+		const y = row * (tileHeight + tileGapY) + tileHeight / 2 + this.offsetY
 		const zIndex = rows - row
 		const imageKey = image
 

@@ -39,9 +39,9 @@ export class GameView extends View {
 		this.gameBlast = new GameBlast({
 			renderer: new PhaserRenderer({
 				container: this.gameContainer,
+				getContainerOffset: this.getContainerOffset.bind(this),
 			}),
-			toggleContainerFullSizeMode:
-				this.toggleGameContainerFullSizeMode.bind(this),
+			setGameContainerSize: this.setGameContainerSize.bind(this),
 			updateMovesCounter: this.updateMovesCounter.bind(this),
 			updateScoreCounter: this.updateScoreCounter.bind(this),
 			openWinModal: this.openWinModal.bind(this),
@@ -71,11 +71,34 @@ export class GameView extends View {
 		this.gameBlast?.onResize()
 	}
 
-	private toggleGameContainerFullSizeMode(isFullSize: boolean) {
+	private setGameContainerSize(
+		sizes: { width: number; height: number } | null
+	) {
+		const isResetSizes = sizes === null
 		this.gameContainer?.classList.toggle(
 			"game-blast-container__canvas-container--fullsize",
-			isFullSize
+			isResetSizes
 		)
+		if (isResetSizes) {
+			return
+		}
+
+		const { width, height } = sizes
+		this.gameContainer?.style.setProperty("--field-width", `${width}px`)
+		this.gameContainer?.style.setProperty("--field-height", `${height}px`)
+	}
+
+	private getContainerOffset() {
+		if (this.gameContainer === undefined) {
+			return { offsetX: 0, offsetY: 0 }
+		}
+
+		const { x, y } = this.gameContainer.getBoundingClientRect()
+		const style = window.getComputedStyle(this.gameContainer)
+		const offsetX = x + parseFloat(style.paddingLeft || "0")
+		const offsetY = y + parseFloat(style.paddingTop || "0")
+
+		return { offsetX, offsetY }
 	}
 
 	private updateMovesCounter({

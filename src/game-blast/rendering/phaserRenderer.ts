@@ -9,24 +9,24 @@ export class PhaserRenderer implements Renderer {
 	private readonly container: HTMLElement
 	private readonly game: Phaser.Game
 	private scene: PhaserScene
-
 	readonly readyPromise: Promise<void>
 
-	constructor(props: { container: HTMLElement }) {
-		const { container } = props
+	constructor(props: {
+		container: HTMLElement
+		getContainerOffset: () => { offsetX: number; offsetY: number }
+	}) {
+		const { container, getContainerOffset } = props
 
 		this.container = container
 
-		const initialCanvasWidth = this.getSafeCanvasSize()
-		const initialCanvasHeight = this.getSafeCanvasSize()
-		const rendererScene = new PhaserScene()
+		const rendererScene = new PhaserScene({ getContainerOffset })
 
 		this.game = new Phaser.Game({
 			type: Phaser.AUTO,
 			parent: this.container,
-			width: initialCanvasWidth,
-			height: initialCanvasHeight,
 			transparent: true,
+			width: window.innerWidth,
+			height: window.innerHeight,
 			physics: {
 				default: "none",
 			},
@@ -56,8 +56,8 @@ export class PhaserRenderer implements Renderer {
 		tilesSnapshots: ReadonlyArray<TileSnapshot>,
 		gridSnapshot: GridSnapshot
 	) {
-		const { gridWidth, gridHeight } = gridSnapshot
-		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
+		this.game.scale.resize(window.innerWidth, window.innerHeight)
+		this.scene.setOffsets()
 		this.scene.resize(tilesSnapshots, gridSnapshot)
 	}
 
@@ -88,8 +88,7 @@ export class PhaserRenderer implements Renderer {
 		gridSnapshot: GridSnapshot
 		isAppearOnDefaultPosition?: boolean
 	}) {
-		const { gridWidth, gridHeight } = gridSnapshot
-		this.setCanvasSizes({ width: gridWidth, height: gridHeight })
+		this.scene.setOffsets()
 
 		await this.scene.renderTiles(
 			tilesSnapshots,
@@ -103,25 +102,5 @@ export class PhaserRenderer implements Renderer {
 		gridSnapshot: GridSnapshot
 	}) {
 		await this.scene.shuffleTiles(props.tilesSnapshots, props.gridSnapshot)
-	}
-
-	private setCanvasSizes({
-		width,
-		height,
-	}: {
-		width?: number
-		height?: number
-	}) {
-		const canvasWidth = this.getSafeCanvasSize(width)
-		const canvasHeight = this.getSafeCanvasSize(height)
-		this.game.scale.resize(canvasWidth, canvasHeight)
-	}
-
-	private getSafeCanvasSize(size?: number) {
-		if (typeof size !== "number" || !Number.isFinite(size) || size <= 0) {
-			return 1
-		}
-
-		return Math.max(1, Math.floor(size))
 	}
 }

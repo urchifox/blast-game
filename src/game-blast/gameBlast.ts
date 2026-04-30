@@ -35,7 +35,12 @@ export class GameBlast {
 	private readonly renderer: Renderer
 	private readonly grid: Grid
 	private readonly field: Field
-	private readonly toggleContainerFullSizeMode: (isFullSize: boolean) => void
+	private readonly setGameContainerSize: (
+		sizes: {
+			width: number
+			height: number
+		} | null
+	) => void
 	private readonly blockedTileIds = new Set<string>()
 
 	private columns = 0
@@ -70,7 +75,7 @@ export class GameBlast {
 
 	constructor({
 		renderer,
-		toggleContainerFullSizeMode,
+		setGameContainerSize,
 		updateMovesCounter,
 		updateScoreCounter,
 		openWinModal,
@@ -78,7 +83,12 @@ export class GameBlast {
 		getContainerSize,
 	}: {
 		renderer: Renderer
-		toggleContainerFullSizeMode: (isFullSize: boolean) => void
+		setGameContainerSize: (
+			sizes: {
+				width: number
+				height: number
+			} | null
+		) => void
 		updateMovesCounter: ({
 			movesNumber,
 			movesLimit,
@@ -101,7 +111,7 @@ export class GameBlast {
 		}
 	}) {
 		this.renderer = renderer
-		this.toggleContainerFullSizeMode = toggleContainerFullSizeMode
+		this.setGameContainerSize = setGameContainerSize
 		this.updateMovesCounter = updateMovesCounter
 		this.updateScoreCounter = updateScoreCounter
 		this.openWinModal = openWinModal
@@ -134,9 +144,12 @@ export class GameBlast {
 	}
 
 	onResize() {
-		this.toggleContainerFullSizeMode(true)
+		this.setGameContainerSize(null)
 		const snapshot = this.grid.updateGridSizes()
-		this.toggleContainerFullSizeMode(false)
+		this.setGameContainerSize({
+			width: snapshot.gridWidth,
+			height: snapshot.gridHeight,
+		})
 		const tilesSnapshots = this.field.getTilesSnapshots()
 		this.renderer.resize(tilesSnapshots, snapshot)
 	}
@@ -168,14 +181,18 @@ export class GameBlast {
 	}
 
 	private createLevel() {
-		this.toggleContainerFullSizeMode(true)
+		this.setGameContainerSize(null)
 		this.grid.createGrid(this.columns, this.rows)
 		this.field.generateTiles()
+		const gridSnapshot = this.grid.getSnapshot()
+		this.setGameContainerSize({
+			width: gridSnapshot.gridWidth,
+			height: gridSnapshot.gridHeight,
+		})
 		this.renderer.renderTiles({
 			tilesSnapshots: this.field.getTilesSnapshots(),
-			gridSnapshot: this.grid.getSnapshot(),
+			gridSnapshot: gridSnapshot,
 		})
-		this.toggleContainerFullSizeMode(false)
 		this.updateMovesCounter({
 			movesNumber: this.movesNumber,
 			movesLimit: this.movesLimit,
