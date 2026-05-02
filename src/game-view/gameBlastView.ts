@@ -168,7 +168,7 @@ export class GameView extends View {
 
 	private setboosterBombButtonListeners() {
 		this.boosterBombButton?.addEventListener("click", () =>
-			this.gameBlast?.onboosterBombButtonClick()
+			this.gameBlast?.onBoosterBombButtonClick()
 		)
 	}
 

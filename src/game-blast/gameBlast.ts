@@ -576,7 +576,7 @@ export class GameBlast {
 
 	// #region Boosters
 
-	onboosterBombButtonClick() {
+	onBoosterBombButtonClick() {
 		this.boosterBomb.tryActivate()
 	}
 
