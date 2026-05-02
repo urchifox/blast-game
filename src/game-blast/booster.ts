@@ -11,6 +11,7 @@ export class Booster {
 	}) {
 		this.progress = new Progress({
 			updateCounter: ({ currentValue }) => updateCounter(currentValue),
+			isDirectionDown: true,
 		})
 		this.progress.setTargetValue(0)
 	}
