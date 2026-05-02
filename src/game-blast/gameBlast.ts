@@ -138,7 +138,7 @@ export class GameBlast {
 	async init() {
 		this.renderer.setOnTileClick(this.onTileClick.bind(this))
 		await this.renderer.init()
-		this.startNewLevel()
+		await this.startNewLevel()
 	}
 
 	destroy() {
