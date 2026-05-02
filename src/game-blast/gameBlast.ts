@@ -1,6 +1,5 @@
 import { getRandomNumber, pickRandomItem } from "../helpers/random"
 import { wait } from "../helpers/time"
-import { loadingScreen } from "../view/loadingScreen"
 import { Booster, BoosterName } from "./booster"
 import {
 	BASE_SCORE,
@@ -173,18 +172,14 @@ export class GameBlast {
 	// #region Level creation
 
 	async startNewLevel() {
-		loadingScreen.show()
 		await this.clearLevel()
 		this.generateLevelData()
 		this.createLevel()
-		loadingScreen.hide()
 	}
 
 	async restartLevel() {
-		loadingScreen.show()
 		await this.clearLevel()
 		this.createLevel()
-		loadingScreen.hide()
 	}
 
 	private generateLevelData() {
