@@ -283,6 +283,19 @@ export class PhaserScene extends Phaser.Scene {
 		})
 	}
 
+	async swapTiles({
+		tilesSnapshots,
+		gridSnapshot,
+	}: {
+		tilesSnapshots: ReadonlyArray<TileSnapshot>
+		gridSnapshot: GridSnapshot
+	}) {
+		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
+			this.animateShiffling(tileSnapshot, gridSnapshot)
+		)
+		await Promise.all(shuffleTasks)
+	}
+
 	// #endregion
 
 	// #region Removing
@@ -350,6 +363,7 @@ export class PhaserScene extends Phaser.Scene {
 		currentMovingTween?.stop()
 		this.movingTweens.delete(tileSprite)
 
+		tileSprite.setDepth(Infinity)
 		const onTweenComplete = (resolve: () => void) => {
 			tileSprite.setDepth(zIndex)
 			this.movingTweens.delete(tileSprite)

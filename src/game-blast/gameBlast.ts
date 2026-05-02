@@ -1,8 +1,11 @@
 import { getRandomNumber, pickRandomItem } from "../helpers/random"
 import { wait } from "../helpers/time"
+import { Booster } from "./booster"
 import {
 	BASE_SCORE,
-	BOMB_RADIUS,
+	TILE_BOMB_RADIUS,
+	BOOSTER_BOMBS_COUNT,
+	BOOSTER_TELEPORT_COUNT,
 	DEFAULT_COLUMNS,
 	DEFAULT_ROWS,
 	GROWTH_EXPONENT,
@@ -13,6 +16,7 @@ import {
 	MIN_COMBO_SIZE,
 	MIN_GOAL_SCORE,
 	TILE_DELAY_BETWEEN_REMOVALS_MS,
+	BOOSTER_BOMB_RADIUS,
 } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
@@ -56,6 +60,11 @@ export class GameBlast {
 
 	private isGameEnded = false
 
+	private readonly boosterBombs: Booster
+	private readonly boosterTeleport: Booster
+
+	private selectedTile: Tile | null = null
+
 	constructor({
 		renderer,
 		setGameContainerSize,
@@ -64,6 +73,8 @@ export class GameBlast {
 		openWinModal,
 		openLossModal,
 		getContainerSize,
+		updateBoosterBombCounter,
+		updateBoosterTeleportCounter,
 	}: {
 		renderer: Renderer
 		setGameContainerSize: (
@@ -83,6 +94,8 @@ export class GameBlast {
 			width: number
 			height: number
 		}
+		updateBoosterBombCounter: (currentValue: number) => void
+		updateBoosterTeleportCounter: (currentValue: number) => void
 	}) {
 		this.renderer = renderer
 		this.setGameContainerSize = setGameContainerSize
@@ -107,6 +120,12 @@ export class GameBlast {
 					movesLimit: targetValue,
 				}),
 		})
+		this.boosterBombs = new Booster({
+			updateCounter: updateBoosterBombCounter,
+		})
+		this.boosterTeleport = new Booster({
+			updateCounter: updateBoosterTeleportCounter,
+		})
 	}
 
 	async init() {
@@ -125,6 +144,8 @@ export class GameBlast {
 		this.field.clearTiles()
 		this.scoreProgress.clear()
 		this.movesProgress.clear()
+		this.boosterBombs.clear()
+		this.boosterTeleport.clear()
 		this.isGameEnded = false
 	}
 
@@ -168,6 +189,10 @@ export class GameBlast {
 	}
 
 	private createLevel() {
+		this.boosterBombs.setCurrentValue(BOOSTER_BOMBS_COUNT)
+		this.boosterTeleport.setCurrentValue(BOOSTER_TELEPORT_COUNT)
+		this.boosterBombs.renderCounter()
+		this.boosterTeleport.renderCounter()
 		this.setGameContainerSize(null)
 		this.grid.createGrid(this.columns, this.rows)
 		this.field.generateTiles()
@@ -215,22 +240,22 @@ export class GameBlast {
 			return
 		}
 
+		if (this.boosterBombs.isActivated()) {
+			this.useBoosterBomb(tile)
+			return
+		}
+
+		if (this.boosterTeleport.isActivated()) {
+			this.useBoosterTeleport(tile)
+			return
+		}
+
 		const kind = tile.getKind()
 		const { removedTiles, removedPositions } = isTileKindSpecial(kind)
 			? await this.specialTileHandler[kind](tile)
 			: await this.onNormalTileClick(tile)
 
-		if (removedTiles.size === 0) {
-			return
-		}
-
-		const points = this.getPoints(removedTiles.size)
-		this.scoreProgress.addCurrentValue(points)
-		this.movesProgress.addCurrentValue()
-
-		await this.fillEmptyPositions(removedPositions)
-
-		await this.checkGameEnd()
+		await this.processRemovingTiles({ removedTiles, removedPositions })
 	}
 
 	// #region Normal tile handlers
@@ -342,7 +367,7 @@ export class GameBlast {
 	private async onBombTileClick(tile: Tile): TileClickHandlerResult {
 		const { tiles, positions } = this.field.getTilesInRadius(
 			tile.getPosition(),
-			BOMB_RADIUS
+			TILE_BOMB_RADIUS
 		)
 		if (tiles.size === 0) {
 			return {
@@ -442,6 +467,26 @@ export class GameBlast {
 		}
 	}
 
+	async processRemovingTiles({
+		removedTiles,
+		removedPositions,
+	}: {
+		removedTiles: Set<Tile>
+		removedPositions: Set<TilePosition>
+	}) {
+		if (removedTiles.size === 0) {
+			return
+		}
+
+		const points = this.getPoints(removedTiles.size)
+		this.scoreProgress.addCurrentValue(points)
+		this.movesProgress.addCurrentValue()
+
+		await this.fillEmptyPositions(removedPositions)
+
+		await this.checkGameEnd()
+	}
+
 	private async fillEmptyPositions(positions: Set<TilePosition>) {
 		const { movedTiles, newTiles } = this.field.fillEmptyPositions(positions)
 
@@ -514,6 +559,51 @@ export class GameBlast {
 		return Math.round(
 			BASE_SCORE * Math.pow(removedTilesNumber, GROWTH_EXPONENT)
 		)
+	}
+
+	// #endregion
+
+	// #region Boosters
+
+	onBoosterBombsButtonClick() {
+		this.boosterBombs.tryActivate()
+	}
+
+	onBoosterTeleportButtonClick() {
+		this.boosterTeleport.tryActivate()
+	}
+
+	private async useBoosterBomb(tile: Tile) {
+		const { tiles, positions } = this.field.getTilesInRadius(
+			tile.getPosition(),
+			BOOSTER_BOMB_RADIUS
+		)
+		if (tiles.size === 0) {
+			return
+		}
+
+		this.boosterBombs.use()
+
+		await this.removeTilesFromCenter(tiles, tile.getPosition())
+		await this.processRemovingTiles({
+			removedTiles: tiles,
+			removedPositions: positions,
+		})
+	}
+
+	private useBoosterTeleport(tile: Tile) {
+		if (this.selectedTile === null) {
+			this.selectedTile = tile
+			return
+		}
+
+		this.field.swapTiles(this.selectedTile, tile)
+		this.renderer.swapTiles({
+			tilesSnapshots: [this.selectedTile.getSnapshot(), tile.getSnapshot()],
+			gridSnapshot: this.grid.getSnapshot(),
+		})
+		this.boosterTeleport.use()
+		this.selectedTile = null
 	}
 
 	// #endregion

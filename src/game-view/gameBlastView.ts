@@ -20,6 +20,10 @@ export class GameView extends View {
 	private winModalWrapper?: HTMLElement
 	private lossModal?: HTMLDialogElement
 	private lossModalWrapper?: HTMLElement
+	private boosterBombsButton?: HTMLElement
+	private boosterTeleportButton?: HTMLElement
+	private boosterBombsCounter?: HTMLElement
+	private boosterTeleportCounter?: HTMLElement
 
 	constructor() {
 		super("game-blast")
@@ -35,6 +39,10 @@ export class GameView extends View {
 		this.winModalWrapper = queryElement(".win-modal__wrapper", this.winModal)
 		this.lossModal = queryElement<HTMLDialogElement>("#loss-modal")
 		this.lossModalWrapper = queryElement(".loss-modal__wrapper", this.lossModal)
+		this.boosterBombsButton = queryElement("#booster-bomb")
+		this.boosterTeleportButton = queryElement("#booster-teleport")
+		this.boosterBombsCounter = queryElement("#booster-counter-bomb")
+		this.boosterTeleportCounter = queryElement("#booster-counter-teleport")
 
 		this.gameBlast = new GameBlast({
 			renderer: new PhaserRenderer({
@@ -47,6 +55,9 @@ export class GameView extends View {
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
 			getContainerSize: this.getGameContainerSize.bind(this),
+			updateBoosterBombCounter: this.updateBoosterBombCounter.bind(this),
+			updateBoosterTeleportCounter:
+				this.updateBoosterTeleportCounter.bind(this),
 		})
 
 		this.setListeners()
@@ -57,6 +68,8 @@ export class GameView extends View {
 	private setListeners() {
 		this.setWinModalListeners()
 		this.setLossModalListeners()
+		this.setBoosterBombsButtonListeners()
+		this.setBoosterTeleportButtonListeners()
 		window.addEventListener("resize", this.handleWindowResize)
 	}
 
@@ -128,11 +141,37 @@ export class GameView extends View {
 		this.scoreCounter.textContent = `${score}/${goalScore}`
 	}
 
+	private updateBoosterBombCounter(currentValue: number) {
+		if (this.boosterBombsCounter === undefined) {
+			return
+		}
+		this.boosterBombsCounter.textContent = currentValue.toString()
+	}
+
+	private updateBoosterTeleportCounter(currentValue: number) {
+		if (this.boosterTeleportCounter === undefined) {
+			return
+		}
+		this.boosterTeleportCounter.textContent = currentValue.toString()
+	}
+
 	private getGameContainerSize() {
 		if (this.gameContainer === undefined) {
 			return { width: 0, height: 0 }
 		}
 		return getElementInnerSize({ element: this.gameContainer })
+	}
+
+	private setBoosterBombsButtonListeners() {
+		this.boosterBombsButton?.addEventListener("click", () =>
+			this.gameBlast?.onBoosterBombsButtonClick()
+		)
+	}
+
+	private setBoosterTeleportButtonListeners() {
+		this.boosterTeleportButton?.addEventListener("click", () =>
+			this.gameBlast?.onBoosterTeleportButtonClick()
+		)
 	}
 
 	// #region Win Modal

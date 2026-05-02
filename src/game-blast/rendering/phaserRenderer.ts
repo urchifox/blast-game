@@ -103,4 +103,11 @@ export class PhaserRenderer implements Renderer {
 	}) {
 		await this.scene.shuffleTiles(props.tilesSnapshots, props.gridSnapshot)
 	}
+
+	async swapTiles(props: {
+		tilesSnapshots: ReadonlyArray<TileSnapshot>
+		gridSnapshot: GridSnapshot
+	}) {
+		await this.scene.swapTiles(props)
+	}
 }

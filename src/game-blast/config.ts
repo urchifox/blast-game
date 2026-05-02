@@ -36,7 +36,7 @@ export const TILES_KINDS_SPECIAL = [
 
 export const MIN_COMBO_SIZE = 2
 
-export const BOMB_RADIUS = 2
+export const TILE_BOMB_RADIUS = 2
 
 /** tile heights per second */
 export const TILE_MOVE_SPEED = 10
@@ -49,3 +49,7 @@ export const TILE_DELAY_BETWEEN_REMOVALS_MS = TILE_REMOVE_DURATION_MS / 4
 export const TILE_SHUFFLE_DURATION_MS = 900
 
 export const MAX_SHUFFLE_ATTEMPTS = 3
+
+export const BOOSTER_BOMBS_COUNT = 3
+export const BOOSTER_TELEPORT_COUNT = 5
+export const BOOSTER_BOMB_RADIUS = 2
