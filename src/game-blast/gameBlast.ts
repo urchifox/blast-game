@@ -21,7 +21,7 @@ import {
 } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
-import { Progress } from "./progress"
+import { Progress } from "../helpers/progress"
 import { Renderer } from "./rendering/renderer"
 import {
 	isTileKindSpecial,

@@ -1,4 +1,4 @@
-import { Progress } from "./progress"
+import { Progress } from "../helpers/progress"
 
 export class Booster {
 	private readonly progress: Progress
