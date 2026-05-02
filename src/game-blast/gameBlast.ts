@@ -1,7 +1,7 @@
 import { getRandomNumber, pickRandomItem } from "../helpers/random"
 import { wait } from "../helpers/time"
 import { loadingScreen } from "../view/loadingScreen"
-import { Booster } from "./booster"
+import { Booster, BoosterName } from "./booster"
 import {
 	BASE_SCORE,
 	TILE_BOMB_RADIUS,
@@ -66,6 +66,11 @@ export class GameBlast {
 
 	private selectedTile: Tile | null = null
 
+	private boosterMap: Record<BoosterName, () => Booster> = {
+		bomb: () => this.boosterBomb,
+		teleport: () => this.boosterTeleport,
+	}
+
 	constructor({
 		renderer,
 		setGameContainerSize,
@@ -74,10 +79,8 @@ export class GameBlast {
 		openWinModal,
 		openLossModal,
 		getContainerSize,
-		updateBoosterBombCounter,
-		updateBoosterTeleportCounter,
-		onBoosterBombActiveChange,
-		onBoosterTeleportActiveChange,
+		updateBoosterCounter,
+		onBoosterActiveChange,
 	}: {
 		renderer: Renderer
 		setGameContainerSize: (
@@ -97,10 +100,8 @@ export class GameBlast {
 			width: number
 			height: number
 		}
-		updateBoosterBombCounter: (currentValue: number) => void
-		updateBoosterTeleportCounter: (currentValue: number) => void
-		onBoosterBombActiveChange: (isActive: boolean) => void
-		onBoosterTeleportActiveChange: (isActive: boolean) => void
+		updateBoosterCounter: (booster: BoosterName, currentValue: number) => void
+		onBoosterActiveChange: (boosterName: BoosterName, isActive: boolean) => void
 	}) {
 		this.renderer = renderer
 		this.setGameContainerSize = setGameContainerSize
@@ -126,12 +127,14 @@ export class GameBlast {
 				}),
 		})
 		this.boosterBomb = new Booster({
-			updateCounter: updateBoosterBombCounter,
-			onActiveChange: onBoosterBombActiveChange,
+			name: "bomb",
+			updateCounter: updateBoosterCounter,
+			onActiveChange: onBoosterActiveChange,
 		})
 		this.boosterTeleport = new Booster({
-			updateCounter: updateBoosterTeleportCounter,
-			onActiveChange: onBoosterTeleportActiveChange,
+			name: "teleport",
+			updateCounter: updateBoosterCounter,
+			onActiveChange: onBoosterActiveChange,
 		})
 	}
 
@@ -576,12 +579,8 @@ export class GameBlast {
 
 	// #region Boosters
 
-	onBoosterBombButtonClick() {
-		this.boosterBomb.tryActivate()
-	}
-
-	onBoosterTeleportButtonClick() {
-		this.boosterTeleport.tryActivate()
+	onBoosterButtonClick(boosterName: BoosterName) {
+		this.boosterMap[boosterName]().tryActivate()
 	}
 
 	private async useBoosterBomb(tile: Tile) {

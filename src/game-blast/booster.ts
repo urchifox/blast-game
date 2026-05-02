@@ -1,31 +1,41 @@
 import { Progress } from "../helpers/progress"
 
+export type BoosterName = "bomb" | "teleport"
+
 export class Booster {
+	readonly name: BoosterName
 	private readonly progress: Progress
 	private isActive = false
-	private readonly onActiveChange?: (isActive: boolean) => void
+	private readonly onActiveChange?: (
+		boosterName: BoosterName,
+		isActive: boolean
+	) => void
 
 	constructor({
+		name,
 		updateCounter,
 		onActiveChange,
 	}: {
-		updateCounter: (currentValue: number) => void
-		onActiveChange?: (isActive: boolean) => void
+		name: BoosterName
+		updateCounter: (booster: BoosterName, currentValue: number) => void
+		onActiveChange?: (boosterName: BoosterName, isActive: boolean) => void
 	}) {
+		this.name = name
 		this.progress = new Progress({
-			updateCounter: ({ currentValue }) => updateCounter(currentValue),
+			updateCounter: ({ currentValue }) =>
+				updateCounter(this.name, currentValue),
 			isDirectionDown: true,
 		})
 		this.onActiveChange = onActiveChange
 		this.progress.setTargetValue(0)
 	}
 
-	private setIsActive(value: boolean) {
-		if (this.isActive === value) {
+	private setIsActive(isActive: boolean) {
+		if (this.isActive === isActive) {
 			return
 		}
-		this.isActive = value
-		this.onActiveChange?.(value)
+		this.isActive = isActive
+		this.onActiveChange?.(this.name, isActive)
 	}
 
 	setCurrentValue(value: number) {

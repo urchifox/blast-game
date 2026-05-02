@@ -10,6 +10,7 @@ import {
 	queryElement,
 } from "../helpers/dom"
 import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
+import { BoosterName } from "../game-blast/booster"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -25,6 +26,23 @@ export class GameView extends View {
 	private boosterTeleportButton?: HTMLElement
 	private boosterBombCounter?: HTMLElement
 	private boosterTeleportCounter?: HTMLElement
+
+	private boosterElementsMap: Record<
+		BoosterName,
+		{
+			getButton: () => HTMLElement | undefined
+			getCounter: () => HTMLElement | undefined
+		}
+	> = {
+		bomb: {
+			getButton: () => this.boosterBombButton,
+			getCounter: () => this.boosterBombCounter,
+		},
+		teleport: {
+			getButton: () => this.boosterTeleportButton,
+			getCounter: () => this.boosterTeleportCounter,
+		},
+	}
 
 	constructor() {
 		super("game-blast")
@@ -56,12 +74,8 @@ export class GameView extends View {
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
 			getContainerSize: this.getGameContainerSize.bind(this),
-			updateBoosterBombCounter: this.updateBoosterBombCounter.bind(this),
-			updateBoosterTeleportCounter:
-				this.updateBoosterTeleportCounter.bind(this),
-			onBoosterBombActiveChange: this.onBoosterBombActiveChange.bind(this),
-			onBoosterTeleportActiveChange:
-				this.onBoosterTeleportActiveChange.bind(this),
+			updateBoosterCounter: this.updateBoosterCounter.bind(this),
+			onBoosterActiveChange: this.toggleBoosterButtonActive.bind(this),
 		})
 
 		this.setListeners()
@@ -72,8 +86,7 @@ export class GameView extends View {
 	private setListeners() {
 		this.setWinModalListeners()
 		this.setLossModalListeners()
-		this.setboosterBombButtonListeners()
-		this.setBoosterTeleportButtonListeners()
+		this.setBoostersButtonsListeners()
 		window.addEventListener("resize", this.handleWindowResize)
 	}
 
@@ -145,18 +158,12 @@ export class GameView extends View {
 		this.scoreCounter.textContent = `${score}/${goalScore}`
 	}
 
-	private updateBoosterBombCounter(currentValue: number) {
-		if (this.boosterBombCounter === undefined) {
+	private updateBoosterCounter(booster: BoosterName, currentValue: number) {
+		const counter = this.boosterElementsMap[booster].getCounter()
+		if (counter === undefined) {
 			return
 		}
-		this.boosterBombCounter.textContent = currentValue.toString()
-	}
-
-	private updateBoosterTeleportCounter(currentValue: number) {
-		if (this.boosterTeleportCounter === undefined) {
-			return
-		}
-		this.boosterTeleportCounter.textContent = currentValue.toString()
+		counter.textContent = currentValue.toString()
 	}
 
 	private getGameContainerSize() {
@@ -166,34 +173,31 @@ export class GameView extends View {
 		return getElementInnerSize({ element: this.gameContainer })
 	}
 
-	private setboosterBombButtonListeners() {
-		this.boosterBombButton?.addEventListener("click", () =>
-			this.gameBlast?.onBoosterBombButtonClick()
-		)
-	}
+	private setBoostersButtonsListeners() {
+		for (const [boosterName, booster] of Object.entries(
+			this.boosterElementsMap
+		)) {
+			if (this.gameBlast === undefined) {
+				continue
+			}
 
-	private setBoosterTeleportButtonListeners() {
-		this.boosterTeleportButton?.addEventListener("click", () =>
-			this.gameBlast?.onBoosterTeleportButtonClick()
-		)
-	}
+			const button = booster.getButton()
+			if (button === undefined) {
+				continue
+			}
 
-	private toggleBoosterButtonActive(button: HTMLElement, active: boolean) {
-		button.classList.toggle("booster--active", active)
-	}
+			const onClick = this.gameBlast.onBoosterButtonClick.bind(
+				this.gameBlast,
+				boosterName as BoosterName
+			)
 
-	private onBoosterBombActiveChange(isActive: boolean) {
-		if (this.boosterBombButton === undefined) {
-			return
+			button.addEventListener("click", onClick)
 		}
-		this.toggleBoosterButtonActive(this.boosterBombButton, isActive)
 	}
 
-	private onBoosterTeleportActiveChange(isActive: boolean) {
-		if (this.boosterTeleportButton === undefined) {
-			return
-		}
-		this.toggleBoosterButtonActive(this.boosterTeleportButton, isActive)
+	private toggleBoosterButtonActive(boosterName: BoosterName, active: boolean) {
+		const button = this.boosterElementsMap[boosterName].getButton()
+		button?.classList.toggle("booster--active", active)
 	}
 
 	// #region Win Modal
