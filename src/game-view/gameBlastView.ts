@@ -59,6 +59,9 @@ export class GameView extends View {
 			updateBoosterBombCounter: this.updateBoosterBombCounter.bind(this),
 			updateBoosterTeleportCounter:
 				this.updateBoosterTeleportCounter.bind(this),
+			onBoosterBombActiveChange: this.onBoosterBombActiveChange.bind(this),
+			onBoosterTeleportActiveChange:
+				this.onBoosterTeleportActiveChange.bind(this),
 		})
 
 		this.setListeners()
@@ -173,6 +176,24 @@ export class GameView extends View {
 		this.boosterTeleportButton?.addEventListener("click", () =>
 			this.gameBlast?.onBoosterTeleportButtonClick()
 		)
+	}
+
+	private toggleBoosterButtonActive(button: HTMLElement, active: boolean) {
+		button.classList.toggle("booster--active", active)
+	}
+
+	private onBoosterBombActiveChange(isActive: boolean) {
+		if (this.boosterBombsButton === undefined) {
+			return
+		}
+		this.toggleBoosterButtonActive(this.boosterBombsButton, isActive)
+	}
+
+	private onBoosterTeleportActiveChange(isActive: boolean) {
+		if (this.boosterTeleportButton === undefined) {
+			return
+		}
+		this.toggleBoosterButtonActive(this.boosterTeleportButton, isActive)
 	}
 
 	// #region Win Modal

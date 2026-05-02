@@ -3,17 +3,29 @@ import { Progress } from "./progress"
 export class Booster {
 	private readonly progress: Progress
 	private isActive = false
+	private readonly onActiveChange?: (isActive: boolean) => void
 
 	constructor({
 		updateCounter,
+		onActiveChange,
 	}: {
 		updateCounter: (currentValue: number) => void
+		onActiveChange?: (isActive: boolean) => void
 	}) {
 		this.progress = new Progress({
 			updateCounter: ({ currentValue }) => updateCounter(currentValue),
 			isDirectionDown: true,
 		})
+		this.onActiveChange = onActiveChange
 		this.progress.setTargetValue(0)
+	}
+
+	private setIsActive(value: boolean) {
+		if (this.isActive === value) {
+			return
+		}
+		this.isActive = value
+		this.onActiveChange?.(value)
 	}
 
 	setCurrentValue(value: number) {
@@ -22,7 +34,7 @@ export class Booster {
 
 	use() {
 		this.progress.addCurrentValue(-1)
-		this.isActive = false
+		this.setIsActive(false)
 	}
 
 	renderCounter() {
@@ -31,14 +43,14 @@ export class Booster {
 
 	clear() {
 		this.progress.clear()
-		this.isActive = false
+		this.setIsActive(false)
 	}
 
 	tryActivate() {
 		if (this.progress.isTargetReached()) {
-			this.isActive = false
+			return
 		}
-		this.isActive = true
+		this.setIsActive(true)
 	}
 
 	isActivated() {

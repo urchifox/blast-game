@@ -76,6 +76,8 @@ export class GameBlast {
 		getContainerSize,
 		updateBoosterBombCounter,
 		updateBoosterTeleportCounter,
+		onBoosterBombActiveChange,
+		onBoosterTeleportActiveChange,
 	}: {
 		renderer: Renderer
 		setGameContainerSize: (
@@ -97,6 +99,8 @@ export class GameBlast {
 		}
 		updateBoosterBombCounter: (currentValue: number) => void
 		updateBoosterTeleportCounter: (currentValue: number) => void
+		onBoosterBombActiveChange: (isActive: boolean) => void
+		onBoosterTeleportActiveChange: (isActive: boolean) => void
 	}) {
 		this.renderer = renderer
 		this.setGameContainerSize = setGameContainerSize
@@ -123,9 +127,11 @@ export class GameBlast {
 		})
 		this.boosterBombs = new Booster({
 			updateCounter: updateBoosterBombCounter,
+			onActiveChange: onBoosterBombActiveChange,
 		})
 		this.boosterTeleport = new Booster({
 			updateCounter: updateBoosterTeleportCounter,
+			onActiveChange: onBoosterTeleportActiveChange,
 		})
 	}
 

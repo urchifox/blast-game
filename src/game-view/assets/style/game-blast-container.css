@@ -39,6 +39,9 @@
 	height: var(--field-height, 1px);
 	box-sizing: content-box;
 }
+:has(.booster--active) .game-blast-container__canvas-container {
+	z-index: 2;
+}
 
 .game-blast-container__canvas-container--fullsize {
 	width: 100%;

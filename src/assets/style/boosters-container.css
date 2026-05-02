@@ -30,6 +30,9 @@
 	flex-shrink: 1;
 	flex-basis: 90px;
 }
+.boosters-container__item:has(.booster--active) {
+	z-index: 1;
+}
 
 .boosters-container__booster {
 	width: calc(100% + 13px * 2);
