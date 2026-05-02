@@ -49,10 +49,6 @@ export class GameBlast {
 		} | null
 	) => void
 	private readonly blockedTileIds = new Set<string>()
-
-	private columns = 0
-	private rows = 0
-
 	private shuffleAttempts = 0
 
 	private readonly openWinModal: () => void
@@ -77,6 +73,18 @@ export class GameBlast {
 			getBooster: () => this.boosterTeleport,
 			useBooster: this.useBoosterTeleport.bind(this),
 		},
+	}
+
+	private levelData: {
+		columns: number
+		rows: number
+		goalScore: number
+		movesLimit: number
+	} = {
+		columns: 0,
+		rows: 0,
+		goalScore: 0,
+		movesLimit: 0,
 	}
 
 	constructor({
@@ -193,27 +201,24 @@ export class GameBlast {
 	}
 
 	private generateLevelData() {
-		this.columns = DEFAULT_COLUMNS
-		this.rows = DEFAULT_ROWS
-
-		const goalScore = getRandomNumber({
+		this.levelData.columns = DEFAULT_COLUMNS
+		this.levelData.rows = DEFAULT_ROWS
+		this.levelData.goalScore = getRandomNumber({
 			min: MIN_GOAL_SCORE,
 			max: MAX_GOAL_SCORE,
 			step: 100,
 		})
-		this.scoreProgress.setTargetValue(goalScore)
-
-		const movesLimit = this.estimateMoves(goalScore)
-		this.movesProgress.setTargetValue(movesLimit)
+		this.levelData.movesLimit = this.estimateMoves(this.levelData.goalScore)
 	}
 
 	private createLevel() {
+		const { columns, rows, goalScore, movesLimit } = this.levelData
 		this.boosterBomb.setCurrentValue(BOOSTER_BOMBS_COUNT)
 		this.boosterTeleport.setCurrentValue(BOOSTER_TELEPORT_COUNT)
 		this.boosterBomb.renderCounter()
 		this.boosterTeleport.renderCounter()
 		this.setGameContainerSize(null)
-		this.grid.createGrid(this.columns, this.rows)
+		this.grid.createGrid(columns, rows)
 		this.field.generateTiles()
 		const gridSnapshot = this.grid.getSnapshot()
 		this.setGameContainerSize({
@@ -224,6 +229,8 @@ export class GameBlast {
 			tilesSnapshots: this.field.getTilesSnapshots(),
 			gridSnapshot: gridSnapshot,
 		})
+		this.scoreProgress.setTargetValue(goalScore)
+		this.movesProgress.setTargetValue(movesLimit)
 		this.scoreProgress.renderCounters()
 		this.movesProgress.renderCounters()
 	}
