@@ -110,4 +110,15 @@ export class PhaserRenderer implements Renderer {
 	}) {
 		await this.scene.swapTiles(props)
 	}
+
+	async selectTile(props: { tileSnapshot: TileSnapshot }) {
+		await this.scene.selectTile(props)
+	}
+
+	async unselectTile(props: {
+		tileSnapshot: TileSnapshot
+		gridSnapshot: GridSnapshot
+	}) {
+		await this.scene.unselectTile(props)
+	}
 }

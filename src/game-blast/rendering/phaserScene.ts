@@ -414,6 +414,64 @@ export class PhaserScene extends Phaser.Scene {
 		this.tilesMap.clear()
 	}
 
+	async selectTile({ tileSnapshot }: { tileSnapshot: TileSnapshot }) {
+		const tileSprite = this.tilesMap.get(tileSnapshot.id)
+		if (!tileSprite) {
+			return
+		}
+		tileSprite.setDepth(Infinity)
+		const targetScaleX = tileSprite.scaleX
+		const targetScaleY = tileSprite.scaleY
+		const scale = 1.1
+		tileSprite.disableInteractive()
+
+		await new Promise<void>((resolve) => {
+			this.tweens.add({
+				targets: tileSprite,
+				scaleX: targetScaleX * scale,
+				scaleY: targetScaleY * scale,
+				duration: 300,
+				ease: "Cubic.easeInOut",
+				onComplete: () => resolve(),
+				onStop: () => resolve(),
+			})
+		})
+	}
+
+	async unselectTile({
+		tileSnapshot,
+		gridSnapshot,
+	}: {
+		tileSnapshot: TileSnapshot
+		gridSnapshot: GridSnapshot
+	}) {
+		const tileSprite = this.tilesMap.get(tileSnapshot.id)
+		if (!tileSprite) {
+			return
+		}
+
+		await new Promise<void>((resolve) => {
+			const onEnd = () => {
+				const { zIndex } = this.getTileVisualProperties(
+					tileSnapshot,
+					gridSnapshot
+				)
+				tileSprite.setDepth(zIndex)
+				tileSprite.setInteractive({ useHandCursor: true })
+				resolve()
+			}
+			this.tweens.add({
+				targets: tileSprite,
+				scaleX: tileSprite.scaleX,
+				scaleY: tileSprite.scaleY,
+				duration: 300,
+				ease: "Cubic.easeInOut",
+				onComplete: onEnd,
+				onStop: onEnd,
+			})
+		})
+	}
+
 	// #region Helpers
 
 	setOffsets() {
