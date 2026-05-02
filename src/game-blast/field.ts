@@ -96,6 +96,11 @@ export class Field {
 
 	addTile({ kind, position }: { kind: TileKind; position: TilePosition }) {
 		const tile = new Tile({ kind, position })
+		return this.placeTile(tile)
+	}
+
+	placeTile(tile: Tile) {
+		const position = tile.getPosition()
 		const column = this.tilesByColumns[position.column]
 		const isPositionEmpty = column[position.row] === undefined
 		if (isPositionEmpty) {
@@ -104,6 +109,17 @@ export class Field {
 			column.unshift(tile)
 		}
 		return tile
+	}
+
+	swapTiles(tile1: Tile, tile2: Tile) {
+		const position1 = tile1.getPosition()
+		const position2 = tile2.getPosition()
+		this.removeTile(position1)
+		this.removeTile(position2)
+		tile1.setPosition(position2)
+		tile2.setPosition(position1)
+		this.placeTile(tile1)
+		this.placeTile(tile2)
 	}
 
 	getTilesInColumn(column: number) {

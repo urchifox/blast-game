@@ -55,7 +55,7 @@ export class Grid {
 		}
 	}
 
-	createGrid(columns: number, rows: number) {
+	createGrid({ columns, rows }: { columns: number; rows: number }) {
 		this.rows = rows
 		this.columns = columns
 		this.updateGridSizes()

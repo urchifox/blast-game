@@ -9,6 +9,9 @@
 		/>
 	</head>
 	<body>
+		<div class="loading-screen" id="loading-screen">
+			<div class="loading-screen__spinner"></div>
+		</div>
 		<div id="app"></div>
 		<script type="module" src="/src/app.ts"></script>
 	</body>
@@ -43,7 +46,7 @@
 							type="button"
 						>
 							<span class="booster__icon booster__icon--teleport"></span>
-							<p class="booster__counter" id="booster-counter-teleport">5</p>
+							<p class="booster__counter" id="booster-counter-teleport"></p>
 						</button>
 					</li>
 					<li class="boosters-container__item">
@@ -53,7 +56,7 @@
 							type="button"
 						>
 							<span class="booster__icon booster__icon--bomb"></span>
-							<p class="booster__counter" id="booster-counter-bomb">3</p>
+							<p class="booster__counter" id="booster-counter-bomb"></p>
 						</button>
 					</li>
 				</ul>

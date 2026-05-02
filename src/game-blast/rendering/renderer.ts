@@ -33,4 +33,16 @@ export type Renderer = {
 		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
 	}): Promise<void>
+	swapTiles(props: {
+		tilesSnapshots: ReadonlyArray<TileSnapshot>
+		gridSnapshot: GridSnapshot
+	}): Promise<void>
+	selectTile(props: {
+		tileSnapshot: TileSnapshot
+		gridSnapshot: GridSnapshot
+	}): Promise<void>
+	unselectTile(props: {
+		tileSnapshot: TileSnapshot
+		gridSnapshot: GridSnapshot
+	}): Promise<void>
 }

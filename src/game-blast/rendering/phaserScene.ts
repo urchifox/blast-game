@@ -283,6 +283,19 @@ export class PhaserScene extends Phaser.Scene {
 		})
 	}
 
+	async swapTiles({
+		tilesSnapshots,
+		gridSnapshot,
+	}: {
+		tilesSnapshots: ReadonlyArray<TileSnapshot>
+		gridSnapshot: GridSnapshot
+	}) {
+		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
+			this.animateShiffling(tileSnapshot, gridSnapshot)
+		)
+		await Promise.all(shuffleTasks)
+	}
+
 	// #endregion
 
 	// #region Removing
@@ -350,6 +363,7 @@ export class PhaserScene extends Phaser.Scene {
 		currentMovingTween?.stop()
 		this.movingTweens.delete(tileSprite)
 
+		tileSprite.setDepth(Infinity)
 		const onTweenComplete = (resolve: () => void) => {
 			tileSprite.setDepth(zIndex)
 			this.movingTweens.delete(tileSprite)
@@ -359,13 +373,15 @@ export class PhaserScene extends Phaser.Scene {
 		}
 
 		await new Promise<void>((resolve) => {
-			const targetScaleX = tileSprite.scaleX
-			const targetScaleY = tileSprite.scaleY
+			const { scaleX, scaleY } = this.getInitialTileScale(
+				tileSprite,
+				gridSnapshot
+			)
 			const scale = 1.05
 			this.tweens.add({
 				targets: tileSprite,
-				scaleX: targetScaleX * scale,
-				scaleY: targetScaleY * scale,
+				scaleX: scaleX * scale,
+				scaleY: scaleY * scale,
 				duration: TILE_SHUFFLE_DURATION_MS / 2,
 				ease: "Cubic.easeInOut",
 				onStart: () => tileSprite.disableInteractive(),
@@ -398,6 +414,78 @@ export class PhaserScene extends Phaser.Scene {
 		this.appearingTweens.clear()
 		this.movingTweens.clear()
 		this.tilesMap.clear()
+	}
+
+	async selectTile({
+		tileSnapshot,
+		gridSnapshot,
+	}: {
+		tileSnapshot: TileSnapshot
+		gridSnapshot: GridSnapshot
+	}) {
+		const tileSprite = this.tilesMap.get(tileSnapshot.id)
+		if (!tileSprite) {
+			return
+		}
+		tileSprite.setDepth(Infinity)
+		const { scaleX, scaleY } = this.getInitialTileScale(
+			tileSprite,
+			gridSnapshot
+		)
+
+		const scale = 1.1
+		tileSprite.disableInteractive()
+
+		await new Promise<void>((resolve) => {
+			this.tweens.add({
+				targets: tileSprite,
+				scaleX: scaleX * scale,
+				scaleY: scaleY * scale,
+				duration: 300,
+				ease: "Cubic.easeInOut",
+				onComplete: () => resolve(),
+				onStop: () => resolve(),
+			})
+		})
+	}
+
+	async unselectTile({
+		tileSnapshot,
+		gridSnapshot,
+	}: {
+		tileSnapshot: TileSnapshot
+		gridSnapshot: GridSnapshot
+	}) {
+		const tileSprite = this.tilesMap.get(tileSnapshot.id)
+		if (!tileSprite) {
+			return
+		}
+
+		const { scaleX, scaleY } = this.getInitialTileScale(
+			tileSprite,
+			gridSnapshot
+		)
+
+		await new Promise<void>((resolve) => {
+			const onEnd = () => {
+				const { zIndex } = this.getTileVisualProperties(
+					tileSnapshot,
+					gridSnapshot
+				)
+				tileSprite.setDepth(zIndex)
+				tileSprite.setInteractive({ useHandCursor: true })
+				resolve()
+			}
+			this.tweens.add({
+				targets: tileSprite,
+				scaleX,
+				scaleY,
+				duration: 300,
+				ease: "Cubic.easeInOut",
+				onComplete: onEnd,
+				onStop: onEnd,
+			})
+		})
 	}
 
 	// #region Helpers
@@ -433,6 +521,18 @@ export class PhaserScene extends Phaser.Scene {
 			MIN_TILE_MOVE_DURATION_MS,
 			(distance / (Math.max(tileHeight, 1) * TILE_MOVE_SPEED)) * 1000
 		)
+	}
+
+	getInitialTileScale(
+		tileSprite: Phaser.GameObjects.Sprite,
+		gridSnapshot: GridSnapshot
+	) {
+		const { tileWidth, tileHeight } = gridSnapshot
+		const frameWidth = tileSprite.frame.width
+		const frameHeight = tileSprite.frame.height
+		const scaleX = tileWidth / frameWidth
+		const scaleY = tileHeight / frameHeight
+		return { scaleX, scaleY }
 	}
 
 	// #endregion

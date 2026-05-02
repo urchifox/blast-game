@@ -10,8 +10,10 @@ import {
 	queryElement,
 } from "../helpers/dom"
 import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
+import { BoosterName } from "../game-blast/booster"
 
 export class GameView extends View {
+	override readonly needLoadingScreenOnMount: boolean = true
 	private gameBlast?: GameBlast
 	private gameContainer?: HTMLElement
 	private movesCounter?: HTMLElement
@@ -20,6 +22,27 @@ export class GameView extends View {
 	private winModalWrapper?: HTMLElement
 	private lossModal?: HTMLDialogElement
 	private lossModalWrapper?: HTMLElement
+	private boosterBombButton?: HTMLElement
+	private boosterTeleportButton?: HTMLElement
+	private boosterBombCounter?: HTMLElement
+	private boosterTeleportCounter?: HTMLElement
+
+	private boosterElementsMap: Record<
+		BoosterName,
+		{
+			getButton: () => HTMLElement | undefined
+			getCounter: () => HTMLElement | undefined
+		}
+	> = {
+		bomb: {
+			getButton: () => this.boosterBombButton,
+			getCounter: () => this.boosterBombCounter,
+		},
+		teleport: {
+			getButton: () => this.boosterTeleportButton,
+			getCounter: () => this.boosterTeleportCounter,
+		},
+	}
 
 	constructor() {
 		super("game-blast")
@@ -35,6 +58,10 @@ export class GameView extends View {
 		this.winModalWrapper = queryElement(".win-modal__wrapper", this.winModal)
 		this.lossModal = queryElement<HTMLDialogElement>("#loss-modal")
 		this.lossModalWrapper = queryElement(".loss-modal__wrapper", this.lossModal)
+		this.boosterBombButton = queryElement("#booster-bomb")
+		this.boosterTeleportButton = queryElement("#booster-teleport")
+		this.boosterBombCounter = queryElement("#booster-counter-bomb")
+		this.boosterTeleportCounter = queryElement("#booster-counter-teleport")
 
 		this.gameBlast = new GameBlast({
 			renderer: new PhaserRenderer({
@@ -47,6 +74,8 @@ export class GameView extends View {
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
 			getContainerSize: this.getGameContainerSize.bind(this),
+			updateBoosterCounter: this.updateBoosterCounter.bind(this),
+			onBoosterActiveChange: this.toggleBoosterButtonActive.bind(this),
 		})
 
 		this.setListeners()
@@ -57,6 +86,7 @@ export class GameView extends View {
 	private setListeners() {
 		this.setWinModalListeners()
 		this.setLossModalListeners()
+		this.setBoostersButtonsListeners()
 		window.addEventListener("resize", this.handleWindowResize)
 	}
 
@@ -128,11 +158,46 @@ export class GameView extends View {
 		this.scoreCounter.textContent = `${score}/${goalScore}`
 	}
 
+	private updateBoosterCounter(booster: BoosterName, currentValue: number) {
+		const counter = this.boosterElementsMap[booster].getCounter()
+		if (counter === undefined) {
+			return
+		}
+		counter.textContent = currentValue.toString()
+	}
+
 	private getGameContainerSize() {
 		if (this.gameContainer === undefined) {
 			return { width: 0, height: 0 }
 		}
 		return getElementInnerSize({ element: this.gameContainer })
+	}
+
+	private setBoostersButtonsListeners() {
+		for (const [boosterName, booster] of Object.entries(
+			this.boosterElementsMap
+		)) {
+			if (this.gameBlast === undefined) {
+				continue
+			}
+
+			const button = booster.getButton()
+			if (button === undefined) {
+				continue
+			}
+
+			const onClick = this.gameBlast.onBoosterButtonClick.bind(
+				this.gameBlast,
+				boosterName as BoosterName
+			)
+
+			button.addEventListener("click", onClick)
+		}
+	}
+
+	private toggleBoosterButtonActive(boosterName: BoosterName, active: boolean) {
+		const button = this.boosterElementsMap[boosterName].getButton()
+		button?.classList.toggle("booster--active", active)
 	}
 
 	// #region Win Modal
