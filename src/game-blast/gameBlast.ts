@@ -218,7 +218,7 @@ export class GameBlast {
 		this.boosterBomb.renderCounter()
 		this.boosterTeleport.renderCounter()
 		this.setGameContainerSize(null)
-		this.grid.createGrid(columns, rows)
+		this.grid.createGrid({ columns, rows })
 		this.field.generateTiles()
 		const gridSnapshot = this.grid.getSnapshot()
 		this.setGameContainerSize({
