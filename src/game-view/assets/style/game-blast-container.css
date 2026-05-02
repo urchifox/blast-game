@@ -38,8 +38,10 @@
 	width: var(--field-width, 1px);
 	height: var(--field-height, 1px);
 	box-sizing: content-box;
+	transition: z-index 0s 0.3s ease allow-discrete;
 }
 :has(.booster--active) .game-blast-container__canvas-container {
+	transition: z-index 0s 0s ease allow-discrete;
 	z-index: 2;
 }
 
