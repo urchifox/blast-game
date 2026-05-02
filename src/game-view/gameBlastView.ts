@@ -12,6 +12,7 @@ import {
 import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
 
 export class GameView extends View {
+	override readonly needLoadingScreenOnMount: boolean = true
 	private gameBlast?: GameBlast
 	private gameContainer?: HTMLElement
 	private movesCounter?: HTMLElement

@@ -1,3 +1,4 @@
+import { loadingScreen } from "./loadingScreen"
 import { View, ViewConstructor } from "./view"
 
 class ViewManager {
@@ -10,7 +11,11 @@ class ViewManager {
 	async openView(view: ViewConstructor) {
 		this.currentView?.unmount()
 		const newView = new view()
+		if (newView.needLoadingScreenOnMount) {
+			loadingScreen.show()
+		}
 		await newView.mount()
+		loadingScreen.hide()
 		this.currentView = newView
 	}
 }
