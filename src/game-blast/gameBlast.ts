@@ -61,7 +61,7 @@ export class GameBlast {
 
 	private isGameEnded = false
 
-	private readonly boosterBombs: Booster
+	private readonly boosterBomb: Booster
 	private readonly boosterTeleport: Booster
 
 	private selectedTile: Tile | null = null
@@ -125,7 +125,7 @@ export class GameBlast {
 					movesLimit: targetValue,
 				}),
 		})
-		this.boosterBombs = new Booster({
+		this.boosterBomb = new Booster({
 			updateCounter: updateBoosterBombCounter,
 			onActiveChange: onBoosterBombActiveChange,
 		})
@@ -151,7 +151,7 @@ export class GameBlast {
 		this.field.clearTiles()
 		this.scoreProgress.clear()
 		this.movesProgress.clear()
-		this.boosterBombs.clear()
+		this.boosterBomb.clear()
 		this.boosterTeleport.clear()
 		this.isGameEnded = false
 	}
@@ -200,9 +200,9 @@ export class GameBlast {
 	}
 
 	private createLevel() {
-		this.boosterBombs.setCurrentValue(BOOSTER_BOMBS_COUNT)
+		this.boosterBomb.setCurrentValue(BOOSTER_BOMBS_COUNT)
 		this.boosterTeleport.setCurrentValue(BOOSTER_TELEPORT_COUNT)
-		this.boosterBombs.renderCounter()
+		this.boosterBomb.renderCounter()
 		this.boosterTeleport.renderCounter()
 		this.setGameContainerSize(null)
 		this.grid.createGrid(this.columns, this.rows)
@@ -251,7 +251,7 @@ export class GameBlast {
 			return
 		}
 
-		if (this.boosterBombs.isActivated()) {
+		if (this.boosterBomb.isActivated()) {
 			this.useBoosterBomb(tile)
 			return
 		}
@@ -576,8 +576,8 @@ export class GameBlast {
 
 	// #region Boosters
 
-	onBoosterBombsButtonClick() {
-		this.boosterBombs.tryActivate()
+	onboosterBombButtonClick() {
+		this.boosterBomb.tryActivate()
 	}
 
 	onBoosterTeleportButtonClick() {
@@ -593,7 +593,7 @@ export class GameBlast {
 			return
 		}
 
-		this.boosterBombs.use()
+		this.boosterBomb.use()
 
 		await this.removeTilesFromCenter(tiles, tile.getPosition())
 		await this.processRemovingTiles({

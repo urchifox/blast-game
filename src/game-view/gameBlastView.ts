@@ -21,9 +21,9 @@ export class GameView extends View {
 	private winModalWrapper?: HTMLElement
 	private lossModal?: HTMLDialogElement
 	private lossModalWrapper?: HTMLElement
-	private boosterBombsButton?: HTMLElement
+	private boosterBombButton?: HTMLElement
 	private boosterTeleportButton?: HTMLElement
-	private boosterBombsCounter?: HTMLElement
+	private boosterBombCounter?: HTMLElement
 	private boosterTeleportCounter?: HTMLElement
 
 	constructor() {
@@ -40,9 +40,9 @@ export class GameView extends View {
 		this.winModalWrapper = queryElement(".win-modal__wrapper", this.winModal)
 		this.lossModal = queryElement<HTMLDialogElement>("#loss-modal")
 		this.lossModalWrapper = queryElement(".loss-modal__wrapper", this.lossModal)
-		this.boosterBombsButton = queryElement("#booster-bomb")
+		this.boosterBombButton = queryElement("#booster-bomb")
 		this.boosterTeleportButton = queryElement("#booster-teleport")
-		this.boosterBombsCounter = queryElement("#booster-counter-bomb")
+		this.boosterBombCounter = queryElement("#booster-counter-bomb")
 		this.boosterTeleportCounter = queryElement("#booster-counter-teleport")
 
 		this.gameBlast = new GameBlast({
@@ -72,7 +72,7 @@ export class GameView extends View {
 	private setListeners() {
 		this.setWinModalListeners()
 		this.setLossModalListeners()
-		this.setBoosterBombsButtonListeners()
+		this.setboosterBombButtonListeners()
 		this.setBoosterTeleportButtonListeners()
 		window.addEventListener("resize", this.handleWindowResize)
 	}
@@ -146,10 +146,10 @@ export class GameView extends View {
 	}
 
 	private updateBoosterBombCounter(currentValue: number) {
-		if (this.boosterBombsCounter === undefined) {
+		if (this.boosterBombCounter === undefined) {
 			return
 		}
-		this.boosterBombsCounter.textContent = currentValue.toString()
+		this.boosterBombCounter.textContent = currentValue.toString()
 	}
 
 	private updateBoosterTeleportCounter(currentValue: number) {
@@ -166,9 +166,9 @@ export class GameView extends View {
 		return getElementInnerSize({ element: this.gameContainer })
 	}
 
-	private setBoosterBombsButtonListeners() {
-		this.boosterBombsButton?.addEventListener("click", () =>
-			this.gameBlast?.onBoosterBombsButtonClick()
+	private setboosterBombButtonListeners() {
+		this.boosterBombButton?.addEventListener("click", () =>
+			this.gameBlast?.onboosterBombButtonClick()
 		)
 	}
 
@@ -183,10 +183,10 @@ export class GameView extends View {
 	}
 
 	private onBoosterBombActiveChange(isActive: boolean) {
-		if (this.boosterBombsButton === undefined) {
+		if (this.boosterBombButton === undefined) {
 			return
 		}
-		this.toggleBoosterButtonActive(this.boosterBombsButton, isActive)
+		this.toggleBoosterButtonActive(this.boosterBombButton, isActive)
 	}
 
 	private onBoosterTeleportActiveChange(isActive: boolean) {
