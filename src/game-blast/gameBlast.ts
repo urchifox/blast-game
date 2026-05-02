@@ -615,7 +615,10 @@ export class GameBlast {
 	private async useBoosterTeleport(tile: Tile) {
 		if (this.selectedTile === null) {
 			this.selectedTile = tile
-			await this.renderer.selectTile({ tileSnapshot: tile.getSnapshot() })
+			await this.renderer.selectTile({
+				tileSnapshot: tile.getSnapshot(),
+				gridSnapshot: this.grid.getSnapshot(),
+			})
 			return
 		}
 
@@ -623,21 +626,27 @@ export class GameBlast {
 		this.selectedTile = null
 		this.boosterTeleport.spend()
 
-		await this.renderer.selectTile({ tileSnapshot: tile.getSnapshot() })
+		await this.renderer.selectTile({
+			tileSnapshot: tile.getSnapshot(),
+			gridSnapshot: this.grid.getSnapshot(),
+		})
 		this.field.swapTiles(selectedTile, tile)
+
 		await this.renderer.swapTiles({
 			tilesSnapshots: [selectedTile.getSnapshot(), tile.getSnapshot()],
 			gridSnapshot: this.grid.getSnapshot(),
 		})
 
-		await this.renderer.unselectTile({
-			tileSnapshot: selectedTile.getSnapshot(),
-			gridSnapshot: this.grid.getSnapshot(),
-		})
-		await this.renderer.unselectTile({
-			tileSnapshot: tile.getSnapshot(),
-			gridSnapshot: this.grid.getSnapshot(),
-		})
+		await Promise.all([
+			this.renderer.unselectTile({
+				tileSnapshot: selectedTile.getSnapshot(),
+				gridSnapshot: this.grid.getSnapshot(),
+			}),
+			this.renderer.unselectTile({
+				tileSnapshot: tile.getSnapshot(),
+				gridSnapshot: this.grid.getSnapshot(),
+			}),
+		])
 	}
 
 	// #endregion

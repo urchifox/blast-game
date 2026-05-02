@@ -416,22 +416,31 @@ export class PhaserScene extends Phaser.Scene {
 		this.tilesMap.clear()
 	}
 
-	async selectTile({ tileSnapshot }: { tileSnapshot: TileSnapshot }) {
+	async selectTile({
+		tileSnapshot,
+		gridSnapshot,
+	}: {
+		tileSnapshot: TileSnapshot
+		gridSnapshot: GridSnapshot
+	}) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
 		if (!tileSprite) {
 			return
 		}
 		tileSprite.setDepth(Infinity)
-		const targetScaleX = tileSprite.scaleX
-		const targetScaleY = tileSprite.scaleY
+		const { scaleX, scaleY } = this.getInitialTileScale(
+			tileSprite,
+			gridSnapshot
+		)
+
 		const scale = 1.1
 		tileSprite.disableInteractive()
 
 		await new Promise<void>((resolve) => {
 			this.tweens.add({
 				targets: tileSprite,
-				scaleX: targetScaleX * scale,
-				scaleY: targetScaleY * scale,
+				scaleX: scaleX * scale,
+				scaleY: scaleY * scale,
 				duration: 300,
 				ease: "Cubic.easeInOut",
 				onComplete: () => resolve(),
