@@ -16,6 +16,7 @@ import {
 } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
+import { Progress } from "./progress"
 import { Renderer } from "./rendering/renderer"
 import {
 	isTileKindSpecial,
@@ -35,6 +36,8 @@ export class GameBlast {
 	private readonly renderer: Renderer
 	private readonly grid: Grid
 	private readonly field: Field
+	private readonly scoreProgress: Progress
+	private readonly movesProgress: Progress
 	private readonly setGameContainerSize: (
 		sizes: {
 			width: number
@@ -47,26 +50,6 @@ export class GameBlast {
 	private rows = 0
 
 	private shuffleAttempts = 0
-
-	private movesNumber = 0
-	private movesLimit = 0
-	private readonly updateMovesCounter: ({
-		movesNumber,
-		movesLimit,
-	}: {
-		movesNumber: number
-		movesLimit: number
-	}) => void
-
-	private score = 0
-	private goalScore = 0
-	private readonly updateScoreCounter: ({
-		score,
-		goalScore,
-	}: {
-		score: number
-		goalScore: number
-	}) => void
 
 	private readonly openWinModal: () => void
 	private readonly openLossModal: () => void
@@ -89,20 +72,11 @@ export class GameBlast {
 				height: number
 			} | null
 		) => void
-		updateMovesCounter: ({
-			movesNumber,
-			movesLimit,
-		}: {
+		updateMovesCounter: (props: {
 			movesNumber: number
 			movesLimit: number
 		}) => void
-		updateScoreCounter: ({
-			score,
-			goalScore,
-		}: {
-			score: number
-			goalScore: number
-		}) => void
+		updateScoreCounter: (props: { score: number; goalScore: number }) => void
 		openWinModal: () => void
 		openLossModal: () => void
 		getContainerSize: () => {
@@ -112,15 +86,26 @@ export class GameBlast {
 	}) {
 		this.renderer = renderer
 		this.setGameContainerSize = setGameContainerSize
-		this.updateMovesCounter = updateMovesCounter
-		this.updateScoreCounter = updateScoreCounter
 		this.openWinModal = openWinModal
 		this.openLossModal = openLossModal
 
 		this.grid = new Grid({ getContainerSize })
-
 		this.field = new Field({
 			getFieldSnapshot: this.grid.getSnapshot.bind(this.grid),
+		})
+		this.scoreProgress = new Progress({
+			updateCounter: ({ currentValue, targetValue }) =>
+				updateScoreCounter({
+					score: currentValue,
+					goalScore: targetValue,
+				}),
+		})
+		this.movesProgress = new Progress({
+			updateCounter: ({ currentValue, targetValue }) =>
+				updateMovesCounter({
+					movesNumber: currentValue,
+					movesLimit: targetValue,
+				}),
 		})
 	}
 
@@ -138,8 +123,8 @@ export class GameBlast {
 	private async clearLevel() {
 		await this.renderer.clearTiles()
 		this.field.clearTiles()
-		this.movesNumber = 0
-		this.score = 0
+		this.scoreProgress.clear()
+		this.movesProgress.clear()
 		this.isGameEnded = false
 	}
 
@@ -171,13 +156,15 @@ export class GameBlast {
 		this.columns = DEFAULT_COLUMNS
 		this.rows = DEFAULT_ROWS
 
-		this.goalScore = getRandomNumber({
+		const goalScore = getRandomNumber({
 			min: MIN_GOAL_SCORE,
 			max: MAX_GOAL_SCORE,
 			step: 100,
 		})
+		this.scoreProgress.setTargetValue(goalScore)
 
-		this.movesLimit = this.estimateMoves(this.goalScore)
+		const movesLimit = this.estimateMoves(goalScore)
+		this.movesProgress.setTargetValue(movesLimit)
 	}
 
 	private createLevel() {
@@ -193,14 +180,8 @@ export class GameBlast {
 			tilesSnapshots: this.field.getTilesSnapshots(),
 			gridSnapshot: gridSnapshot,
 		})
-		this.updateMovesCounter({
-			movesNumber: this.movesNumber,
-			movesLimit: this.movesLimit,
-		})
-		this.updateScoreCounter({
-			score: this.score,
-			goalScore: this.goalScore,
-		})
+		this.scoreProgress.renderCounters()
+		this.movesProgress.renderCounters()
 	}
 
 	/** Based on average score per move */
@@ -243,8 +224,9 @@ export class GameBlast {
 			return
 		}
 
-		this.updateScore(removedTiles.size)
-		this.updateMoves()
+		const points = this.getPoints(removedTiles.size)
+		this.scoreProgress.addCurrentValue(points)
+		this.movesProgress.addCurrentValue()
 
 		await this.fillEmptyPositions(removedPositions)
 
@@ -527,28 +509,11 @@ export class GameBlast {
 
 	// #region Progress
 
-	private updateMoves() {
-		this.movesNumber++
-		this.updateMovesCounter({
-			movesNumber: this.movesNumber,
-			movesLimit: this.movesLimit,
-		})
-	}
-
 	/** Uses power scale formula */
 	private getPoints(removedTilesNumber: number) {
 		return Math.round(
 			BASE_SCORE * Math.pow(removedTilesNumber, GROWTH_EXPONENT)
 		)
-	}
-
-	private updateScore(removedTilesNumber: number) {
-		const points = this.getPoints(removedTilesNumber)
-		this.score += points
-		this.updateScoreCounter({
-			score: this.score,
-			goalScore: this.goalScore,
-		})
 	}
 
 	// #endregion
@@ -560,9 +525,9 @@ export class GameBlast {
 			return
 		}
 
-		if (this.score >= this.goalScore) {
+		if (this.scoreProgress.isTargetReached()) {
 			this.win()
-		} else if (this.movesNumber >= this.movesLimit) {
+		} else if (this.movesProgress.isTargetReached()) {
 			this.lose()
 		}
 
