@@ -65,9 +65,18 @@ export class GameBlast {
 
 	private selectedTile: Tile | null = null
 
-	private boosterMap: Record<BoosterName, () => Booster> = {
-		bomb: () => this.boosterBomb,
-		teleport: () => this.boosterTeleport,
+	private boosterMap: Record<
+		BoosterName,
+		{ getBooster: () => Booster; useBooster: (tile: Tile) => Promise<void> }
+	> = {
+		bomb: {
+			getBooster: () => this.boosterBomb,
+			useBooster: this.useBoosterBomb.bind(this),
+		},
+		teleport: {
+			getBooster: () => this.boosterTeleport,
+			useBooster: this.useBoosterTeleport.bind(this),
+		},
 	}
 
 	constructor({
@@ -250,14 +259,13 @@ export class GameBlast {
 			return
 		}
 
-		if (this.boosterBomb.isActivated()) {
-			this.useBoosterBomb(tile)
-			return
-		}
-
-		if (this.boosterTeleport.isActivated()) {
-			this.useBoosterTeleport(tile)
-			return
+		for (const boosterName of Object.keys(this.boosterMap)) {
+			const boosterData = this.boosterMap[boosterName as BoosterName]
+			const booster = boosterData.getBooster()
+			if (booster.isActivated()) {
+				await boosterData.useBooster(tile)
+				return
+			}
 		}
 
 		const kind = tile.getKind()
@@ -576,7 +584,7 @@ export class GameBlast {
 	// #region Boosters
 
 	onBoosterButtonClick(boosterName: BoosterName) {
-		this.boosterMap[boosterName]().tryActivate()
+		this.boosterMap[boosterName].getBooster().tryActivate()
 	}
 
 	private async useBoosterBomb(tile: Tile) {
@@ -588,7 +596,7 @@ export class GameBlast {
 			return
 		}
 
-		this.boosterBomb.use()
+		this.boosterBomb.spend()
 
 		await this.removeTilesFromCenter(tiles, tile.getPosition())
 		await this.processRemovingTiles({
@@ -597,18 +605,18 @@ export class GameBlast {
 		})
 	}
 
-	private useBoosterTeleport(tile: Tile) {
+	private async useBoosterTeleport(tile: Tile) {
 		if (this.selectedTile === null) {
 			this.selectedTile = tile
 			return
 		}
 
 		this.field.swapTiles(this.selectedTile, tile)
-		this.renderer.swapTiles({
+		await this.renderer.swapTiles({
 			tilesSnapshots: [this.selectedTile.getSnapshot(), tile.getSnapshot()],
 			gridSnapshot: this.grid.getSnapshot(),
 		})
-		this.boosterTeleport.use()
+		this.boosterTeleport.spend()
 		this.selectedTile = null
 	}
 

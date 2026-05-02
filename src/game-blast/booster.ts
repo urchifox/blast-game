@@ -42,7 +42,7 @@ export class Booster {
 		this.progress.setCurrentValue(value)
 	}
 
-	use() {
+	spend() {
 		this.progress.addCurrentValue(-1)
 		this.setIsActive(false)
 	}
