@@ -618,13 +618,15 @@ export class GameBlast {
 			return
 		}
 
-		this.field.swapTiles(this.selectedTile, tile)
+		const selectedTile = this.selectedTile
+		this.selectedTile = null
+		this.boosterTeleport.spend()
+
+		this.field.swapTiles(selectedTile, tile)
 		await this.renderer.swapTiles({
-			tilesSnapshots: [this.selectedTile.getSnapshot(), tile.getSnapshot()],
+			tilesSnapshots: [selectedTile.getSnapshot(), tile.getSnapshot()],
 			gridSnapshot: this.grid.getSnapshot(),
 		})
-		this.boosterTeleport.spend()
-		this.selectedTile = null
 	}
 
 	// #endregion
