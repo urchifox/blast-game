@@ -155,6 +155,7 @@ export class GameBlast {
 		this.movesProgress.clear()
 		this.boosterBomb.clear()
 		this.boosterTeleport.clear()
+		this.selectedTile = null
 		this.isGameEnded = false
 	}
 
