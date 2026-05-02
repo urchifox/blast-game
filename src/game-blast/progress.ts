@@ -1,6 +1,7 @@
 export class Progress {
 	private currentValue = 0
 	private targetValue = 0
+	private readonly isDirectionDown: boolean
 	private readonly updateCounter: (props: {
 		currentValue: number
 		targetValue: number
@@ -8,13 +9,16 @@ export class Progress {
 
 	constructor({
 		updateCounter,
+		isDirectionDown = false,
 	}: {
 		updateCounter: (props: {
 			currentValue: number
 			targetValue: number
 		}) => void
+		isDirectionDown?: boolean
 	}) {
 		this.updateCounter = updateCounter
+		this.isDirectionDown = isDirectionDown
 	}
 
 	clear() {
@@ -46,6 +50,8 @@ export class Progress {
 	}
 
 	isTargetReached() {
-		return this.currentValue >= this.targetValue
+		return this.isDirectionDown
+			? this.currentValue <= this.targetValue
+			: this.currentValue >= this.targetValue
 	}
 }
