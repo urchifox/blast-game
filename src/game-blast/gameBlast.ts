@@ -29,6 +29,7 @@ import {
 	TilePosition,
 	TileSnapshot,
 } from "./tile"
+import { AnimationsManager } from "../helpers/animationManager"
 
 type TileClickHandler = (tile: Tile) => TileClickHandlerResult
 type TileClickHandlerResult = {
@@ -50,7 +51,7 @@ export class GameBlast {
 		} | null
 	) => void
 	private shuffleAttempts = 0
-
+	private readonly animationsManager = new AnimationsManager()
 	private readonly openWinModal: () => void
 	private readonly openLossModal: () => void
 
@@ -86,8 +87,6 @@ export class GameBlast {
 		goalScore: 0,
 		movesLimit: 0,
 	}
-
-	private animationPromises = new Set<Promise<void>>()
 
 	constructor({
 		renderer,
@@ -174,6 +173,7 @@ export class GameBlast {
 		this.movesProgress.clear()
 		this.boosterBomb.clear()
 		this.boosterTeleport.clear()
+		this.animationsManager.clear()
 		this.selectedTile = null
 		this.isGameEnded = false
 	}
@@ -535,7 +535,7 @@ export class GameBlast {
 		const animationPromise = removingPromise
 			.then(() => fillEmptyPositionsPromise)
 			.then(() => this.checkForMove())
-		this.animate(animationPromise)
+		this.animationsManager.animate(animationPromise)
 
 		this.checkGameEnd()
 	}
@@ -687,7 +687,7 @@ export class GameBlast {
 			})
 			.then(() => {})
 
-		this.animate(promiseSelection)
+		this.animationsManager.animate(promiseSelection)
 	}
 
 	// #endregion
@@ -725,7 +725,7 @@ export class GameBlast {
 		let attempts = 0
 		while (!this.isPossibleToMakeMove()) {
 			const shuffleFieldPromise = this.shuffleField()
-			await this.animate(shuffleFieldPromise)
+			await this.animationsManager.animate(shuffleFieldPromise)
 			attempts++
 			// Prevent infinite loop
 			if (attempts >= 100) {
@@ -752,7 +752,7 @@ export class GameBlast {
 		}
 
 		this.isGameEnded = true
-		this.waitAllAnimations().then(() => this.openWinModal())
+		this.animationsManager.waitAllAnimations().then(() => this.openWinModal())
 	}
 
 	private lose() {
@@ -761,24 +761,7 @@ export class GameBlast {
 		}
 
 		this.isGameEnded = true
-		this.waitAllAnimations().then(() => this.openLossModal())
-	}
-
-	// #endregion
-
-	// #region Animation
-
-	private async animate(promise: Promise<void>) {
-		this.animationPromises.add(promise)
-		try {
-			await promise
-		} finally {
-			this.animationPromises.delete(promise)
-		}
-	}
-
-	private async waitAllAnimations(): Promise<void> {
-		await Promise.allSettled(Array.from(this.animationPromises))
+		this.animationsManager.waitAllAnimations().then(() => this.openLossModal())
 	}
 
 	// #endregion
