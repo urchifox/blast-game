@@ -1,9 +1,7 @@
 import Phaser from "phaser"
 
-import { GridSnapshot } from "../grid"
 import { PhaserScene } from "./phaserScene"
-import { OnTileClickHandler, Renderer } from "./renderer"
-import { TileSnapshot } from "../tile"
+import { Renderer, RendererParams, RendererResult } from "./renderer"
 
 export class PhaserRenderer implements Renderer {
 	private readonly container: HTMLElement
@@ -40,88 +38,73 @@ export class PhaserRenderer implements Renderer {
 		})
 	}
 
-	async init(): Promise<void> {
+	async init(): RendererResult<"init"> {
 		await this.readyPromise
 	}
 
-	setOnTileClick(onTileClick: OnTileClickHandler) {
-		this.scene.setOnTileClick(onTileClick)
+	setOnTileClick(
+		props: RendererParams<"setOnTileClick">
+	): RendererResult<"setOnTileClick"> {
+		this.scene.setOnTileClick(props)
 	}
 
-	destroy() {
+	destroy(): RendererResult<"destroy"> {
 		this.game.destroy(true)
 	}
 
-	resize(
-		tilesSnapshots: ReadonlyArray<TileSnapshot>,
-		gridSnapshot: GridSnapshot
-	) {
+	resize(props: RendererParams<"resize">): RendererResult<"resize"> {
 		this.game.scale.resize(window.innerWidth, window.innerHeight)
-		this.scene.setOffsets()
-		this.scene.resize(tilesSnapshots, gridSnapshot)
+		this.updateFieldOffsets()
+		this.scene.resize(props)
 	}
 
-	async clearTiles() {
+	async clearTiles(): RendererResult<"clearTiles"> {
 		await this.scene.clearTiles()
 	}
 
-	async removeTile(id: string) {
-		await this.scene.removeTile(id)
-	}
-
-	async fallTilesToCurrentPosituons({
-		tilesSnapshots,
-		gridSnapshot,
-	}: {
-		tilesSnapshots: ReadonlyArray<TileSnapshot>
-		gridSnapshot: GridSnapshot
-	}) {
-		await this.scene.fallTilesToCurrentPosituons(tilesSnapshots, gridSnapshot)
-	}
-
-	async renderTiles({
-		tilesSnapshots,
-		gridSnapshot,
-		isAppearOnDefaultPosition,
-	}: {
-		tilesSnapshots: ReadonlyArray<TileSnapshot>
-		gridSnapshot: GridSnapshot
-		isAppearOnDefaultPosition?: boolean
-	}) {
+	updateFieldOffsets(): RendererResult<"updateFieldOffsets"> {
 		this.scene.setOffsets()
-
-		await this.scene.renderTiles(
-			tilesSnapshots,
-			gridSnapshot,
-			isAppearOnDefaultPosition
-		)
 	}
 
-	async shuffleTiles(props: {
-		tilesSnapshots: ReadonlyArray<TileSnapshot>
-		gridSnapshot: GridSnapshot
-	}) {
-		await this.scene.shuffleTiles(props.tilesSnapshots, props.gridSnapshot)
+	async removeTile(
+		props: RendererParams<"removeTile">
+	): RendererResult<"removeTile"> {
+		await this.scene.removeTile(props)
 	}
 
-	async swapTiles(props: {
-		tilesSnapshots: ReadonlyArray<TileSnapshot>
-		gridSnapshot: GridSnapshot
-	}) {
+	async fallTilesToCurrentPositions(
+		props: RendererParams<"fallTilesToCurrentPositions">
+	): RendererResult<"fallTilesToCurrentPositions"> {
+		await this.scene.fallTilesToCurrentPosituons(props)
+	}
+
+	async renderTiles(
+		props: RendererParams<"renderTiles">
+	): RendererResult<"renderTiles"> {
+		await this.scene.renderTiles(props)
+	}
+
+	async shuffleTiles(
+		props: RendererParams<"shuffleTiles">
+	): RendererResult<"shuffleTiles"> {
+		await this.scene.shuffleTiles(props)
+	}
+
+	async swapTiles(
+		props: RendererParams<"swapTiles">
+	): RendererResult<"swapTiles"> {
 		await this.scene.swapTiles(props)
 	}
 
-	async selectTile(props: {
-		tileSnapshot: TileSnapshot
-		gridSnapshot: GridSnapshot
-	}) {
+	async selectTile(
+		props: RendererParams<"selectTile">
+	): RendererResult<"selectTile"> {
 		await this.scene.selectTile(props)
 	}
 
-	async unselectTile(props: {
-		tileSnapshot: TileSnapshot
-		gridSnapshot: GridSnapshot
-	}) {
+	async unselectTile(
+		props: RendererParams<"unselectTile">
+	): RendererResult<"unselectTile"> {
 		await this.scene.unselectTile(props)
 	}
 }

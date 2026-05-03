@@ -1,7 +1,7 @@
 import Phaser from "phaser"
 
 import { GridSnapshot } from "../grid"
-import { OnTileClickHandler } from "./renderer"
+import { OnTileClickHandler, RendererParams } from "./renderer"
 import { TileSnapshot } from "../tile"
 import { wait } from "../../helpers/time"
 import {
@@ -81,7 +81,7 @@ export class PhaserScene extends Phaser.Scene {
 		this.onReadyCallbacks.push(callback)
 	}
 
-	setOnTileClick(onTileClick: OnTileClickHandler) {
+	setOnTileClick(onTileClick: RendererParams<"setOnTileClick">) {
 		this.onTileClick = onTileClick
 	}
 
@@ -89,10 +89,7 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Resizing
 
-	resize(
-		tilesSnapshots: ReadonlyArray<TileSnapshot>,
-		gridSnapshot: GridSnapshot
-	) {
+	resize({ tilesSnapshots, gridSnapshot }: RendererParams<"resize">) {
 		for (const tileSnapshot of tilesSnapshots) {
 			const tileSprite = this.tilesMap.get(tileSnapshot.id)
 			if (tileSprite === undefined) {
@@ -118,11 +115,11 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Rendering
 
-	async renderTiles(
-		tiles: ReadonlyArray<TileSnapshot>,
-		gridSnapshot: GridSnapshot,
-		isAppearOnDefaultPosition?: boolean
-	) {
+	async renderTiles({
+		tilesSnapshots,
+		gridSnapshot,
+		isAppearOnDefaultPosition,
+	}: RendererParams<"renderTiles">) {
 		let pauseDuration = 0
 		if (isAppearOnDefaultPosition) {
 			const tileHeight = gridSnapshot.tileHeight
@@ -133,7 +130,7 @@ export class PhaserScene extends Phaser.Scene {
 			pauseDuration = fallingDuration + TILE_APPEAR_DURATION_MS
 		}
 
-		const renderTasks = tiles.map(async (tile, index) => {
+		const renderTasks = tilesSnapshots.map(async (tile, index) => {
 			await this.renderTile({
 				tileSnapshot: tile,
 				gridSnapshot,
@@ -225,12 +222,12 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Falling
 
-	async fallTilesToCurrentPosituons(
-		tiles: ReadonlyArray<TileSnapshot>,
-		gridSnapshot: GridSnapshot
-	) {
-		const moveTasks = tiles.map((tile) =>
-			this.animateFallingToCurrentPosition(tile, gridSnapshot)
+	async fallTilesToCurrentPosituons({
+		tilesSnapshots,
+		gridSnapshot,
+	}: RendererParams<"fallTilesToCurrentPositions">) {
+		const moveTasks = tilesSnapshots.map((tileSnapshot) =>
+			this.animateFallingToCurrentPosition(tileSnapshot, gridSnapshot)
 		)
 
 		await Promise.all(moveTasks)
@@ -316,10 +313,7 @@ export class PhaserScene extends Phaser.Scene {
 	async swapTiles({
 		tilesSnapshots,
 		gridSnapshot,
-	}: {
-		tilesSnapshots: ReadonlyArray<TileSnapshot>
-		gridSnapshot: GridSnapshot
-	}) {
+	}: RendererParams<"swapTiles">) {
 		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
 			this.animateShuffling(tileSnapshot, gridSnapshot)
 		)
@@ -328,7 +322,7 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Removing
 
-	async removeTile(tileId: string) {
+	async removeTile(tileId: RendererParams<"removeTile">) {
 		const tileSprite = this.tilesMap.get(tileId)
 		if (tileSprite === undefined) {
 			return
@@ -359,10 +353,10 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Shuffling
 
-	async shuffleTiles(
-		tilesSnapshots: ReadonlyArray<TileSnapshot>,
-		gridSnapshot: GridSnapshot
-	) {
+	async shuffleTiles({
+		tilesSnapshots,
+		gridSnapshot,
+	}: RendererParams<"shuffleTiles">) {
 		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
 			this.animateShuffling(tileSnapshot, gridSnapshot)
 		)
@@ -446,10 +440,7 @@ export class PhaserScene extends Phaser.Scene {
 	async selectTile({
 		tileSnapshot,
 		gridSnapshot,
-	}: {
-		tileSnapshot: TileSnapshot
-		gridSnapshot: GridSnapshot
-	}) {
+	}: RendererParams<"selectTile">) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
 		if (!tileSprite) {
 			return
@@ -479,10 +470,7 @@ export class PhaserScene extends Phaser.Scene {
 	async unselectTile({
 		tileSnapshot,
 		gridSnapshot,
-	}: {
-		tileSnapshot: TileSnapshot
-		gridSnapshot: GridSnapshot
-	}) {
+	}: RendererParams<"unselectTile">) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
 		if (!tileSprite) {
 			return

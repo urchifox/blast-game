@@ -180,13 +180,13 @@ export class GameBlast {
 
 	onResize() {
 		this.setGameContainerSize(null)
-		const snapshot = this.grid.updateGridSizes()
+		const gridSnapshot = this.grid.updateGridSizes()
 		this.setGameContainerSize({
-			width: snapshot.gridWidth,
-			height: snapshot.gridHeight,
+			width: gridSnapshot.gridWidth,
+			height: gridSnapshot.gridHeight,
 		})
 		const tilesSnapshots = this.field.getTilesSnapshots()
-		this.renderer.resize(tilesSnapshots, snapshot)
+		this.renderer.resize({ tilesSnapshots, gridSnapshot })
 	}
 
 	// #region Level creation
@@ -227,6 +227,7 @@ export class GameBlast {
 			width: gridSnapshot.gridWidth,
 			height: gridSnapshot.gridHeight,
 		})
+		this.renderer.updateFieldOffsets()
 		this.renderer.renderTiles({
 			tilesSnapshots: this.field.getTilesSnapshots(),
 			gridSnapshot: gridSnapshot,
@@ -577,7 +578,7 @@ export class GameBlast {
 		}
 
 		return this.renderer
-			.fallTilesToCurrentPosituons({
+			.fallTilesToCurrentPositions({
 				tilesSnapshots: Array.from(movedTiles).map((tile) =>
 					tile.getSnapshot()
 				),
