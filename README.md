@@ -1,6 +1,7 @@
 # Blast Game
 
-Browser game built with TypeScript and Phaser for rendering.
+Browser game built with TypeScript. Game logic is engine-agnostic; [Phaser](https://phaser.io/) implements the renderer behind a small interface. UI uses plain DOM and CSS (with BEM methology).
+Play the deployed build: https://urchifox.github.io/blast-game/
 
 ## Architecture Overview
 
@@ -8,20 +9,21 @@ Browser game built with TypeScript and Phaser for rendering.
   - Domain and game flow:
     - `gameBlast.ts`: main game orchestration and rules flow.
     - `field.ts`, `grid.ts`, `tile.ts`: model/state and board computations.
+    - `booster.ts`: booster rules and state.
     - `config.ts`: gameplay constants.
   - Rendering abstraction:
-    - `rendering/renderer.ts`: renderer contract (interface boundary).
+    - `rendering/renderer.ts`: renderer contract.
     - `rendering/phaserRenderer.ts`: Phaser adapter implementing the contract.
     - `rendering/phaserScene.ts`: Phaser scene-specific implementation.
 - `src/game-view/`
-  - `gameBlastView.ts`: UI-level wiring (DOM counters, modals, resize handlers).
+  - `gameBlastView.ts`: UI wiring (counters, boosters, modals, resize).
   - `assets/style/*.css`: view-specific styles.
 - `src/view/`
-  - Generic view lifecycle and switching (`view.ts`, `viewManager.ts`).
+  - Generic view lifecycle and switching.
 - `src/assets/style/`
   - Shared BEM-based styles for reusable UI blocks.
 - `src/helpers/`
-  - Shared utility functions (`dom`, `random`, `time`).
+  - Shared utilities.
 
 ## Key Design Decisions
 
@@ -45,4 +47,5 @@ Browser game built with TypeScript and Phaser for rendering.
 npm install
 npm run dev
 ```
-Or just visit https://urchifox.github.io/blast-game/
+
+Then open **http://localhost:5173/blast-game/**.
