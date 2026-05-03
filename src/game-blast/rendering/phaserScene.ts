@@ -1,7 +1,7 @@
 import Phaser from "phaser"
 
 import { GridSnapshot } from "../grid"
-import { OnTileClickHandler } from "./renderer"
+import { OnTileClickHandler, RendererParams } from "./renderer"
 import { TileSnapshot } from "../tile"
 import { wait } from "../../helpers/time"
 import {
@@ -9,8 +9,8 @@ import {
 	TILE_BOUNCE_HEIGHT_RATIO,
 	TILE_BOUNCE_DURATION_MS,
 	TILE_REMOVE_DURATION_MS,
-	MIN_TILE_MOVE_DURATION_MS,
-	TILE_MOVE_SPEED,
+	MIN_TILE_FALL_DURATION_MS,
+	TILE_FALL_SPEED,
 	TILE_SHUFFLE_DURATION_MS,
 } from "../config"
 import { easeInOutBack } from "../../helpers/animation"
@@ -23,11 +23,11 @@ const tileTextureModules = import.meta.glob("../assets/img/*.png", {
 
 export class PhaserScene extends Phaser.Scene {
 	private readonly tilesMap = new Map<string, Phaser.GameObjects.Sprite>()
-	private readonly appearingTweens = new Map<
+	private readonly scaleTweens = new Map<
 		Phaser.GameObjects.Sprite,
 		Phaser.Tweens.Tween
 	>()
-	private readonly movingTweens = new Map<
+	private readonly positionTweens = new Map<
 		Phaser.GameObjects.Sprite,
 		Phaser.Tweens.Tween
 	>()
@@ -81,7 +81,7 @@ export class PhaserScene extends Phaser.Scene {
 		this.onReadyCallbacks.push(callback)
 	}
 
-	setOnTileClick(onTileClick: OnTileClickHandler) {
+	setOnTileClick(onTileClick: RendererParams<"setOnTileClick">) {
 		this.onTileClick = onTileClick
 	}
 
@@ -89,10 +89,7 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Resizing
 
-	resize(
-		tilesSnapshots: ReadonlyArray<TileSnapshot>,
-		gridSnapshot: GridSnapshot
-	) {
+	resize({ tilesSnapshots, gridSnapshot }: RendererParams<"resize">) {
 		for (const tileSnapshot of tilesSnapshots) {
 			const tileSprite = this.tilesMap.get(tileSnapshot.id)
 			if (tileSprite === undefined) {
@@ -118,44 +115,53 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Rendering
 
-	async renderTiles(
-		tiles: ReadonlyArray<TileSnapshot>,
-		gridSnapshot: GridSnapshot,
-		isAppearOnDefaultPosition?: boolean
-	) {
-		if (!this.isReady) {
-			await Promise.resolve()
+	async renderTiles({
+		tilesSnapshots,
+		gridSnapshot,
+		isAppearOnDefaultPosition,
+	}: RendererParams<"renderTiles">) {
+		let pauseDuration = 0
+		if (isAppearOnDefaultPosition) {
+			const tileHeight = gridSnapshot.tileHeight
+			const fallingDuration = this.getFallingDuration({
+				distance: tileHeight,
+				tileHeight: tileHeight,
+			})
+			pauseDuration = fallingDuration + TILE_APPEAR_DURATION_MS
 		}
 
-		const tileHeight = gridSnapshot.tileHeight
-		const pauseDuration =
-			this.getMoveDuration({ distance: tileHeight, tileHeight: tileHeight }) +
-			TILE_APPEAR_DURATION_MS / 2
-
-		const renderTasks = tiles.map(async (tile, index) => {
-			if (isAppearOnDefaultPosition) {
-				await wait(index * pauseDuration)
-			}
-			await this.renderTile(tile, gridSnapshot, isAppearOnDefaultPosition)
+		const renderTasks = tilesSnapshots.map(async (tile, index) => {
+			await this.renderTile({
+				tileSnapshot: tile,
+				gridSnapshot,
+				isAppearOnDefaultPosition,
+				pauseDuration: index * pauseDuration,
+			})
 		})
 
 		await Promise.all(renderTasks)
 	}
 
-	private async renderTile(
-		tileSnapshot: TileSnapshot,
-		gridSnapshot: GridSnapshot,
+	private async renderTile({
+		tileSnapshot,
+		gridSnapshot,
+		isAppearOnDefaultPosition,
+		pauseDuration,
+	}: {
+		tileSnapshot: TileSnapshot
+		gridSnapshot: GridSnapshot
 		isAppearOnDefaultPosition?: boolean
-	) {
+		pauseDuration?: number
+	}) {
 		const { x, y, zIndex, tileWidth, tileHeight, imageKey } =
-			this.getTileVisualProperties(tileSnapshot, gridSnapshot)
+			this.getTileVisualProperties(
+				tileSnapshot,
+				gridSnapshot,
+				isAppearOnDefaultPosition
+			)
 
 		const tileSprite = this.add
-			.sprite(
-				x,
-				isAppearOnDefaultPosition ? this.offsetY + tileHeight / 2 : y,
-				imageKey
-			)
+			.sprite(x, y, imageKey)
 			.setDepth(zIndex)
 			.setDisplaySize(tileWidth, tileHeight)
 			.setInteractive({ useHandCursor: true })
@@ -164,65 +170,75 @@ export class PhaserScene extends Phaser.Scene {
 		this.tilesMap.set(id, tileSprite)
 		tileSprite.on("pointerdown", () => this.onTileClick?.(id))
 
-		await this.animateAppear(tileSprite)
+		await this.animateAppear({ tileSprite, gridSnapshot, pauseDuration })
 		if (isAppearOnDefaultPosition) {
-			await this.animateMovingToCurrentPosition(tileSnapshot, gridSnapshot)
+			await this.animateFallingToCurrentPosition(tileSnapshot, gridSnapshot)
 		}
 	}
 
-	private animateAppear(tileSprite: Phaser.GameObjects.Sprite) {
-		const targetScaleX = tileSprite.scaleX
-		const targetScaleY = tileSprite.scaleY
+	private async animateAppear({
+		tileSprite,
+		gridSnapshot,
+		pauseDuration,
+	}: {
+		tileSprite: Phaser.GameObjects.Sprite
+		gridSnapshot: GridSnapshot
+		pauseDuration?: number
+	}) {
+		tileSprite.disableInteractive()
+		const { scaleX, scaleY } = this.getInitialTileScale(
+			tileSprite,
+			gridSnapshot
+		)
 		tileSprite.setScale(0)
 		tileSprite.setAlpha(0)
-		const onTweenComplete = (resolve: () => void) => {
-			this.appearingTweens.delete(tileSprite)
-			tileSprite.setInteractive({ useHandCursor: true })
-			resolve()
+
+		if (pauseDuration !== undefined && pauseDuration > 0) {
+			await wait(pauseDuration)
 		}
 		return new Promise<void>((resolve) => {
+			const onTweenComplete = () => {
+				this.scaleTweens.delete(tileSprite)
+				tileSprite.setInteractive({ useHandCursor: true })
+				resolve()
+			}
+
 			const appearingTween = this.tweens.add({
-				onStart: () => {
-					tileSprite.disableInteractive()
-				},
 				targets: tileSprite,
 				alpha: 1,
-				scaleX: targetScaleX,
-				scaleY: targetScaleY,
+				scaleX,
+				scaleY,
 				duration: TILE_APPEAR_DURATION_MS,
 				ease: "Quad.easeOut",
-				onComplete: () => onTweenComplete(resolve),
-				onStop: () => onTweenComplete(resolve),
+				onComplete: onTweenComplete,
+				onStop: onTweenComplete,
 			})
-			this.appearingTweens.set(tileSprite, appearingTween)
+
+			this.scaleTweens.set(tileSprite, appearingTween)
 		})
 	}
 
 	// #endregion
 
-	// #region Moving
+	// #region Falling
 
-	async moveTiles(
-		tiles: ReadonlyArray<TileSnapshot>,
-		gridSnapshot: GridSnapshot
-	) {
-		if (!this.isReady) {
-			return
-		}
-
-		const moveTasks = tiles.map((tile) =>
-			this.animateMovingToCurrentPosition(tile, gridSnapshot)
+	async fallTilesToCurrentPositions({
+		tilesSnapshots,
+		gridSnapshot,
+	}: RendererParams<"fallTilesToCurrentPositions">) {
+		const moveTasks = tilesSnapshots.map((tileSnapshot) =>
+			this.animateFallingToCurrentPosition(tileSnapshot, gridSnapshot)
 		)
 
 		await Promise.all(moveTasks)
 	}
 
-	private async animateMovingToCurrentPosition(
+	private async animateFallingToCurrentPosition(
 		tileSnapshot: TileSnapshot,
 		gridSnapshot: GridSnapshot
 	) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
-		if (!tileSprite) {
+		if (tileSprite === undefined) {
 			return
 		}
 
@@ -236,97 +252,99 @@ export class PhaserScene extends Phaser.Scene {
 			return
 		}
 
+		const currentMovingTween = this.positionTweens.get(tileSprite)
+		currentMovingTween?.stop()
+		this.positionTweens.delete(tileSprite)
+		tileSprite.disableInteractive()
+
 		const distance = Phaser.Math.Distance.Between(
 			tileSprite.x,
 			tileSprite.y,
 			x,
 			y
 		)
-		const moveDuration = this.getMoveDuration({ distance, tileHeight })
+		const moveDuration = this.getFallingDuration({ distance, tileHeight })
 		const bounceHeight = tileHeight * TILE_BOUNCE_HEIGHT_RATIO
 
-		const currentMovingTween = this.movingTweens.get(tileSprite)
-		currentMovingTween?.stop()
-		this.movingTweens.delete(tileSprite)
-
-		const onTweenComplete = (resolve: () => void) => {
-			tileSprite.setDepth(zIndex)
-			this.movingTweens.delete(tileSprite)
-			tileSprite.setInteractive({ useHandCursor: true })
-
-			resolve()
-		}
-
 		await new Promise<void>((resolve) => {
+			const onTweenComplete = () => {
+				tileSprite.setDepth(zIndex)
+				this.positionTweens.delete(tileSprite)
+				tileSprite.setInteractive({ useHandCursor: true })
+				resolve()
+			}
+
 			const moveTween = this.tweens.add({
 				targets: tileSprite,
 				x,
 				y,
 				duration: moveDuration,
 				ease: "Quad.easeIn",
-				onStart: () => {
-					tileSprite.disableInteractive()
-				},
 				onComplete: () => {
-					onTweenComplete(resolve)
-					this.tweens.add({
-						targets: tileSprite,
-						y: y - bounceHeight,
-						duration: TILE_BOUNCE_DURATION_MS / 2,
-						ease: "Sine.easeOut",
-						yoyo: true,
-					})
+					onTweenComplete()
+					this.animateBouncing(tileSprite, y - bounceHeight)
 				},
-				onStop: () => onTweenComplete(resolve),
+				onStop: onTweenComplete,
 			})
-			this.movingTweens.set(tileSprite, moveTween)
+
+			this.positionTweens.set(tileSprite, moveTween)
 		})
 	}
 
-	async swapTiles({
-		tilesSnapshots,
-		gridSnapshot,
-	}: {
-		tilesSnapshots: ReadonlyArray<TileSnapshot>
-		gridSnapshot: GridSnapshot
-	}) {
-		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
-			this.animateShiffling(tileSnapshot, gridSnapshot)
-		)
-		await Promise.all(shuffleTasks)
+	private async animateBouncing(
+		tileSprite: Phaser.GameObjects.Sprite,
+		bounceY: number
+	) {
+		await new Promise((resolve) => {
+			this.tweens.add({
+				targets: tileSprite,
+				y: bounceY,
+				duration: TILE_BOUNCE_DURATION_MS / 2,
+				ease: "Sine.easeOut",
+				yoyo: true,
+				onComplete: resolve,
+				onStop: resolve,
+			})
+		})
 	}
 
 	// #endregion
 
-	// #region Removing
-
-	async removeTile(tileId: string) {
-		const tileSprite = this.tilesMap.get(tileId)
-		if (tileSprite) {
-			await this.animateRemoving(tileSprite).then(() => {
-				tileSprite.destroy()
-				this.tilesMap.delete(tileId)
-			})
-		}
-		await Promise.resolve()
+	async swapTiles({
+		tilesSnapshots,
+		gridSnapshot,
+	}: RendererParams<"swapTiles">) {
+		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
+			this.animateShuffling(tileSnapshot, gridSnapshot)
+		)
+		await Promise.all(shuffleTasks)
 	}
 
-	private animateRemoving(tileSprite: Phaser.GameObjects.Sprite) {
-		return new Promise<void>((resolve) => {
-			const appearingTween = this.appearingTweens.get(tileSprite)
-			appearingTween?.stop()
-			this.appearingTweens.delete(tileSprite)
+	// #region Removing
 
+	async removeTile(tileId: RendererParams<"removeTile">) {
+		const tileSprite = this.tilesMap.get(tileId)
+		if (tileSprite === undefined) {
+			return
+		}
+
+		tileSprite.disableInteractive()
+		this.tilesMap.delete(tileId)
+		const appearingTween = this.scaleTweens.get(tileSprite)
+		appearingTween?.stop()
+		this.scaleTweens.delete(tileSprite)
+
+		await new Promise<void>((resolve) => {
 			this.tweens.add({
-				onStart: () => {
-					tileSprite.disableInteractive()
-				},
 				targets: tileSprite,
 				scale: 0,
 				alpha: 0,
 				duration: TILE_REMOVE_DURATION_MS,
 				ease: "Quad.easeOut",
-				onComplete: () => resolve(),
+				onComplete: () => {
+					tileSprite.destroy()
+					resolve()
+				},
 			})
 		})
 	}
@@ -335,17 +353,17 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Shuffling
 
-	async shuffleTiles(
-		tilesSnapshots: ReadonlyArray<TileSnapshot>,
-		gridSnapshot: GridSnapshot
-	) {
+	async shuffleTiles({
+		tilesSnapshots,
+		gridSnapshot,
+	}: RendererParams<"shuffleTiles">) {
 		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
-			this.animateShiffling(tileSnapshot, gridSnapshot)
+			this.animateShuffling(tileSnapshot, gridSnapshot)
 		)
 		await Promise.all(shuffleTasks)
 	}
 
-	private async animateShiffling(
+	private async animateShuffling(
 		tileSnapshot: TileSnapshot,
 		gridSnapshot: GridSnapshot
 	) {
@@ -354,52 +372,53 @@ export class PhaserScene extends Phaser.Scene {
 			return
 		}
 
+		const currentMovingTween = this.positionTweens.get(tileSprite)
+		currentMovingTween?.stop()
+		this.positionTweens.delete(tileSprite)
+		tileSprite.disableInteractive()
+
+		tileSprite.setDepth(Infinity)
 		const { x, y, zIndex } = this.getTileVisualProperties(
 			tileSnapshot,
 			gridSnapshot
 		)
 
-		const currentMovingTween = this.movingTweens.get(tileSprite)
-		currentMovingTween?.stop()
-		this.movingTweens.delete(tileSprite)
-
-		tileSprite.setDepth(Infinity)
-		const onTweenComplete = (resolve: () => void) => {
-			tileSprite.setDepth(zIndex)
-			this.movingTweens.delete(tileSprite)
-			tileSprite.setInteractive({ useHandCursor: true })
-
-			resolve()
-		}
+		const { scaleX, scaleY } = this.getInitialTileScale(
+			tileSprite,
+			gridSnapshot
+		)
+		const scale = 1.05
 
 		await new Promise<void>((resolve) => {
-			const { scaleX, scaleY } = this.getInitialTileScale(
-				tileSprite,
-				gridSnapshot
-			)
-			const scale = 1.05
+			const onTweenComplete = () => {
+				this.positionTweens.delete(tileSprite)
+				tileSprite.setInteractive({ useHandCursor: true })
+				tileSprite.setDepth(zIndex)
+
+				resolve()
+			}
+
 			this.tweens.add({
 				targets: tileSprite,
 				scaleX: scaleX * scale,
 				scaleY: scaleY * scale,
 				duration: TILE_SHUFFLE_DURATION_MS / 2,
 				ease: "Cubic.easeInOut",
-				onStart: () => tileSprite.disableInteractive(),
-				onComplete: () => onTweenComplete(resolve),
-				onStop: () => onTweenComplete(resolve),
+				onComplete: onTweenComplete,
+				onStop: onTweenComplete,
 				yoyo: true,
 			})
+
 			const moveTween = this.tweens.add({
 				targets: tileSprite,
 				x,
 				y,
 				duration: TILE_SHUFFLE_DURATION_MS,
 				ease: easeInOutBack,
-				onStart: () => tileSprite.disableInteractive(),
-				onComplete: () => onTweenComplete(resolve),
-				onStop: () => onTweenComplete(resolve),
+				onComplete: onTweenComplete,
+				onStop: onTweenComplete,
 			})
-			this.movingTweens.set(tileSprite, moveTween)
+			this.positionTweens.set(tileSprite, moveTween)
 		})
 	}
 
@@ -411,18 +430,17 @@ export class PhaserScene extends Phaser.Scene {
 				this.removeTile(id).then(() => this.tweens.killTweensOf(tileSprite))
 		)
 		await Promise.all(removeTasks)
-		this.appearingTweens.clear()
-		this.movingTweens.clear()
+		this.scaleTweens.clear()
+		this.positionTweens.clear()
 		this.tilesMap.clear()
 	}
+
+	// #region Selecting
 
 	async selectTile({
 		tileSnapshot,
 		gridSnapshot,
-	}: {
-		tileSnapshot: TileSnapshot
-		gridSnapshot: GridSnapshot
-	}) {
+	}: RendererParams<"selectTile">) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
 		if (!tileSprite) {
 			return
@@ -452,10 +470,7 @@ export class PhaserScene extends Phaser.Scene {
 	async unselectTile({
 		tileSnapshot,
 		gridSnapshot,
-	}: {
-		tileSnapshot: TileSnapshot
-		gridSnapshot: GridSnapshot
-	}) {
+	}: RendererParams<"unselectTile">) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
 		if (!tileSprite) {
 			return
@@ -488,6 +503,8 @@ export class PhaserScene extends Phaser.Scene {
 		})
 	}
 
+	// #endregion
+
 	// #region Helpers
 
 	setOffsets() {
@@ -498,19 +515,22 @@ export class PhaserScene extends Phaser.Scene {
 
 	private getTileVisualProperties(
 		tileSnapshot: TileSnapshot,
-		gridSnapshot: GridSnapshot
+		gridSnapshot: GridSnapshot,
+		isAppearOnDefaultPosition?: boolean
 	) {
 		const { column, row, image } = tileSnapshot
 		const { tileWidth, tileHeight, tileGapX, tileGapY, rows } = gridSnapshot
 		const x = column * (tileWidth + tileGapX) + tileWidth / 2 + this.offsetX
-		const y = row * (tileHeight + tileGapY) + tileHeight / 2 + this.offsetY
+		const y = isAppearOnDefaultPosition
+			? this.offsetY + tileHeight / 2
+			: row * (tileHeight + tileGapY) + tileHeight / 2 + this.offsetY
 		const zIndex = rows - row
 		const imageKey = image
 
 		return { x, y, zIndex, tileWidth, tileHeight, imageKey }
 	}
 
-	private getMoveDuration({
+	private getFallingDuration({
 		distance,
 		tileHeight,
 	}: {
@@ -518,8 +538,8 @@ export class PhaserScene extends Phaser.Scene {
 		tileHeight: number
 	}) {
 		return Math.max(
-			MIN_TILE_MOVE_DURATION_MS,
-			(distance / (Math.max(tileHeight, 1) * TILE_MOVE_SPEED)) * 1000
+			MIN_TILE_FALL_DURATION_MS,
+			(distance / (Math.max(tileHeight, 1) * TILE_FALL_SPEED)) * 1000
 		)
 	}
 

@@ -11,12 +11,13 @@ class ViewManager {
 	async openView(view: ViewConstructor) {
 		this.currentView?.unmount()
 		const newView = new view()
+		this.currentView = newView
 		if (newView.needLoadingScreenOnMount) {
 			loadingScreen.show()
 		}
 		await newView.mount()
+		newView.isMounted = true
 		loadingScreen.hide()
-		this.currentView = newView
 	}
 }
 

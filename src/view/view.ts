@@ -5,6 +5,7 @@ export type ViewConstructor<T extends View = View> = new () => T
 export abstract class View {
 	readonly name: string
 	readonly needLoadingScreenOnMount: boolean = false
+	isMounted = false
 
 	private readonly element: HTMLElement
 	private readonly appRoot: HTMLElement = queryElement("#app")
@@ -30,6 +31,7 @@ export abstract class View {
 	}
 
 	unmount() {
+		this.isMounted = false
 		this.element.remove()
 	}
 }
