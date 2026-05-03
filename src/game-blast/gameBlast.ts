@@ -48,7 +48,6 @@ export class GameBlast {
 			height: number
 		} | null
 	) => void
-	private readonly blockedTileIds = new Set<string>()
 	private shuffleAttempts = 0
 
 	private readonly openWinModal: () => void
@@ -257,12 +256,8 @@ export class GameBlast {
 			return
 		}
 
-		if (this.blockedTileIds.has(id)) {
-			return
-		}
-
 		const tile = this.field.getTileById(id)
-		if (tile === undefined) {
+		if (tile === undefined || tile.getIsBlocked()) {
 			return
 		}
 
@@ -320,7 +315,7 @@ export class GameBlast {
 				if (
 					neighborTile !== undefined &&
 					neighborTile.getKind() === kind &&
-					!this.blockedTileIds.has(neighborTile.getId())
+					!neighborTile.getIsBlocked()
 				) {
 					tilesToRemove.add(neighborTile)
 					positionsToRemove.add(neighborPosition)
@@ -462,7 +457,7 @@ export class GameBlast {
 	private async removeTiles(tiles: Set<Tile>) {
 		for (const tile of tiles) {
 			const removedTileId = tile.getId()
-			this.blockedTileIds.add(removedTileId)
+			tile.setIsBlocked(true)
 			this.field.removeTile(tile.getPosition())
 			this.renderer.removeTile(removedTileId)
 		}
@@ -515,17 +510,15 @@ export class GameBlast {
 	private async fillEmptyPositions(positions: Set<TilePosition>) {
 		const { movedTiles, newTiles } = this.field.fillEmptyPositions(positions)
 
-		const temporaryblockedTilesIds = new Set<string>()
+		const temporaryblockedTiles = new Set<Tile>()
 
 		for (const movedTile of movedTiles) {
-			const movedTileId = movedTile.getId()
-			temporaryblockedTilesIds.add(movedTileId)
-			this.blockedTileIds.add(movedTileId)
+			temporaryblockedTiles.add(movedTile)
+			movedTile.setIsBlocked(true)
 		}
 		for (const newTile of newTiles) {
-			const newTileId = newTile.getId()
-			temporaryblockedTilesIds.add(newTileId)
-			this.blockedTileIds.add(newTileId)
+			temporaryblockedTiles.add(newTile)
+			newTile.setIsBlocked(true)
 		}
 
 		const gridSnapshot = this.grid.getSnapshot()
@@ -557,8 +550,8 @@ export class GameBlast {
 		}
 
 		await Promise.all(renderTasks)
-		for (const blockedTileId of temporaryblockedTilesIds) {
-			this.blockedTileIds.delete(blockedTileId)
+		for (const blockedTile of temporaryblockedTiles) {
+			blockedTile.setIsBlocked(false)
 		}
 	}
 

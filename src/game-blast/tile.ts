@@ -33,12 +33,22 @@ export class Tile {
 	private readonly kind: TileKind
 	private position: TilePosition
 	private readonly image: string
+	private isBlocked = false
 
 	constructor({ kind, position }: { kind: TileKind; position: TilePosition }) {
 		this.kind = kind
 		this.position = position
 		this.image = `tile-${kind}`
 	}
+
+	getIsBlocked(): boolean {
+		return this.isBlocked
+	}
+
+	setIsBlocked(isBlocked: boolean) {
+		this.isBlocked = isBlocked
+	}
+
 	getId(): string {
 		return this.id
 	}
