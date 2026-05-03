@@ -22,27 +22,14 @@ export class GameView extends View {
 	private winModalWrapper?: HTMLElement
 	private lossModal?: HTMLDialogElement
 	private lossModalWrapper?: HTMLElement
-	private boosterBombButton?: HTMLElement
-	private boosterTeleportButton?: HTMLElement
-	private boosterBombCounter?: HTMLElement
-	private boosterTeleportCounter?: HTMLElement
 
-	private boosterElementsMap: Record<
+	private boostersElementsMap: Record<
 		BoosterName,
 		{
-			getButton: () => HTMLElement | undefined
-			getCounter: () => HTMLElement | undefined
+			button: HTMLElement
+			counter: HTMLElement
 		}
-	> = {
-		bomb: {
-			getButton: () => this.boosterBombButton,
-			getCounter: () => this.boosterBombCounter,
-		},
-		teleport: {
-			getButton: () => this.boosterTeleportButton,
-			getCounter: () => this.boosterTeleportCounter,
-		},
-	}
+	> | null = null
 
 	constructor() {
 		super("game-blast")
@@ -58,10 +45,17 @@ export class GameView extends View {
 		this.winModalWrapper = queryElement(".win-modal__wrapper", this.winModal)
 		this.lossModal = queryElement<HTMLDialogElement>("#loss-modal")
 		this.lossModalWrapper = queryElement(".loss-modal__wrapper", this.lossModal)
-		this.boosterBombButton = queryElement("#booster-bomb")
-		this.boosterTeleportButton = queryElement("#booster-teleport")
-		this.boosterBombCounter = queryElement("#booster-counter-bomb")
-		this.boosterTeleportCounter = queryElement("#booster-counter-teleport")
+
+		this.boostersElementsMap = {
+			bomb: {
+				button: queryElement("#booster-bomb"),
+				counter: queryElement("#booster-counter-bomb"),
+			},
+			teleport: {
+				button: queryElement("#booster-teleport"),
+				counter: queryElement("#booster-counter-teleport"),
+			},
+		}
 
 		this.gameBlast = new GameBlast({
 			renderer: new PhaserRenderer({
@@ -159,10 +153,10 @@ export class GameView extends View {
 	}
 
 	private updateBoosterCounter(booster: BoosterName, currentValue: number) {
-		const counter = this.boosterElementsMap[booster].getCounter()
-		if (counter === undefined) {
+		if (this.boostersElementsMap === null) {
 			return
 		}
+		const counter = this.boostersElementsMap[booster].counter
 		counter.textContent = currentValue.toString()
 	}
 
@@ -174,18 +168,14 @@ export class GameView extends View {
 	}
 
 	private setBoostersButtonsListeners() {
+		if (this.boostersElementsMap === null || this.gameBlast === undefined) {
+			return
+		}
+
 		for (const [boosterName, booster] of Object.entries(
-			this.boosterElementsMap
+			this.boostersElementsMap
 		)) {
-			if (this.gameBlast === undefined) {
-				continue
-			}
-
-			const button = booster.getButton()
-			if (button === undefined) {
-				continue
-			}
-
+			const button = booster.button
 			const onClick = this.gameBlast.onBoosterButtonClick.bind(
 				this.gameBlast,
 				boosterName as BoosterName
@@ -196,8 +186,11 @@ export class GameView extends View {
 	}
 
 	private toggleBoosterButtonActive(boosterName: BoosterName, active: boolean) {
-		const button = this.boosterElementsMap[boosterName].getButton()
-		button?.classList.toggle("booster--active", active)
+		if (this.boostersElementsMap === null) {
+			return
+		}
+		const button = this.boostersElementsMap[boosterName].button
+		button.classList.toggle("booster--active", active)
 	}
 
 	// #region Win Modal
