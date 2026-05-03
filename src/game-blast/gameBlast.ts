@@ -543,14 +543,14 @@ export class GameBlast {
 	private fillEmptyPositions(positions: Set<TilePosition>) {
 		const { movedTiles, newTiles } = this.field.fillEmptyPositions(positions)
 
-		const temporaryblockedTiles = new Set<Tile>()
+		const temporaryBlockedTiles = new Set<Tile>()
 
 		for (const movedTile of movedTiles) {
-			temporaryblockedTiles.add(movedTile)
+			temporaryBlockedTiles.add(movedTile)
 			movedTile.setIsBlocked(true)
 		}
 		for (const newTile of newTiles) {
-			temporaryblockedTiles.add(newTile)
+			temporaryBlockedTiles.add(newTile)
 			newTile.setIsBlocked(true)
 		}
 
@@ -588,7 +588,7 @@ export class GameBlast {
 				return Promise.all(renderTasks)
 			})
 			.then(() => {
-				for (const blockedTile of temporaryblockedTiles) {
+				for (const blockedTile of temporaryBlockedTiles) {
 					blockedTile.setIsBlocked(false)
 				}
 			})

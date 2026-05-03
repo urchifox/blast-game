@@ -22,7 +22,7 @@ export const MAX_TILE_HEIGHT = MAX_TILE_WIDTH * TILE_RATIO
 export const TILES_KINDS_NORMAL = [
 	"blue",
 	"green",
-	"purpure",
+	"purple",
 	"red",
 	"yellow",
 ] as const

@@ -75,7 +75,7 @@ export class PhaserRenderer implements Renderer {
 	async fallTilesToCurrentPositions(
 		props: RendererParams<"fallTilesToCurrentPositions">
 	): RendererResult<"fallTilesToCurrentPositions"> {
-		await this.scene.fallTilesToCurrentPosituons(props)
+		await this.scene.fallTilesToCurrentPositions(props)
 	}
 
 	async renderTiles(

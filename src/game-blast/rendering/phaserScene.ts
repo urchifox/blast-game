@@ -222,7 +222,7 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Falling
 
-	async fallTilesToCurrentPosituons({
+	async fallTilesToCurrentPositions({
 		tilesSnapshots,
 		gridSnapshot,
 	}: RendererParams<"fallTilesToCurrentPositions">) {
