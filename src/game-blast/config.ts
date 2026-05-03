@@ -39,8 +39,8 @@ export const MIN_COMBO_SIZE = 2
 export const TILE_BOMB_RADIUS = 2
 
 /** tile heights per second */
-export const TILE_MOVE_SPEED = 10
-export const MIN_TILE_MOVE_DURATION_MS = 10
+export const TILE_FALL_SPEED = 10
+export const MIN_TILE_FALL_DURATION_MS = 10
 export const TILE_BOUNCE_DURATION_MS = 150
 export const TILE_BOUNCE_HEIGHT_RATIO = 0.05
 export const TILE_APPEAR_DURATION_MS = 150

@@ -22,7 +22,7 @@ export type Renderer = {
 	): void
 	clearTiles(): Promise<void>
 	removeTile(id: string): Promise<void>
-	moveTiles({
+	fallTilesToCurrentPosituons({
 		tilesSnapshots,
 		gridSnapshot,
 	}: {

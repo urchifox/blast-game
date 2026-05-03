@@ -577,7 +577,7 @@ export class GameBlast {
 		}
 
 		return this.renderer
-			.moveTiles({
+			.fallTilesToCurrentPosituons({
 				tilesSnapshots: Array.from(movedTiles).map((tile) =>
 					tile.getSnapshot()
 				),

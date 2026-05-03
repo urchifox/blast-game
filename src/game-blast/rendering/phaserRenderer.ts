@@ -69,14 +69,14 @@ export class PhaserRenderer implements Renderer {
 		await this.scene.removeTile(id)
 	}
 
-	async moveTiles({
+	async fallTilesToCurrentPosituons({
 		tilesSnapshots,
 		gridSnapshot,
 	}: {
 		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
 	}) {
-		await this.scene.moveTiles(tilesSnapshots, gridSnapshot)
+		await this.scene.fallTilesToCurrentPosituons(tilesSnapshots, gridSnapshot)
 	}
 
 	async renderTiles({
