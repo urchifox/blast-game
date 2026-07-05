@@ -4,6 +4,7 @@ export type BoosterName = "bomb" | "teleport"
 
 export class Booster {
 	readonly name: BoosterName
+	private readonly initialValue: number
 	private readonly progress: Progress
 	private isActive = false
 	private readonly onActiveChange?: (
@@ -13,14 +14,17 @@ export class Booster {
 
 	constructor({
 		name,
+		initialValue,
 		updateCounter,
 		onActiveChange,
 	}: {
 		name: BoosterName
+		initialValue: number
 		updateCounter: (booster: BoosterName, currentValue: number) => void
 		onActiveChange?: (boosterName: BoosterName, isActive: boolean) => void
 	}) {
 		this.name = name
+		this.initialValue = initialValue
 		this.progress = new Progress({
 			updateCounter: ({ currentValue }) =>
 				updateCounter(this.name, currentValue),
@@ -36,6 +40,10 @@ export class Booster {
 		}
 		this.isActive = isActive
 		this.onActiveChange?.(this.name, isActive)
+	}
+
+	setInitialValue() {
+		this.setCurrentValue(this.initialValue)
 	}
 
 	setCurrentValue(value: number) {

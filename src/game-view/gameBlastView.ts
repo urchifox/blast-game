@@ -14,6 +14,10 @@ import { Booster, BoosterName } from "../game-blast/booster"
 import { Field } from "../game-blast/field"
 import { Grid } from "../game-blast/grid"
 import { Progress } from "../helpers/progress"
+import {
+	BOOSTER_BOMBS_COUNT,
+	BOOSTER_TELEPORT_COUNT,
+} from "../game-blast/config"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -66,10 +70,12 @@ export class GameView extends View {
 		}
 		const boosterBomb = new Booster({
 			name: "bomb",
+			initialValue: BOOSTER_BOMBS_COUNT,
 			...boosterProps,
 		})
 		const boosterTeleport = new Booster({
 			name: "teleport",
+			initialValue: BOOSTER_TELEPORT_COUNT,
 			...boosterProps,
 		})
 		const grid = new Grid({
