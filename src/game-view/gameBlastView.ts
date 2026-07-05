@@ -10,14 +10,10 @@ import {
 	queryElement,
 } from "../helpers/dom"
 import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
-import { Booster, BoosterName } from "../game-blast/booster"
+import { BoosterName } from "../game-blast/booster"
 import { Field } from "../game-blast/field"
 import { Grid } from "../game-blast/grid"
 import { Progress } from "../helpers/progress"
-import {
-	BOOSTER_BOMBS_COUNT,
-	BOOSTER_TELEPORT_COUNT,
-} from "../game-blast/config"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -68,16 +64,6 @@ export class GameView extends View {
 			updateCounter: this.updateBoosterCounter.bind(this),
 			onActiveChange: this.toggleBoosterButtonActive.bind(this),
 		}
-		const boosterBomb = new Booster({
-			name: "bomb",
-			initialValue: BOOSTER_BOMBS_COUNT,
-			...boosterProps,
-		})
-		const boosterTeleport = new Booster({
-			name: "teleport",
-			initialValue: BOOSTER_TELEPORT_COUNT,
-			...boosterProps,
-		})
 		const grid = new Grid({
 			getContainerSize: this.getGameContainerSize.bind(this),
 		})
@@ -105,8 +91,7 @@ export class GameView extends View {
 			setGameContainerSize: this.setGameContainerSize.bind(this),
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
-			boosterBomb,
-			boosterTeleport,
+			boosterProps,
 			grid,
 			field,
 			scoreProgress,
