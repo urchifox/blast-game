@@ -91,13 +91,14 @@ export class GameBlast {
 	constructor({
 		renderer,
 		setGameContainerSize,
-		updateMovesCounter,
-		updateScoreCounter,
 		openWinModal,
 		openLossModal,
-		getContainerSize,
-		updateBoosterCounter,
-		onBoosterActiveChange,
+		boosterBomb,
+		boosterTeleport,
+		grid,
+		field,
+		scoreProgress,
+		movesProgress,
 	}: {
 		renderer: Renderer
 		setGameContainerSize: (
@@ -106,53 +107,26 @@ export class GameBlast {
 				height: number
 			} | null
 		) => void
-		updateMovesCounter: (props: {
-			movesNumber: number
-			movesLimit: number
-		}) => void
-		updateScoreCounter: (props: { score: number; goalScore: number }) => void
 		openWinModal: () => void
 		openLossModal: () => void
-		getContainerSize: () => {
-			width: number
-			height: number
-		}
-		updateBoosterCounter: (booster: BoosterName, currentValue: number) => void
-		onBoosterActiveChange: (boosterName: BoosterName, isActive: boolean) => void
+		boosterBomb: Booster
+		boosterTeleport: Booster
+		grid: Grid
+		field: Field
+		scoreProgress: Progress
+		movesProgress: Progress
 	}) {
 		this.renderer = renderer
 		this.setGameContainerSize = setGameContainerSize
 		this.openWinModal = openWinModal
 		this.openLossModal = openLossModal
 
-		this.grid = new Grid({ getContainerSize })
-		this.field = new Field({
-			getFieldSnapshot: this.grid.getSnapshot.bind(this.grid),
-		})
-		this.scoreProgress = new Progress({
-			updateCounter: ({ currentValue, targetValue }) =>
-				updateScoreCounter({
-					score: currentValue,
-					goalScore: targetValue,
-				}),
-		})
-		this.movesProgress = new Progress({
-			updateCounter: ({ currentValue, targetValue }) =>
-				updateMovesCounter({
-					movesNumber: currentValue,
-					movesLimit: targetValue,
-				}),
-		})
-		this.boosterBomb = new Booster({
-			name: "bomb",
-			updateCounter: updateBoosterCounter,
-			onActiveChange: onBoosterActiveChange,
-		})
-		this.boosterTeleport = new Booster({
-			name: "teleport",
-			updateCounter: updateBoosterCounter,
-			onActiveChange: onBoosterActiveChange,
-		})
+		this.grid = grid
+		this.field = field
+		this.scoreProgress = scoreProgress
+		this.movesProgress = movesProgress
+		this.boosterBomb = boosterBomb
+		this.boosterTeleport = boosterTeleport
 	}
 
 	async init() {
