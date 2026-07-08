@@ -37,11 +37,12 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 
 		const selectedTile = this.selectedTile
 		this.selectedTile = null
-		this.booster.spend()
+		this.spend()
 		this.swapTiles(selectedTile, tile)
 	}
 
-	clear() {
+	override clear() {
+		super.clear()
 		this.selectedTile = null
 	}
 }

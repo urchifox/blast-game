@@ -50,7 +50,7 @@ export class BoosterHandlerBomb extends BoosterHandler {
 			return
 		}
 
-		this.booster.spend()
+		this.spend()
 		const removingPromise = this.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
@@ -60,9 +60,5 @@ export class BoosterHandlerBomb extends BoosterHandler {
 			removedPositions: positions,
 			removingPromise: removingPromise,
 		})
-	}
-
-	clear() {
-		// nothing to clear
 	}
 }

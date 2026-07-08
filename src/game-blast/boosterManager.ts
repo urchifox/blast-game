@@ -53,22 +53,20 @@ export class BoosterManager {
 
 	clear() {
 		for (const handler of this.boostersHandlers) {
-			handler.booster.clear()
 			handler.clear()
 		}
 	}
 
 	setInitialValue() {
 		for (const handler of this.boostersHandlers) {
-			handler.booster.setInitialValue()
-			handler.booster.renderCounter()
+			handler.setInitialValue()
 		}
 	}
 
 	maybeUseBooster(tile: Tile) {
 		for (const handler of this.boostersHandlers) {
-			if (handler.booster.isActivated()) {
-				handler.use(tile)
+			const isBoosterUsed = handler.maybeUse(tile)
+			if (isBoosterUsed) {
 				return true
 			}
 		}
@@ -76,6 +74,6 @@ export class BoosterManager {
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {
-		this.boostersHandlersMap[boosterName].booster.tryActivate()
+		this.boostersHandlersMap[boosterName].tryActivate()
 	}
 }
