@@ -20,10 +20,8 @@ import { Renderer } from "./rendering/renderer"
 import { isTileKindSpecial, Tile, TilePosition, TileSnapshot } from "./tile"
 import { AnimationsManager } from "../helpers/animationManager"
 import { TileClickHandlerResult } from "./types"
-import { BoosterHandlerBomb } from "./boosterHandlerBomb"
-import { BoosterHandler } from "./boosterHandler"
-import { BoosterHandlerTeleport } from "./boosterHandlerTeleport"
 import { TileClickManager } from "./tileClickManager"
+import { BoosterManager } from "./boosterManager"
 
 export class GameBlast {
 	private readonly renderer: Renderer
@@ -44,9 +42,8 @@ export class GameBlast {
 
 	private isGameEnded = false
 
-	private boostersHandlersMap: Record<BoosterName, BoosterHandler>
-
 	private tileClickManager: TileClickManager
+	private boosterManager: BoosterManager
 
 	private levelData: {
 		columns: number
@@ -96,19 +93,14 @@ export class GameBlast {
 		this.scoreProgress = scoreProgress
 		this.movesProgress = movesProgress
 
-		this.boostersHandlersMap = {
-			bomb: new BoosterHandlerBomb({
-				boosterProps,
-				getTilesInRadius: this.field.getTilesInRadius.bind(this.field),
-				removeTilesFromCenter: this.removeTilesFromCenter.bind(this),
-				processRemovingTiles: this.processRemovingTiles.bind(this),
-			}),
-			teleport: new BoosterHandlerTeleport({
-				boosterProps,
-				selectTile: this.selectTile.bind(this),
-				swapTiles: this.swapTiles.bind(this),
-			}),
-		}
+		this.boosterManager = new BoosterManager({
+			getTilesInRadius: this.field.getTilesInRadius.bind(this.field),
+			removeTilesFromCenter: this.removeTilesFromCenter.bind(this),
+			processRemovingTiles: this.processRemovingTiles.bind(this),
+			selectTile: this.selectTile.bind(this),
+			swapTiles: this.swapTiles.bind(this),
+			boosterProps,
+		})
 
 		this.tileClickManager = new TileClickManager({
 			getTiles: this.field.getTiles.bind(this.field),
@@ -145,10 +137,7 @@ export class GameBlast {
 		this.field.clearTiles()
 		this.scoreProgress.clear()
 		this.movesProgress.clear()
-		for (const handler of Object.values(this.boostersHandlersMap)) {
-			handler.booster.clear()
-			handler.clear()
-		}
+		this.boosterManager.clear()
 		this.animationsManager.clear()
 		this.isGameEnded = false
 	}
@@ -190,10 +179,7 @@ export class GameBlast {
 
 	private createLevel() {
 		const { columns, rows, goalScore, movesLimit } = this.levelData
-		for (const handler of Object.values(this.boostersHandlersMap)) {
-			handler.booster.setInitialValue()
-			handler.booster.renderCounter()
-		}
+		this.boosterManager.setInitialValue()
 		this.setGameContainerSize(null)
 		this.grid.createGrid({ columns, rows })
 		this.field.generateTiles()
@@ -278,11 +264,9 @@ export class GameBlast {
 			return
 		}
 
-		for (const handler of Object.values(this.boostersHandlersMap)) {
-			if (handler.booster.isActivated()) {
-				handler.use(tile)
-				return
-			}
+		const isBoosterUsed = this.boosterManager.maybeUseBooster(tile)
+		if (isBoosterUsed) {
+			return
 		}
 
 		const result = this.tileClickManager.onClick(tile)
@@ -475,7 +459,7 @@ export class GameBlast {
 	// #region Boosters
 
 	onBoosterButtonClick(boosterName: BoosterName) {
-		this.boostersHandlersMap[boosterName].booster.tryActivate()
+		this.boosterManager.onBoosterButtonClick(boosterName)
 	}
 
 	// #endregion
