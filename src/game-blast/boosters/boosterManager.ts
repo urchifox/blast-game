@@ -1,7 +1,7 @@
 import { BoosterHandlerBomb } from "./boosterHandlerBomb"
-import { TilePosition, Tile } from "./tile"
+import { TilePosition, Tile } from "../tile"
 import { BoosterHandlerTeleport } from "./boosterHandlerTeleport"
-import { TileClickHandlerResult } from "./types"
+import { TileClickHandlerResult } from "../types"
 import { BoosterCommonProps, BoosterName } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 

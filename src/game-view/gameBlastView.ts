@@ -10,7 +10,7 @@ import {
 	queryElement,
 } from "../helpers/dom"
 import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
-import { BoosterName } from "../game-blast/booster"
+import { BoosterName } from "../game-blast/boosters/booster"
 import { Field } from "../game-blast/field"
 import { Grid } from "../game-blast/grid"
 import { Progress } from "../helpers/progress"

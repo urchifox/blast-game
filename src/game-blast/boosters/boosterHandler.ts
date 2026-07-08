@@ -1,5 +1,5 @@
 import { Booster, BoosterProps } from "./booster"
-import { Tile } from "./tile"
+import { Tile } from "../tile"
 
 export abstract class BoosterHandler {
 	private readonly booster: Booster

@@ -1,7 +1,7 @@
 import { BoosterCommonProps } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
-import { BOOSTER_TELEPORT_COUNT } from "./config"
-import { Tile } from "./tile"
+import { BOOSTER_TELEPORT_COUNT } from "../config"
+import { Tile } from "../tile"
 
 type BoosterHandlerTeleportProps = {
 	selectTile: (tile: Tile) => void

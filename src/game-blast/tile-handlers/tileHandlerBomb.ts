@@ -1,7 +1,7 @@
-import { TILE_BOMB_RADIUS } from "./config"
-import { Tile, TilePosition } from "./tile"
+import { TILE_BOMB_RADIUS } from "../config"
+import { Tile, TilePosition } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
-import { TileClickHandlerResult } from "./types"
+import { TileClickHandlerResult } from "../types"
 
 export type TileHandlerBombProps = {
 	getTilesInRadius: (

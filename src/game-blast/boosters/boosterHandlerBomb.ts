@@ -1,8 +1,8 @@
 import { BoosterCommonProps } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
-import { BOOSTER_BOMB_RADIUS, BOOSTER_BOMBS_COUNT } from "./config"
-import { Tile, TilePosition } from "./tile"
-import { TileClickHandlerResult } from "./types"
+import { BOOSTER_BOMB_RADIUS, BOOSTER_BOMBS_COUNT } from "../config"
+import { Tile, TilePosition } from "../tile"
+import { TileClickHandlerResult } from "../types"
 
 export type BoosterHandlerBombProps = {
 	getTilesInRadius: (

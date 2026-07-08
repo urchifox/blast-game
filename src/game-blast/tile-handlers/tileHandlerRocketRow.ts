@@ -1,6 +1,6 @@
-import { Tile, TilePosition } from "./tile"
+import { Tile, TilePosition } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
-import { TileClickHandlerResult } from "./types"
+import { TileClickHandlerResult } from "../types"
 
 export type TileHandlerRocketRowProps = {
 	getTilesInRadius: (

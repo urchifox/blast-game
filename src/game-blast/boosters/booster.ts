@@ -1,4 +1,4 @@
-import { Progress } from "../helpers/progress"
+import { Progress } from "../../helpers/progress"
 
 export type BoosterName = "bomb" | "teleport"
 

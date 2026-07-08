@@ -1,6 +1,6 @@
 import { getRandomNumber } from "../helpers/random"
 import { wait } from "../helpers/time"
-import { BoosterName, BoosterCommonProps } from "./booster"
+import { BoosterName, BoosterCommonProps } from "./boosters/booster"
 import {
 	BASE_SCORE,
 	DEFAULT_COLUMNS,
@@ -20,8 +20,8 @@ import { Renderer } from "./rendering/renderer"
 import { isTileKindSpecial, Tile, TilePosition, TileSnapshot } from "./tile"
 import { AnimationsManager } from "../helpers/animationManager"
 import { TileClickHandlerResult } from "./types"
-import { TileClickManager } from "./tileClickManager"
-import { BoosterManager } from "./boosterManager"
+import { TileClickManager } from "./tile-handlers/tileClickManager"
+import { BoosterManager } from "./boosters/boosterManager"
 
 export class GameBlast {
 	private readonly renderer: Renderer

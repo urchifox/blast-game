@@ -1,7 +1,7 @@
 import { TileHandler } from "./tileHandler"
-import { TileClickHandlerResult } from "./types"
-import { Tile, TilePosition } from "./tile"
-import { MIN_COMBO_SIZE } from "./config"
+import { TileClickHandlerResult } from "../types"
+import { Tile, TilePosition } from "../tile"
+import { MIN_COMBO_SIZE } from "../config"
 
 export type TileHandlerNormalProps = {
 	getSameKindNeighbourTiles: (tile: Tile) => {

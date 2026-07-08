@@ -1,13 +1,13 @@
-import { pickRandomItem } from "../helpers/random"
-import { TILES_KINDS_NORMAL } from "./config"
-import { Tile, TileKind, TilePosition } from "./tile"
+import { pickRandomItem } from "../../helpers/random"
+import { TILES_KINDS_NORMAL } from "../config"
+import { Tile, TileKind, TilePosition } from "../tile"
 import { TileHandlerBomb } from "./tileHandlerBomb"
 import { TileHandlerDynamite } from "./tileHandlerDynamite"
 import { TileHandlerNormal } from "./tileHandlerNormal"
 import { TileHandlerRocketColumn } from "./tileHandlerRocketColumn"
 import { TileHandlerRocketRow } from "./tileHandlerRocketRow"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
-import { TileClickHandler } from "./types"
+import { TileClickHandler } from "../types"
 
 export type TileClickManagerProps = {
 	getTiles: () => Array<Tile>
