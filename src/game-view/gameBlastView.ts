@@ -15,6 +15,7 @@ import { Field } from "../game-blast/field"
 import { Grid } from "../game-blast/grid"
 import { Progress } from "../helpers/progress"
 import { ProgressManager } from "../game-blast/progressManager"
+import { LevelGenerator } from "../game-blast/levelGenerator"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -88,6 +89,9 @@ export class GameView extends View {
 			scoreProgress,
 			movesProgress,
 		})
+		const levelGenerator = new LevelGenerator({
+			getPoints: progressManager.getPoints.bind(progressManager),
+		})
 
 		this.gameBlast = new GameBlast({
 			renderer: new PhaserRenderer({
@@ -101,6 +105,7 @@ export class GameView extends View {
 			grid,
 			field,
 			progressManager,
+			levelGenerator,
 		})
 
 		this.setListeners()

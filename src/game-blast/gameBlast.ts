@@ -1,15 +1,6 @@
-import { getRandomNumber } from "../helpers/random"
 import { wait } from "../helpers/time"
 import { BoosterName, BoosterCommonProps } from "./boosters/booster"
-import {
-	DEFAULT_COLUMNS,
-	DEFAULT_ROWS,
-	MAX_AVG_COMBO,
-	MAX_GOAL_SCORE,
-	MIN_AVG_COMBO,
-	MIN_GOAL_SCORE,
-	TILE_DELAY_BETWEEN_REMOVALS_MS,
-} from "./config"
+import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
 import { Renderer } from "./rendering/renderer"
@@ -20,6 +11,7 @@ import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { BoosterManager } from "./boosters/boosterManager"
 import { CompletionManager } from "./completionManager"
 import { ProgressManager } from "./progressManager"
+import { LevelData, LevelGenerator } from "./levelGenerator"
 
 export class GameBlast {
 	private readonly renderer: Renderer
@@ -34,17 +26,13 @@ export class GameBlast {
 	) => void
 	private readonly animationsManager = new AnimationsManager()
 
+	private levelGenerator: LevelGenerator
 	private tileClickManager: TileClickManager
 	private boosterManager: BoosterManager
 	private completionManager: CompletionManager
 	private progressManager: ProgressManager
 
-	private levelData: {
-		columns: number
-		rows: number
-		goalScore: number
-		movesLimit: number
-	} = {
+	private levelData: LevelData = {
 		columns: 0,
 		rows: 0,
 		goalScore: 0,
@@ -60,6 +48,7 @@ export class GameBlast {
 		grid,
 		field,
 		progressManager,
+		levelGenerator,
 	}: {
 		renderer: Renderer
 		setGameContainerSize: (
@@ -74,9 +63,11 @@ export class GameBlast {
 		grid: Grid
 		field: Field
 		progressManager: ProgressManager
+		levelGenerator: LevelGenerator
 	}) {
 		this.renderer = renderer
 		this.setGameContainerSize = setGameContainerSize
+		this.levelGenerator = levelGenerator
 
 		this.grid = grid
 		this.field = field
@@ -164,24 +155,13 @@ export class GameBlast {
 
 	async startNewLevel() {
 		await this.clearLevel()
-		this.generateLevelData()
+		this.levelData = this.levelGenerator.generateLevelData()
 		this.createLevel()
 	}
 
 	async restartLevel() {
 		await this.clearLevel()
 		this.createLevel()
-	}
-
-	private generateLevelData() {
-		this.levelData.columns = DEFAULT_COLUMNS
-		this.levelData.rows = DEFAULT_ROWS
-		this.levelData.goalScore = getRandomNumber({
-			min: MIN_GOAL_SCORE,
-			max: MAX_GOAL_SCORE,
-			step: 100,
-		})
-		this.levelData.movesLimit = this.estimateMoves(this.levelData.goalScore)
 	}
 
 	private createLevel() {
@@ -201,19 +181,6 @@ export class GameBlast {
 			gridSnapshot: gridSnapshot,
 		})
 		this.progressManager.setinitialValues({ goalScore, movesLimit })
-	}
-
-	/** Based on average score per move */
-	private estimateMoves(targetScore: number): number {
-		if (targetScore <= 0) {
-			return 0
-		}
-
-		const avgCombo = getRandomNumber({ min: MIN_AVG_COMBO, max: MAX_AVG_COMBO })
-		const avgScorePerMove = this.progressManager.getPoints(avgCombo)
-		const moves = targetScore / avgScorePerMove
-
-		return Math.ceil(moves)
 	}
 
 	// #endregion
