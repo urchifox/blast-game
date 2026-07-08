@@ -10,7 +10,10 @@ import {
 	queryElement,
 } from "../helpers/dom"
 import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
-import { BoosterName } from "../game-blast/booster"
+import { BoosterName } from "../game-blast/boosters/booster"
+import { Field } from "../game-blast/field"
+import { Grid } from "../game-blast/grid"
+import { Progress } from "../helpers/progress"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -57,19 +60,42 @@ export class GameView extends View {
 			},
 		}
 
+		const boosterProps = {
+			updateCounter: this.updateBoosterCounter.bind(this),
+			onActiveChange: this.toggleBoosterButtonActive.bind(this),
+		}
+		const grid = new Grid({
+			getContainerSize: this.getGameContainerSize.bind(this),
+		})
+		const field = new Field({ getFieldSnapshot: grid.getSnapshot.bind(grid) })
+		const scoreProgress = new Progress({
+			updateCounter: ({ currentValue, targetValue }) =>
+				this.updateScoreCounter({
+					score: currentValue,
+					goalScore: targetValue,
+				}),
+		})
+		const movesProgress = new Progress({
+			updateCounter: ({ currentValue, targetValue }) =>
+				this.updateMovesCounter({
+					movesNumber: currentValue,
+					movesLimit: targetValue,
+				}),
+		})
+
 		this.gameBlast = new GameBlast({
 			renderer: new PhaserRenderer({
 				container: this.gameContainer,
 				getContainerOffset: this.getContainerOffset.bind(this),
 			}),
 			setGameContainerSize: this.setGameContainerSize.bind(this),
-			updateMovesCounter: this.updateMovesCounter.bind(this),
-			updateScoreCounter: this.updateScoreCounter.bind(this),
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
-			getContainerSize: this.getGameContainerSize.bind(this),
-			updateBoosterCounter: this.updateBoosterCounter.bind(this),
-			onBoosterActiveChange: this.toggleBoosterButtonActive.bind(this),
+			boosterProps,
+			grid,
+			field,
+			scoreProgress,
+			movesProgress,
 		})
 
 		this.setListeners()
