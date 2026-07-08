@@ -14,6 +14,7 @@ import { BoosterName } from "../game-blast/boosters/booster"
 import { Field } from "../game-blast/field"
 import { Grid } from "../game-blast/grid"
 import { Progress } from "../helpers/progress"
+import { ProgressManager } from "../game-blast/progressManager"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -68,6 +69,7 @@ export class GameView extends View {
 			getContainerSize: this.getGameContainerSize.bind(this),
 		})
 		const field = new Field({ getFieldSnapshot: grid.getSnapshot.bind(grid) })
+
 		const scoreProgress = new Progress({
 			updateCounter: ({ currentValue, targetValue }) =>
 				this.updateScoreCounter({
@@ -82,6 +84,10 @@ export class GameView extends View {
 					movesLimit: targetValue,
 				}),
 		})
+		const progressManager = new ProgressManager({
+			scoreProgress,
+			movesProgress,
+		})
 
 		this.gameBlast = new GameBlast({
 			renderer: new PhaserRenderer({
@@ -94,8 +100,7 @@ export class GameView extends View {
 			boosterProps,
 			grid,
 			field,
-			scoreProgress,
-			movesProgress,
+			progressManager,
 		})
 
 		this.setListeners()

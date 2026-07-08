@@ -2,48 +2,42 @@ import { getRandomNumber } from "../helpers/random"
 import { wait } from "../helpers/time"
 import { BoosterName, BoosterCommonProps } from "./boosters/booster"
 import {
-	BASE_SCORE,
 	DEFAULT_COLUMNS,
 	DEFAULT_ROWS,
-	GROWTH_EXPONENT,
 	MAX_AVG_COMBO,
 	MAX_GOAL_SCORE,
-	MAX_SHUFFLE_ATTEMPTS,
 	MIN_AVG_COMBO,
 	MIN_GOAL_SCORE,
 	TILE_DELAY_BETWEEN_REMOVALS_MS,
 } from "./config"
 import { Field } from "./field"
 import { Grid } from "./grid"
-import { Progress } from "../helpers/progress"
 import { Renderer } from "./rendering/renderer"
-import { isTileKindSpecial, Tile, TilePosition, TileSnapshot } from "./tile"
+import { Tile, TilePosition, TileSnapshot } from "./tile"
 import { AnimationsManager } from "../helpers/animationManager"
 import { TileClickHandlerResult } from "./types"
 import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { BoosterManager } from "./boosters/boosterManager"
+import { CompletionManager } from "./completionManager"
+import { ProgressManager } from "./progressManager"
 
 export class GameBlast {
 	private readonly renderer: Renderer
 	private readonly grid: Grid
 	private readonly field: Field
-	private readonly scoreProgress: Progress
-	private readonly movesProgress: Progress
+
 	private readonly setGameContainerSize: (
 		sizes: {
 			width: number
 			height: number
 		} | null
 	) => void
-	private shuffleAttempts = 0
 	private readonly animationsManager = new AnimationsManager()
-	private readonly openWinModal: () => void
-	private readonly openLossModal: () => void
-
-	private isGameEnded = false
 
 	private tileClickManager: TileClickManager
 	private boosterManager: BoosterManager
+	private completionManager: CompletionManager
+	private progressManager: ProgressManager
 
 	private levelData: {
 		columns: number
@@ -65,8 +59,7 @@ export class GameBlast {
 		boosterProps,
 		grid,
 		field,
-		scoreProgress,
-		movesProgress,
+		progressManager,
 	}: {
 		renderer: Renderer
 		setGameContainerSize: (
@@ -80,18 +73,13 @@ export class GameBlast {
 		boosterProps: BoosterCommonProps
 		grid: Grid
 		field: Field
-		scoreProgress: Progress
-		movesProgress: Progress
+		progressManager: ProgressManager
 	}) {
 		this.renderer = renderer
 		this.setGameContainerSize = setGameContainerSize
-		this.openWinModal = openWinModal
-		this.openLossModal = openLossModal
 
 		this.grid = grid
 		this.field = field
-		this.scoreProgress = scoreProgress
-		this.movesProgress = movesProgress
 
 		this.boosterManager = new BoosterManager({
 			getTilesInRadius: this.field.getTilesInRadius.bind(this.field),
@@ -119,6 +107,26 @@ export class GameBlast {
 			removeTilesFromCenter: this.removeTilesFromCenter.bind(this),
 			getPositions: this.field.getPositions.bind(this.field),
 		})
+		this.progressManager = progressManager
+		this.completionManager = new CompletionManager({
+			openWinModal,
+			openLossModal,
+			shuffleField: () => {
+				const shuffleFieldPromise = this.shuffleField()
+				return this.animationsManager.animate(shuffleFieldPromise)
+			},
+			getTiles: this.field.getTiles.bind(this.field),
+			getSameKindNeighbourTiles: this.getSameKindNeighbourTiles.bind(this),
+			isScoreTargetReached: this.progressManager.isScoreTargetReached.bind(
+				this.progressManager
+			),
+			isMovesTargetReached: this.progressManager.isMovesTargetReached.bind(
+				this.progressManager
+			),
+			waitAllAnimations: this.animationsManager.waitAllAnimations.bind(
+				this.animationsManager
+			),
+		})
 	}
 
 	async init() {
@@ -135,11 +143,10 @@ export class GameBlast {
 	private async clearLevel() {
 		await this.renderer.clearTiles()
 		this.field.clearTiles()
-		this.scoreProgress.clear()
-		this.movesProgress.clear()
+		this.progressManager.clear()
 		this.boosterManager.clear()
 		this.animationsManager.clear()
-		this.isGameEnded = false
+		this.completionManager.clear()
 	}
 
 	onResize() {
@@ -193,10 +200,7 @@ export class GameBlast {
 			tilesSnapshots: this.field.getTilesSnapshots(),
 			gridSnapshot: gridSnapshot,
 		})
-		this.scoreProgress.setTargetValue(goalScore)
-		this.movesProgress.setTargetValue(movesLimit)
-		this.scoreProgress.renderCounters()
-		this.movesProgress.renderCounters()
+		this.progressManager.setinitialValues({ goalScore, movesLimit })
 	}
 
 	/** Based on average score per move */
@@ -206,7 +210,7 @@ export class GameBlast {
 		}
 
 		const avgCombo = getRandomNumber({ min: MIN_AVG_COMBO, max: MAX_AVG_COMBO })
-		const avgScorePerMove = this.getPoints(avgCombo)
+		const avgScorePerMove = this.progressManager.getPoints(avgCombo)
 		const moves = targetScore / avgScorePerMove
 
 		return Math.ceil(moves)
@@ -255,7 +259,7 @@ export class GameBlast {
 	// #region Tile interaction
 
 	private onTileClick(id: string) {
-		if (this.isGameEnded) {
+		if (this.completionManager.isGameCompleted()) {
 			return
 		}
 
@@ -362,18 +366,17 @@ export class GameBlast {
 
 		const { removedTiles, removedPositions, removingPromise } = result
 
-		const points = this.getPoints(removedTiles.size)
-		this.scoreProgress.addCurrentValue(points)
-		this.movesProgress.addCurrentValue()
+		const points = this.progressManager.getPoints(removedTiles.size)
+		this.progressManager.addProgress(points)
 
 		const fillEmptyPositionsPromise = this.fillEmptyPositions(removedPositions)
 
 		const animationPromise = removingPromise
 			.then(() => fillEmptyPositionsPromise)
-			.then(() => this.checkForMove())
+			.then(() => this.completionManager.checkForMove())
 		this.animationsManager.animate(animationPromise)
 
-		this.checkGameEnd()
+		this.completionManager.checkGameCompletion()
 	}
 
 	private fillEmptyPositions(positions: Set<TilePosition>) {
@@ -445,95 +448,10 @@ export class GameBlast {
 
 	// #endregion
 
-	// #region Progress
-
-	/** Uses power scale formula */
-	private getPoints(removedTilesNumber: number) {
-		return Math.round(
-			BASE_SCORE * Math.pow(removedTilesNumber, GROWTH_EXPONENT)
-		)
-	}
-
-	// #endregion
-
 	// #region Boosters
 
 	onBoosterButtonClick(boosterName: BoosterName) {
 		this.boosterManager.onBoosterButtonClick(boosterName)
-	}
-
-	// #endregion
-
-	// #region Game End
-
-	private checkGameEnd() {
-		if (this.isGameEnded) {
-			return
-		}
-
-		if (this.scoreProgress.isTargetReached()) {
-			this.win()
-		} else if (this.movesProgress.isTargetReached()) {
-			this.lose()
-		}
-	}
-
-	private async checkForMove() {
-		if (this.isGameEnded) {
-			return
-		}
-
-		const isPossibleToMakeMove = this.isPossibleToMakeMove()
-		if (isPossibleToMakeMove) {
-			return
-		}
-
-		if (this.shuffleAttempts >= MAX_SHUFFLE_ATTEMPTS) {
-			this.lose()
-			return
-		}
-
-		this.shuffleAttempts++
-		let attempts = 0
-		while (!this.isPossibleToMakeMove()) {
-			const shuffleFieldPromise = this.shuffleField()
-			await this.animationsManager.animate(shuffleFieldPromise)
-			attempts++
-			// Prevent infinite loop
-			if (attempts >= 100) {
-				this.lose()
-				return
-			}
-		}
-	}
-
-	private isPossibleToMakeMove() {
-		const tiles = this.field.getTiles()
-		return tiles.some((tile) => {
-			if (isTileKindSpecial(tile.getKind())) {
-				return true
-			}
-			const { tilesToRemove } = this.getSameKindNeighbourTiles(tile)
-			return tilesToRemove.size > 1
-		})
-	}
-
-	private win() {
-		if (this.isGameEnded) {
-			return
-		}
-
-		this.isGameEnded = true
-		this.animationsManager.waitAllAnimations().then(() => this.openWinModal())
-	}
-
-	private lose() {
-		if (this.isGameEnded) {
-			return
-		}
-
-		this.isGameEnded = true
-		this.animationsManager.waitAllAnimations().then(() => this.openLossModal())
 	}
 
 	// #endregion
