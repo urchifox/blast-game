@@ -113,18 +113,18 @@ export class GameView extends View {
 		})
 
 		this.gameBlast = new GameBlast({
+			grid,
+			field,
+			fieldManipulator,
+			gameRules,
+			levelGenerator,
+			progressManager,
 			renderer,
+			animationsManager,
+			boosterProps,
 			setGameContainerSize: this.setGameContainerSize.bind(this),
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
-			boosterProps,
-			grid,
-			field,
-			progressManager,
-			gameRules,
-			levelGenerator,
-			fieldManipulator,
-			animationsManager,
 		})
 
 		this.setListeners()
