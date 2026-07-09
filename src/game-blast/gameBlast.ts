@@ -50,61 +50,22 @@ export class GameBlast {
 		this.animationsManager = props.animationsManager
 
 		this.tileClickManager = new TileClickManager({
-			getTiles: this.fieldManipulator.getTiles.bind(this.fieldManipulator),
-			getTilesInRadius: this.fieldManipulator.getTilesInRadius.bind(
-				this.fieldManipulator
-			),
-			getTilesInRow: this.fieldManipulator.getTilesInRow.bind(
-				this.fieldManipulator
-			),
-			getTilesInColumn: this.fieldManipulator.getTilesInColumn.bind(
-				this.fieldManipulator
-			),
-			getSameKindNeighbourTiles:
-				this.fieldManipulator.getSameKindNeighbourTiles.bind(
-					this.fieldManipulator
-				),
-			renderTile: this.fieldManipulator.renderTile.bind(this.fieldManipulator),
-			addTile: this.fieldManipulator.addTile.bind(this.fieldManipulator),
-			removeTiles: this.fieldManipulator.removeTiles.bind(
-				this.fieldManipulator
-			),
-			removeTilesFromCenter: this.fieldManipulator.removeTilesFromCenter.bind(
-				this.fieldManipulator
-			),
-			getPositions: this.fieldManipulator.getPositions.bind(
-				this.fieldManipulator
-			),
+			innerFieldManipulator: this.fieldManipulator,
 			gameRules: props.gameRules,
 		})
 
 		this.boosterManager = new BoosterManager({
-			getTilesInRadius: this.fieldManipulator.getTilesInRadius.bind(
-				this.fieldManipulator
-			),
-			removeTilesFromCenter: this.fieldManipulator.removeTilesFromCenter.bind(
-				this.fieldManipulator
-			),
+			innerFieldManipulator: this.fieldManipulator,
 			processRemovingTiles: this.processRemovingTiles.bind(this),
-			selectTile: this.fieldManipulator.selectTile.bind(this.fieldManipulator),
-			swapTiles: this.fieldManipulator.swapTiles.bind(this.fieldManipulator),
 			boosterProps: props.boosterProps,
 			gameRules: props.gameRules,
 		})
 
 		this.completionManager = new CompletionManager({
+			innerFieldManipulator: this.fieldManipulator,
 			gameRules: props.gameRules,
 			openWinModal: props.openWinModal,
 			openLossModal: props.openLossModal,
-			shuffleField: () => {
-				const shuffleFieldPromise = this.fieldManipulator.shuffleField()
-				return this.animationsManager.animate(shuffleFieldPromise)
-			},
-			getTiles: this.fieldManipulator.getTiles.bind(this.fieldManipulator),
-			getSameKindNeighbourTiles:
-				this.fieldManipulator.getSameKindNeighbourTiles.bind(
-					this.fieldManipulator
-				),
 			isScoreTargetReached: this.progressManager.isScoreTargetReached.bind(
 				this.progressManager
 			),

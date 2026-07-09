@@ -215,13 +215,14 @@ export class FieldManipulator {
 			})
 	}
 
-	async shuffleField() {
+	shuffleField() {
 		this.field.shuffle()
 		const tiles = this.field.getTiles()
-		await this.renderer.shuffleTiles({
+		const shuffleFieldPromise = this.renderer.shuffleTiles({
 			tilesSnapshots: Array.from(tiles).map((tile) => tile.getSnapshot()),
 			gridSnapshot: this.grid.getSnapshot(),
 		})
+		return this.animationsManager.animate(shuffleFieldPromise)
 	}
 
 	async clear() {

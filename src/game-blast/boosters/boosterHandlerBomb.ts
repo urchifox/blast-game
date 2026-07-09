@@ -1,34 +1,28 @@
 import { BoosterHandler } from "./boosterHandler"
-import { Tile, TilePosition } from "../tile"
+import { Tile } from "../tile"
 import { TileClickHandlerResult } from "../types"
 import { BoosterCommonProps } from "./booster"
 import { GameRules } from "../gameRules"
+import { FieldManipulator } from "../fieldManipulator"
+
+type InnerFieldManipulator = Pick<
+	FieldManipulator,
+	"getTilesInRadius" | "removeTilesFromCenter"
+>
 
 export type BoosterHandlerBombProps = {
-	getTilesInRadius: (
-		position: TilePosition,
-		radius: number
-	) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
-	removeTilesFromCenter: (
-		tiles: Set<Tile>,
-		centerPosition: TilePosition
-	) => Promise<void>
+	innerFieldManipulator: InnerFieldManipulator
 	processRemovingTiles: (result: TileClickHandlerResult) => void
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
 }
 
 export class BoosterHandlerBomb extends BoosterHandler {
-	private getTilesInRadius: BoosterHandlerBombProps["getTilesInRadius"]
-	private removeTilesFromCenter: BoosterHandlerBombProps["removeTilesFromCenter"]
-	private processRemovingTiles: BoosterHandlerBombProps["processRemovingTiles"]
+	private readonly innerFieldManipulator: BoosterHandlerBombProps["innerFieldManipulator"]
+	private readonly processRemovingTiles: BoosterHandlerBombProps["processRemovingTiles"]
 
 	constructor({
-		getTilesInRadius,
-		removeTilesFromCenter,
+		innerFieldManipulator,
 		processRemovingTiles,
 		gameRules,
 		boosterProps,
@@ -39,13 +33,12 @@ export class BoosterHandlerBomb extends BoosterHandler {
 			gameRules,
 			...boosterProps,
 		})
-		this.getTilesInRadius = getTilesInRadius
-		this.removeTilesFromCenter = removeTilesFromCenter
+		this.innerFieldManipulator = innerFieldManipulator
 		this.processRemovingTiles = processRemovingTiles
 	}
 
 	use(tile: Tile) {
-		const { tiles, positions } = this.getTilesInRadius(
+		const { tiles, positions } = this.innerFieldManipulator.getTilesInRadius(
 			tile.getPosition(),
 			this.gameRules.BOOSTER_BOMB_RADIUS
 		)
@@ -54,7 +47,7 @@ export class BoosterHandlerBomb extends BoosterHandler {
 		}
 
 		this.spend()
-		const removingPromise = this.removeTilesFromCenter(
+		const removingPromise = this.innerFieldManipulator.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
 		)

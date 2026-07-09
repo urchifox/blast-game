@@ -1,28 +1,27 @@
-import { isTileKindSpecial, Tile, TilePosition } from "./tile"
+import { isTileKindSpecial } from "./tile"
 import { GameRules } from "./gameRules"
+import { FieldManipulator } from "./fieldManipulator"
+
+type InnerFieldManipulator = Pick<
+	FieldManipulator,
+	"getTiles" | "getSameKindNeighbourTiles" | "shuffleField"
+>
 
 export type CompletionManagerProps = {
+	innerFieldManipulator: InnerFieldManipulator
 	gameRules: GameRules
 	openWinModal: () => void
 	openLossModal: () => void
-	shuffleField: () => Promise<void>
-	getTiles: () => Array<Tile>
-	getSameKindNeighbourTiles: (tile: Tile) => {
-		tilesToRemove: Set<Tile>
-		positionsToRemove: Set<TilePosition>
-	}
 	isScoreTargetReached: () => boolean
 	isMovesTargetReached: () => boolean
 	waitAllAnimations: () => Promise<void>
 }
 
 export class CompletionManager {
+	private readonly innerFieldManipulator: CompletionManagerProps["innerFieldManipulator"]
 	private readonly gameRules: CompletionManagerProps["gameRules"]
 	private readonly openWinModal: CompletionManagerProps["openWinModal"]
 	private readonly openLossModal: CompletionManagerProps["openLossModal"]
-	private readonly shuffleField: CompletionManagerProps["shuffleField"]
-	private readonly getTiles: CompletionManagerProps["getTiles"]
-	private readonly getSameKindNeighbourTiles: CompletionManagerProps["getSameKindNeighbourTiles"]
 	private readonly isScoreTargetReached: CompletionManagerProps["isScoreTargetReached"]
 	private readonly isMovesTargetReached: CompletionManagerProps["isMovesTargetReached"]
 	private readonly waitAllAnimations: CompletionManagerProps["waitAllAnimations"]
@@ -31,22 +30,18 @@ export class CompletionManager {
 	private shuffleAttempts = 0
 
 	constructor({
+		innerFieldManipulator,
 		gameRules,
 		openWinModal,
 		openLossModal,
-		shuffleField,
-		getTiles,
-		getSameKindNeighbourTiles,
 		isScoreTargetReached,
 		isMovesTargetReached,
 		waitAllAnimations,
 	}: CompletionManagerProps) {
+		this.innerFieldManipulator = innerFieldManipulator
 		this.gameRules = gameRules
 		this.openWinModal = openWinModal
 		this.openLossModal = openLossModal
-		this.shuffleField = shuffleField
-		this.getTiles = getTiles
-		this.getSameKindNeighbourTiles = getSameKindNeighbourTiles
 		this.isScoreTargetReached = isScoreTargetReached
 		this.isMovesTargetReached = isMovesTargetReached
 		this.waitAllAnimations = waitAllAnimations
@@ -86,7 +81,7 @@ export class CompletionManager {
 		this.shuffleAttempts++
 		let attempts = 0
 		while (!this.isPossibleToMakeMove()) {
-			await this.shuffleField()
+			await this.innerFieldManipulator.shuffleField()
 			attempts++
 			// Prevent infinite loop
 			if (attempts >= 100) {
@@ -97,12 +92,13 @@ export class CompletionManager {
 	}
 
 	private isPossibleToMakeMove() {
-		const tiles = this.getTiles()
+		const tiles = this.innerFieldManipulator.getTiles()
 		return tiles.some((tile) => {
 			if (isTileKindSpecial(tile.getKind())) {
 				return true
 			}
-			const { tilesToRemove } = this.getSameKindNeighbourTiles(tile)
+			const { tilesToRemove } =
+				this.innerFieldManipulator.getSameKindNeighbourTiles(tile)
 			return tilesToRemove.size > 1
 		})
 	}

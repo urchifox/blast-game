@@ -1,48 +1,36 @@
-import { Tile, TilePosition } from "../tile"
+import { Tile } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileClickHandlerResult } from "../types"
 import { TileHandlerProps } from "./tileHandler"
+import { FieldManipulator } from "../fieldManipulator"
+
+type InnerFieldManipulator = Pick<
+	FieldManipulator,
+	"getTilesInRow" | "removeTilesFromCenter"
+>
 
 export type TileHandlerRocketRowProps = {
-	getTilesInRadius: (
-		position: TilePosition,
-		radius: number
-	) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
-	removeTilesFromCenter: (
-		tiles: Set<Tile>,
-		centerPosition: TilePosition
-	) => Promise<void>
-	getTilesInRow: (row: number) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
+	innerFieldManipulator: InnerFieldManipulator
 } & TileHandlerProps
 
 export class TileHandlerRocketRow extends TileHandlerSpecial {
 	readonly comboSize = 4
 	readonly kind = "rockets-row"
-	private removeTilesFromCenter: TileHandlerRocketRowProps["removeTilesFromCenter"]
-	private getTilesInRow: TileHandlerRocketRowProps["getTilesInRow"]
+	private readonly innerFieldManipulator: TileHandlerRocketRowProps["innerFieldManipulator"]
 
-	constructor({
-		getTilesInRow,
-		removeTilesFromCenter,
-		gameRules,
-	}: TileHandlerRocketRowProps) {
+	constructor({ innerFieldManipulator, gameRules }: TileHandlerRocketRowProps) {
 		super({ gameRules })
-		this.removeTilesFromCenter = removeTilesFromCenter
-		this.getTilesInRow = getTilesInRow
+		this.innerFieldManipulator = innerFieldManipulator
 	}
 
 	onClick(tile: Tile): TileClickHandlerResult {
-		const { tiles, positions } = this.getTilesInRow(tile.getPosition().row)
+		const { tiles, positions } = this.innerFieldManipulator.getTilesInRow(
+			tile.getPosition().row
+		)
 		if (tiles.size === 0) {
 			return null
 		}
-		const removingPromise = this.removeTilesFromCenter(
+		const removingPromise = this.innerFieldManipulator.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
 		)

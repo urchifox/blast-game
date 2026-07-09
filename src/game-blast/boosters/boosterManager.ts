@@ -1,25 +1,19 @@
 import { BoosterHandlerBomb } from "./boosterHandlerBomb"
-import { TilePosition, Tile } from "../tile"
+import { Tile } from "../tile"
 import { BoosterHandlerTeleport } from "./boosterHandlerTeleport"
 import { TileClickHandlerResult } from "../types"
 import { BoosterCommonProps, BoosterName } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { GameRules } from "../gameRules"
+import { FieldManipulator } from "../fieldManipulator"
+
+type InnerFieldManipulator = Pick<
+	FieldManipulator,
+	"selectTile" | "swapTiles" | "getTilesInRadius" | "removeTilesFromCenter"
+>
 
 export type BoosterManagerProps = {
-	selectTile: (tile: Tile) => void
-	swapTiles: (tile1: Tile, tile2: Tile) => void
-	getTilesInRadius: (
-		position: TilePosition,
-		radius: number
-	) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
-	removeTilesFromCenter: (
-		tiles: Set<Tile>,
-		centerPosition: TilePosition
-	) => Promise<void>
+	innerFieldManipulator: InnerFieldManipulator
 	processRemovingTiles: (result: TileClickHandlerResult) => void
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
@@ -30,26 +24,21 @@ export class BoosterManager {
 	private boostersHandlers: Array<BoosterHandler>
 
 	constructor({
-		selectTile,
-		swapTiles,
-		getTilesInRadius,
-		removeTilesFromCenter,
+		innerFieldManipulator,
 		processRemovingTiles,
 		boosterProps,
 		gameRules,
 	}: BoosterManagerProps) {
 		this.boostersHandlersMap = {
 			bomb: new BoosterHandlerBomb({
-				boosterProps,
-				getTilesInRadius,
-				removeTilesFromCenter,
+				innerFieldManipulator,
 				processRemovingTiles,
+				boosterProps,
 				gameRules,
 			}),
 			teleport: new BoosterHandlerTeleport({
+				innerFieldManipulator,
 				boosterProps,
-				selectTile,
-				swapTiles,
 				gameRules,
 			}),
 		}

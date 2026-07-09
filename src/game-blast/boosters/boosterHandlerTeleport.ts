@@ -2,23 +2,23 @@ import { BoosterCommonProps } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { Tile } from "../tile"
 import { GameRules } from "../gameRules"
+import { FieldManipulator } from "../fieldManipulator"
+
+type InnerFieldManipulator = Pick<FieldManipulator, "selectTile" | "swapTiles">
 
 type BoosterHandlerTeleportProps = {
-	selectTile: (tile: Tile) => void
-	swapTiles: (tile1: Tile, tile2: Tile) => void
+	innerFieldManipulator: InnerFieldManipulator
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
 }
 
 export class BoosterHandlerTeleport extends BoosterHandler {
-	private selectTile: BoosterHandlerTeleportProps["selectTile"]
-	private swapTiles: BoosterHandlerTeleportProps["swapTiles"]
+	private readonly innerFieldManipulator: BoosterHandlerTeleportProps["innerFieldManipulator"]
 	private selectedTile: Tile | null = null
 
 	constructor({
 		boosterProps,
-		selectTile,
-		swapTiles,
+		innerFieldManipulator,
 		gameRules,
 	}: BoosterHandlerTeleportProps) {
 		super({
@@ -27,21 +27,20 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 			gameRules,
 			...boosterProps,
 		})
-		this.selectTile = selectTile
-		this.swapTiles = swapTiles
+		this.innerFieldManipulator = innerFieldManipulator
 	}
 
 	use(tile: Tile) {
 		if (this.selectedTile === null) {
 			this.selectedTile = tile
-			this.selectTile(tile)
+			this.innerFieldManipulator.selectTile(tile)
 			return
 		}
 
 		const selectedTile = this.selectedTile
 		this.selectedTile = null
 		this.spend()
-		this.swapTiles(selectedTile, tile)
+		this.innerFieldManipulator.swapTiles(selectedTile, tile)
 	}
 
 	override clear() {
