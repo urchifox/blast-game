@@ -1,7 +1,7 @@
-import { TILE_BOMB_RADIUS } from "../config"
 import { Tile, TilePosition } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileClickHandlerResult } from "../types"
+import { TileHandlerProps } from "./tileHandler"
 
 export type TileHandlerBombProps = {
 	getTilesInRadius: (
@@ -15,7 +15,7 @@ export type TileHandlerBombProps = {
 		tiles: Set<Tile>,
 		centerPosition: TilePosition
 	) => Promise<void>
-}
+} & TileHandlerProps
 
 export class TileHandlerBomb extends TileHandlerSpecial {
 	readonly comboSize = 6
@@ -26,8 +26,9 @@ export class TileHandlerBomb extends TileHandlerSpecial {
 	constructor({
 		getTilesInRadius,
 		removeTilesFromCenter,
+		gameRules,
 	}: TileHandlerBombProps) {
-		super()
+		super({ gameRules })
 		this.getTilesInRadius = getTilesInRadius
 		this.removeTilesFromCenter = removeTilesFromCenter
 	}
@@ -35,7 +36,7 @@ export class TileHandlerBomb extends TileHandlerSpecial {
 	onClick(tile: Tile): TileClickHandlerResult {
 		const { tiles, positions } = this.getTilesInRadius(
 			tile.getPosition(),
-			TILE_BOMB_RADIUS
+			this.gameRules.TILE_BOMB_RADIUS
 		)
 		if (tiles.size === 0) {
 			return null

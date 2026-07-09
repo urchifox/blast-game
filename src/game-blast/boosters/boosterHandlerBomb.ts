@@ -1,8 +1,8 @@
-import { BoosterCommonProps } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
-import { BOOSTER_BOMB_RADIUS, BOOSTER_BOMBS_COUNT } from "../config"
 import { Tile, TilePosition } from "../tile"
 import { TileClickHandlerResult } from "../types"
+import { BoosterCommonProps } from "./booster"
+import { GameRules } from "../gameRules"
 
 export type BoosterHandlerBombProps = {
 	getTilesInRadius: (
@@ -18,6 +18,7 @@ export type BoosterHandlerBombProps = {
 	) => Promise<void>
 	processRemovingTiles: (result: TileClickHandlerResult) => void
 	boosterProps: BoosterCommonProps
+	gameRules: GameRules
 }
 
 export class BoosterHandlerBomb extends BoosterHandler {
@@ -29,11 +30,13 @@ export class BoosterHandlerBomb extends BoosterHandler {
 		getTilesInRadius,
 		removeTilesFromCenter,
 		processRemovingTiles,
+		gameRules,
 		boosterProps,
 	}: BoosterHandlerBombProps) {
 		super({
 			name: "bomb",
-			initialValue: BOOSTER_BOMBS_COUNT,
+			initialValue: gameRules.BOOSTER_BOMBS_COUNT,
+			gameRules,
 			...boosterProps,
 		})
 		this.getTilesInRadius = getTilesInRadius
@@ -44,7 +47,7 @@ export class BoosterHandlerBomb extends BoosterHandler {
 	use(tile: Tile) {
 		const { tiles, positions } = this.getTilesInRadius(
 			tile.getPosition(),
-			BOOSTER_BOMB_RADIUS
+			this.gameRules.BOOSTER_BOMB_RADIUS
 		)
 		if (tiles.size === 0) {
 			return

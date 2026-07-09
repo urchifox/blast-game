@@ -1,12 +1,13 @@
 import { BoosterCommonProps } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
-import { BOOSTER_TELEPORT_COUNT } from "../config"
 import { Tile } from "../tile"
+import { GameRules } from "../gameRules"
 
 type BoosterHandlerTeleportProps = {
 	selectTile: (tile: Tile) => void
 	swapTiles: (tile1: Tile, tile2: Tile) => void
 	boosterProps: BoosterCommonProps
+	gameRules: GameRules
 }
 
 export class BoosterHandlerTeleport extends BoosterHandler {
@@ -18,10 +19,12 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 		boosterProps,
 		selectTile,
 		swapTiles,
+		gameRules,
 	}: BoosterHandlerTeleportProps) {
 		super({
 			name: "teleport",
-			initialValue: BOOSTER_TELEPORT_COUNT,
+			initialValue: gameRules.BOOSTER_TELEPORT_COUNT,
+			gameRules,
 			...boosterProps,
 		})
 		this.selectTile = selectTile

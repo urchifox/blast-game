@@ -1,5 +1,4 @@
 import { Progress } from "../helpers/progress"
-import { BASE_SCORE, GROWTH_EXPONENT } from "./config"
 
 export type ProgressManagerProps = {
 	scoreProgress: Progress
@@ -36,13 +35,6 @@ export class ProgressManager {
 	addProgress(points: number) {
 		this.scoreProgress.addCurrentValue(points)
 		this.movesProgress.addCurrentValue()
-	}
-
-	/** Uses power scale formula */
-	getPoints(removedTilesNumber: number) {
-		return Math.round(
-			BASE_SCORE * Math.pow(removedTilesNumber, GROWTH_EXPONENT)
-		)
 	}
 
 	isScoreTargetReached() {

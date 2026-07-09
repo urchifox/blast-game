@@ -12,6 +12,7 @@ import { BoosterManager } from "./boosters/boosterManager"
 import { CompletionManager } from "./completionManager"
 import { ProgressManager } from "./progressManager"
 import { LevelData, LevelGenerator } from "./levelGenerator"
+import { GameRules } from "./gameRules"
 
 export class GameBlast {
 	private readonly renderer: Renderer
@@ -31,6 +32,7 @@ export class GameBlast {
 	private boosterManager: BoosterManager
 	private completionManager: CompletionManager
 	private progressManager: ProgressManager
+	private gameRules: GameRules
 
 	private levelData: LevelData = {
 		columns: 0,
@@ -48,6 +50,7 @@ export class GameBlast {
 		grid,
 		field,
 		progressManager,
+		gameRules,
 		levelGenerator,
 	}: {
 		renderer: Renderer
@@ -63,12 +66,13 @@ export class GameBlast {
 		grid: Grid
 		field: Field
 		progressManager: ProgressManager
+		gameRules: GameRules
 		levelGenerator: LevelGenerator
 	}) {
 		this.renderer = renderer
 		this.setGameContainerSize = setGameContainerSize
 		this.levelGenerator = levelGenerator
-
+		this.gameRules = gameRules
 		this.grid = grid
 		this.field = field
 
@@ -79,6 +83,7 @@ export class GameBlast {
 			selectTile: this.selectTile.bind(this),
 			swapTiles: this.swapTiles.bind(this),
 			boosterProps,
+			gameRules,
 		})
 
 		this.tileClickManager = new TileClickManager({
@@ -97,9 +102,11 @@ export class GameBlast {
 			removeTiles: this.removeTiles.bind(this),
 			removeTilesFromCenter: this.removeTilesFromCenter.bind(this),
 			getPositions: this.field.getPositions.bind(this.field),
+			gameRules,
 		})
 		this.progressManager = progressManager
 		this.completionManager = new CompletionManager({
+			gameRules,
 			openWinModal,
 			openLossModal,
 			shuffleField: () => {
@@ -333,7 +340,7 @@ export class GameBlast {
 
 		const { removedTiles, removedPositions, removingPromise } = result
 
-		const points = this.progressManager.getPoints(removedTiles.size)
+		const points = this.gameRules.getPoints(removedTiles.size)
 		this.progressManager.addProgress(points)
 
 		const fillEmptyPositionsPromise = this.fillEmptyPositions(removedPositions)

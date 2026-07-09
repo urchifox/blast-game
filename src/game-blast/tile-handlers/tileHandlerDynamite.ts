@@ -1,6 +1,7 @@
 import { Tile, TilePosition } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileClickHandlerResult } from "../types"
+import { TileHandlerProps } from "./tileHandler"
 
 export type TileHandlerDynamiteProps = {
 	removeTilesFromCenter: (
@@ -9,7 +10,7 @@ export type TileHandlerDynamiteProps = {
 	) => Promise<void>
 	getTiles: () => Array<Tile>
 	getPositions: () => Array<TilePosition>
-}
+} & TileHandlerProps
 
 export class TileHandlerDynamite extends TileHandlerSpecial {
 	readonly comboSize = 8
@@ -22,8 +23,9 @@ export class TileHandlerDynamite extends TileHandlerSpecial {
 		removeTilesFromCenter,
 		getTiles,
 		getPositions,
+		gameRules,
 	}: TileHandlerDynamiteProps) {
-		super()
+		super({ gameRules })
 		this.removeTilesFromCenter = removeTilesFromCenter
 		this.getTiles = getTiles
 		this.getPositions = getPositions

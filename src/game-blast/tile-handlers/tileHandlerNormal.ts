@@ -1,9 +1,10 @@
-import { TileHandler } from "./tileHandler"
+import { TileHandler, TileHandlerProps } from "./tileHandler"
 import { TileClickHandlerResult } from "../types"
 import { Tile, TilePosition } from "../tile"
-import { MIN_COMBO_SIZE } from "../config"
+import { GameRules } from "../gameRules"
 
 export type TileHandlerNormalProps = {
+	gameRules: GameRules
 	getSameKindNeighbourTiles: (tile: Tile) => {
 		tilesToRemove: Set<Tile>
 		positionsToRemove: Set<TilePosition>
@@ -11,7 +12,7 @@ export type TileHandlerNormalProps = {
 	removeTiles: (tiles: Set<Tile>) => Promise<void>
 	getComboPrize: (comboSize: number, position: TilePosition) => Tile | undefined
 	renderTile: (tile: Tile) => Promise<void>
-}
+} & TileHandlerProps
 
 export class TileHandlerNormal extends TileHandler {
 	private getSameKindNeighbourTiles: TileHandlerNormalProps["getSameKindNeighbourTiles"]
@@ -20,12 +21,13 @@ export class TileHandlerNormal extends TileHandler {
 	private renderTile: TileHandlerNormalProps["renderTile"]
 
 	constructor({
+		gameRules,
 		getSameKindNeighbourTiles,
 		removeTiles,
 		getComboPrize,
 		renderTile,
 	}: TileHandlerNormalProps) {
-		super()
+		super({ gameRules })
 		this.getSameKindNeighbourTiles = getSameKindNeighbourTiles
 		this.removeTiles = removeTiles
 		this.getComboPrize = getComboPrize
@@ -35,7 +37,7 @@ export class TileHandlerNormal extends TileHandler {
 	onClick(tile: Tile): TileClickHandlerResult {
 		const { tilesToRemove, positionsToRemove } =
 			this.getSameKindNeighbourTiles(tile)
-		if (tilesToRemove.size < MIN_COMBO_SIZE) {
+		if (tilesToRemove.size < this.gameRules.MIN_COMBO_SIZE) {
 			return null
 		}
 

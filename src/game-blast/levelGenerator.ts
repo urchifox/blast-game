@@ -1,14 +1,8 @@
 import { getRandomNumber } from "../helpers/random"
-import {
-	DEFAULT_COLUMNS,
-	DEFAULT_ROWS,
-	MIN_GOAL_SCORE,
-	MAX_GOAL_SCORE,
-	MIN_AVG_COMBO,
-	MAX_AVG_COMBO,
-} from "./config"
+import { GameRules } from "./gameRules"
 
 export type LevelManagerProps = {
+	gameRules: GameRules
 	getPoints(removedTilesNumber: number): number
 }
 
@@ -20,19 +14,21 @@ export type LevelData = {
 }
 
 export class LevelGenerator {
+	private readonly gameRules: LevelManagerProps["gameRules"]
 	private readonly getPoints: LevelManagerProps["getPoints"]
 
-	constructor({ getPoints }: LevelManagerProps) {
+	constructor({ gameRules, getPoints }: LevelManagerProps) {
+		this.gameRules = gameRules
 		this.getPoints = getPoints
 	}
 
 	generateLevelData() {
 		const levelData = {} as LevelData
-		levelData.columns = DEFAULT_COLUMNS
-		levelData.rows = DEFAULT_ROWS
+		levelData.columns = this.gameRules.DEFAULT_COLUMNS
+		levelData.rows = this.gameRules.DEFAULT_ROWS
 		levelData.goalScore = getRandomNumber({
-			min: MIN_GOAL_SCORE,
-			max: MAX_GOAL_SCORE,
+			min: this.gameRules.MIN_GOAL_SCORE,
+			max: this.gameRules.MAX_GOAL_SCORE,
 			step: 100,
 		})
 		levelData.movesLimit = this.estimateMoves(levelData.goalScore)
@@ -45,7 +41,10 @@ export class LevelGenerator {
 			return 0
 		}
 
-		const avgCombo = getRandomNumber({ min: MIN_AVG_COMBO, max: MAX_AVG_COMBO })
+		const avgCombo = getRandomNumber({
+			min: this.gameRules.MIN_AVG_COMBO,
+			max: this.gameRules.MAX_AVG_COMBO,
+		})
 		const avgScorePerMove = this.getPoints(avgCombo)
 		const moves = targetScore / avgScorePerMove
 

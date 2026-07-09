@@ -4,6 +4,7 @@ import { BoosterHandlerTeleport } from "./boosterHandlerTeleport"
 import { TileClickHandlerResult } from "../types"
 import { BoosterCommonProps, BoosterName } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
+import { GameRules } from "../gameRules"
 
 export type BoosterManagerProps = {
 	selectTile: (tile: Tile) => void
@@ -21,6 +22,7 @@ export type BoosterManagerProps = {
 	) => Promise<void>
 	processRemovingTiles: (result: TileClickHandlerResult) => void
 	boosterProps: BoosterCommonProps
+	gameRules: GameRules
 }
 
 export class BoosterManager {
@@ -34,6 +36,7 @@ export class BoosterManager {
 		removeTilesFromCenter,
 		processRemovingTiles,
 		boosterProps,
+		gameRules,
 	}: BoosterManagerProps) {
 		this.boostersHandlersMap = {
 			bomb: new BoosterHandlerBomb({
@@ -41,11 +44,13 @@ export class BoosterManager {
 				getTilesInRadius,
 				removeTilesFromCenter,
 				processRemovingTiles,
+				gameRules,
 			}),
 			teleport: new BoosterHandlerTeleport({
 				boosterProps,
 				selectTile,
 				swapTiles,
+				gameRules,
 			}),
 		}
 		this.boostersHandlers = Object.values(this.boostersHandlersMap)

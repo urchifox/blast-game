@@ -16,6 +16,7 @@ import { Grid } from "../game-blast/grid"
 import { Progress } from "../helpers/progress"
 import { ProgressManager } from "../game-blast/progressManager"
 import { LevelGenerator } from "../game-blast/levelGenerator"
+import { GameRules } from "../game-blast/gameRules"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -62,6 +63,8 @@ export class GameView extends View {
 			},
 		}
 
+		const gameRules = new GameRules()
+
 		const boosterProps = {
 			updateCounter: this.updateBoosterCounter.bind(this),
 			onActiveChange: this.toggleBoosterButtonActive.bind(this),
@@ -90,7 +93,8 @@ export class GameView extends View {
 			movesProgress,
 		})
 		const levelGenerator = new LevelGenerator({
-			getPoints: progressManager.getPoints.bind(progressManager),
+			gameRules,
+			getPoints: gameRules.getPoints.bind(gameRules),
 		})
 
 		this.gameBlast = new GameBlast({
@@ -105,6 +109,7 @@ export class GameView extends View {
 			grid,
 			field,
 			progressManager,
+			gameRules,
 			levelGenerator,
 		})
 

@@ -8,6 +8,7 @@ import { TileHandlerRocketColumn } from "./tileHandlerRocketColumn"
 import { TileHandlerRocketRow } from "./tileHandlerRocketRow"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileClickHandler } from "../types"
+import { GameRules } from "../gameRules"
 
 export type TileClickManagerProps = {
 	getTiles: () => Array<Tile>
@@ -44,6 +45,7 @@ export type TileClickManagerProps = {
 		centerPosition: TilePosition
 	) => Promise<void>
 	getPositions: () => Array<TilePosition>
+	gameRules: GameRules
 }
 
 export class TileClickManager {
@@ -67,6 +69,7 @@ export class TileClickManager {
 		removeTiles,
 		removeTilesFromCenter,
 		getPositions,
+		gameRules,
 	}: TileClickManagerProps) {
 		this.addTile = addTile
 
@@ -74,21 +77,25 @@ export class TileClickManager {
 			new TileHandlerBomb({
 				getTilesInRadius,
 				removeTilesFromCenter,
+				gameRules,
 			}),
 			new TileHandlerDynamite({
 				removeTilesFromCenter,
 				getTiles,
 				getPositions,
+				gameRules,
 			}),
 			new TileHandlerRocketRow({
 				getTilesInRow,
 				removeTilesFromCenter,
 				getTilesInRadius,
+				gameRules,
 			}),
 			new TileHandlerRocketColumn({
 				getTilesInColumn,
 				removeTilesFromCenter,
 				getTilesInRadius,
+				gameRules,
 			}),
 		]
 
@@ -123,6 +130,7 @@ export class TileClickManager {
 			removeTiles,
 			getComboPrize: this.getComboPrize.bind(this),
 			renderTile,
+			gameRules,
 		})
 
 		TILES_KINDS_NORMAL.forEach((kind) => {

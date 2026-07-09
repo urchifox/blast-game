@@ -1,6 +1,7 @@
 import { Tile, TilePosition } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileClickHandlerResult } from "../types"
+import { TileHandlerProps } from "./tileHandler"
 
 export type TileHandlerRocketRowProps = {
 	getTilesInRadius: (
@@ -18,7 +19,7 @@ export type TileHandlerRocketRowProps = {
 		tiles: Set<Tile>
 		positions: Set<TilePosition>
 	}
-}
+} & TileHandlerProps
 
 export class TileHandlerRocketRow extends TileHandlerSpecial {
 	readonly comboSize = 4
@@ -29,8 +30,9 @@ export class TileHandlerRocketRow extends TileHandlerSpecial {
 	constructor({
 		getTilesInRow,
 		removeTilesFromCenter,
+		gameRules,
 	}: TileHandlerRocketRowProps) {
-		super()
+		super({ gameRules })
 		this.removeTilesFromCenter = removeTilesFromCenter
 		this.getTilesInRow = getTilesInRow
 	}

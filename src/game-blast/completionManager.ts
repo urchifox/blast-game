@@ -1,7 +1,8 @@
-import { MAX_SHUFFLE_ATTEMPTS } from "./config"
 import { isTileKindSpecial, Tile, TilePosition } from "./tile"
+import { GameRules } from "./gameRules"
 
 export type CompletionManagerProps = {
+	gameRules: GameRules
 	openWinModal: () => void
 	openLossModal: () => void
 	shuffleField: () => Promise<void>
@@ -16,6 +17,7 @@ export type CompletionManagerProps = {
 }
 
 export class CompletionManager {
+	private readonly gameRules: CompletionManagerProps["gameRules"]
 	private readonly openWinModal: CompletionManagerProps["openWinModal"]
 	private readonly openLossModal: CompletionManagerProps["openLossModal"]
 	private readonly shuffleField: CompletionManagerProps["shuffleField"]
@@ -29,6 +31,7 @@ export class CompletionManager {
 	private shuffleAttempts = 0
 
 	constructor({
+		gameRules,
 		openWinModal,
 		openLossModal,
 		shuffleField,
@@ -38,6 +41,7 @@ export class CompletionManager {
 		isMovesTargetReached,
 		waitAllAnimations,
 	}: CompletionManagerProps) {
+		this.gameRules = gameRules
 		this.openWinModal = openWinModal
 		this.openLossModal = openLossModal
 		this.shuffleField = shuffleField
@@ -74,7 +78,7 @@ export class CompletionManager {
 			return
 		}
 
-		if (this.shuffleAttempts >= MAX_SHUFFLE_ATTEMPTS) {
+		if (this.shuffleAttempts >= this.gameRules.MAX_SHUFFLE_ATTEMPTS) {
 			this.lose()
 			return
 		}
