@@ -7,10 +7,12 @@ import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./config"
 import { AnimationsManager } from "../helpers/animationManager"
 
 type FieldManipulatorProps = {
-	field: Field
-	grid: Grid
 	renderer: Renderer
 	animationsManager: AnimationsManager
+	getGameContainerSize: () => {
+		width: number
+		height: number
+	}
 	setGameContainerSize: (
 		sizes: {
 			width: number
@@ -20,18 +22,24 @@ type FieldManipulatorProps = {
 }
 
 export class FieldManipulator {
-	private readonly field: FieldManipulatorProps["field"]
-	private readonly grid: FieldManipulatorProps["grid"]
 	private readonly renderer: FieldManipulatorProps["renderer"]
 	private readonly animationsManager: FieldManipulatorProps["animationsManager"]
 	private readonly setGameContainerSize: FieldManipulatorProps["setGameContainerSize"]
 
+	private readonly field: Field
+	private readonly grid: Grid
+
 	constructor(props: FieldManipulatorProps) {
-		this.field = props.field
-		this.grid = props.grid
 		this.renderer = props.renderer
 		this.animationsManager = props.animationsManager
 		this.setGameContainerSize = props.setGameContainerSize
+
+		this.grid = new Grid({
+			getContainerSize: props.getGameContainerSize,
+		})
+		this.field = new Field({
+			getFieldSnapshot: this.grid.getSnapshot.bind(this.grid),
+		})
 	}
 
 	selectTile(tile: Tile) {
