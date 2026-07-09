@@ -1,7 +1,7 @@
 import { Field } from "./field"
 import { Grid } from "./grid"
 import { Renderer } from "./rendering/renderer"
-import { Tile, TilePosition, TileSnapshot } from "./tile"
+import { Tile, TileKind, TilePosition, TileSnapshot } from "./tile"
 import { wait } from "../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./config"
 import { AnimationsManager } from "../helpers/animationManager"
@@ -11,6 +11,12 @@ type FieldManipulatorProps = {
 	grid: Grid
 	renderer: Renderer
 	animationsManager: AnimationsManager
+	setGameContainerSize: (
+		sizes: {
+			width: number
+			height: number
+		} | null
+	) => void
 }
 
 export class FieldManipulator {
@@ -18,12 +24,14 @@ export class FieldManipulator {
 	private readonly grid: FieldManipulatorProps["grid"]
 	private readonly renderer: FieldManipulatorProps["renderer"]
 	private readonly animationsManager: FieldManipulatorProps["animationsManager"]
+	private readonly setGameContainerSize: FieldManipulatorProps["setGameContainerSize"]
 
 	constructor(props: FieldManipulatorProps) {
 		this.field = props.field
 		this.grid = props.grid
 		this.renderer = props.renderer
 		this.animationsManager = props.animationsManager
+		this.setGameContainerSize = props.setGameContainerSize
 	}
 
 	selectTile(tile: Tile) {
@@ -212,5 +220,67 @@ export class FieldManipulator {
 		await this.renderer.clearTiles()
 		this.field.clearTiles()
 		this.animationsManager.clear()
+	}
+
+	renderTile(tile: Tile) {
+		return this.renderer.renderTiles({
+			tilesSnapshots: [tile.getSnapshot()],
+			gridSnapshot: this.grid.getSnapshot(),
+		})
+	}
+
+	updateGameSize() {
+		this.setGameContainerSize(null)
+		const gridSnapshot = this.grid.updateGridSizes()
+		this.setGameContainerSize({
+			width: gridSnapshot.gridWidth,
+			height: gridSnapshot.gridHeight,
+		})
+		const tilesSnapshots = this.field.getTilesSnapshots()
+		this.renderer.resize({ tilesSnapshots, gridSnapshot })
+	}
+
+	create({ columns, rows }: { columns: number; rows: number }) {
+		this.setGameContainerSize(null)
+		this.grid.createGrid({ columns, rows })
+		this.field.generateTiles()
+		const gridSnapshot = this.grid.getSnapshot()
+		this.setGameContainerSize({
+			width: gridSnapshot.gridWidth,
+			height: gridSnapshot.gridHeight,
+		})
+		this.renderer.updateFieldOffsets()
+		this.renderer.renderTiles({
+			tilesSnapshots: this.field.getTilesSnapshots(),
+			gridSnapshot: gridSnapshot,
+		})
+	}
+
+	getPositions() {
+		return this.field.getPositions()
+	}
+
+	getTiles() {
+		return this.field.getTiles()
+	}
+
+	getTilesInRadius(position: TilePosition, radius: number) {
+		return this.field.getTilesInRadius(position, radius)
+	}
+
+	getTilesInRow(row: number) {
+		return this.field.getTilesInRow(row)
+	}
+
+	getTilesInColumn(column: number) {
+		return this.field.getTilesInColumn(column)
+	}
+
+	getTileById(id: string) {
+		return this.field.getTileById(id)
+	}
+
+	addTile({ kind, position }: { kind: TileKind; position: TilePosition }) {
+		return this.field.addTile({ kind, position })
 	}
 }

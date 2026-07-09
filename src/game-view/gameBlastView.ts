@@ -110,11 +110,10 @@ export class GameView extends View {
 			grid,
 			renderer,
 			animationsManager,
+			setGameContainerSize: this.setGameContainerSize.bind(this),
 		})
 
 		this.gameBlast = new GameBlast({
-			grid,
-			field,
 			fieldManipulator,
 			gameRules,
 			levelGenerator,
@@ -122,7 +121,6 @@ export class GameView extends View {
 			renderer,
 			animationsManager,
 			boosterProps,
-			setGameContainerSize: this.setGameContainerSize.bind(this),
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
 		})

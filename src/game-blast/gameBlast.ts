@@ -1,8 +1,5 @@
 import { BoosterName, BoosterCommonProps } from "./boosters/booster"
-import { Field } from "./field"
-import { Grid } from "./grid"
 import { Renderer } from "./rendering/renderer"
-import { Tile } from "./tile"
 import { AnimationsManager } from "../helpers/animationManager"
 import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { BoosterManager } from "./boosters/boosterManager"
@@ -14,8 +11,6 @@ import { TileClickHandlerResult } from "./types"
 import { FieldManipulator } from "./fieldManipulator"
 
 type GameBlastProps = {
-	grid: Grid
-	field: Field
 	fieldManipulator: FieldManipulator
 	gameRules: GameRules
 	levelGenerator: LevelGenerator
@@ -23,26 +18,17 @@ type GameBlastProps = {
 	renderer: Renderer
 	animationsManager: AnimationsManager
 	boosterProps: BoosterCommonProps
-	setGameContainerSize: (
-		sizes: {
-			width: number
-			height: number
-		} | null
-	) => void
 	openWinModal: () => void
 	openLossModal: () => void
 }
 
 export class GameBlast {
-	private readonly grid: GameBlastProps["grid"]
-	private readonly field: GameBlastProps["field"]
 	private readonly fieldManipulator: GameBlastProps["fieldManipulator"]
 	private readonly gameRules: GameBlastProps["gameRules"]
 	private readonly levelGenerator: GameBlastProps["levelGenerator"]
 	private readonly progressManager: GameBlastProps["progressManager"]
 	private readonly renderer: GameBlastProps["renderer"]
 	private readonly animationsManager: GameBlastProps["animationsManager"]
-	private readonly setGameContainerSize: GameBlastProps["setGameContainerSize"]
 
 	private tileClickManager: TileClickManager
 	private boosterManager: BoosterManager
@@ -56,44 +42,46 @@ export class GameBlast {
 	}
 
 	constructor(props: GameBlastProps) {
-		this.grid = props.grid
-		this.field = props.field
 		this.fieldManipulator = props.fieldManipulator
 		this.gameRules = props.gameRules
 		this.levelGenerator = props.levelGenerator
 		this.progressManager = props.progressManager
 		this.renderer = props.renderer
 		this.animationsManager = props.animationsManager
-		this.setGameContainerSize = props.setGameContainerSize
 
 		this.tileClickManager = new TileClickManager({
-			getTiles: this.field.getTiles.bind(this.field),
-			getTilesInRadius: this.field.getTilesInRadius.bind(this.field),
-			getTilesInRow: this.field.getTilesInRow.bind(this.field),
-			getTilesInColumn: this.field.getTilesInColumn.bind(this.field),
+			getTiles: this.fieldManipulator.getTiles.bind(this.fieldManipulator),
+			getTilesInRadius: this.fieldManipulator.getTilesInRadius.bind(
+				this.fieldManipulator
+			),
+			getTilesInRow: this.fieldManipulator.getTilesInRow.bind(
+				this.fieldManipulator
+			),
+			getTilesInColumn: this.fieldManipulator.getTilesInColumn.bind(
+				this.fieldManipulator
+			),
 			getSameKindNeighbourTiles:
 				this.fieldManipulator.getSameKindNeighbourTiles.bind(
 					this.fieldManipulator
 				),
-			renderTile: (tile: Tile) => {
-				return this.renderer.renderTiles({
-					tilesSnapshots: [tile.getSnapshot()],
-					gridSnapshot: this.grid.getSnapshot(),
-				})
-			},
-			addTile: this.field.addTile.bind(this.field),
+			renderTile: this.fieldManipulator.renderTile.bind(this.fieldManipulator),
+			addTile: this.fieldManipulator.addTile.bind(this.fieldManipulator),
 			removeTiles: this.fieldManipulator.removeTiles.bind(
 				this.fieldManipulator
 			),
 			removeTilesFromCenter: this.fieldManipulator.removeTilesFromCenter.bind(
 				this.fieldManipulator
 			),
-			getPositions: this.field.getPositions.bind(this.field),
+			getPositions: this.fieldManipulator.getPositions.bind(
+				this.fieldManipulator
+			),
 			gameRules: props.gameRules,
 		})
 
 		this.boosterManager = new BoosterManager({
-			getTilesInRadius: this.field.getTilesInRadius.bind(this.field),
+			getTilesInRadius: this.fieldManipulator.getTilesInRadius.bind(
+				this.fieldManipulator
+			),
 			removeTilesFromCenter: this.fieldManipulator.removeTilesFromCenter.bind(
 				this.fieldManipulator
 			),
@@ -112,7 +100,7 @@ export class GameBlast {
 				const shuffleFieldPromise = this.fieldManipulator.shuffleField()
 				return this.animationsManager.animate(shuffleFieldPromise)
 			},
-			getTiles: this.field.getTiles.bind(this.field),
+			getTiles: this.fieldManipulator.getTiles.bind(this.fieldManipulator),
 			getSameKindNeighbourTiles:
 				this.fieldManipulator.getSameKindNeighbourTiles.bind(
 					this.fieldManipulator
@@ -148,14 +136,7 @@ export class GameBlast {
 	}
 
 	onResize() {
-		this.setGameContainerSize(null)
-		const gridSnapshot = this.grid.updateGridSizes()
-		this.setGameContainerSize({
-			width: gridSnapshot.gridWidth,
-			height: gridSnapshot.gridHeight,
-		})
-		const tilesSnapshots = this.field.getTilesSnapshots()
-		this.renderer.resize({ tilesSnapshots, gridSnapshot })
+		this.fieldManipulator.updateGameSize()
 	}
 
 	// #region Level creation
@@ -174,19 +155,7 @@ export class GameBlast {
 	private createLevel() {
 		const { columns, rows, goalScore, movesLimit } = this.levelData
 		this.boosterManager.setInitialValue()
-		this.setGameContainerSize(null)
-		this.grid.createGrid({ columns, rows })
-		this.field.generateTiles()
-		const gridSnapshot = this.grid.getSnapshot()
-		this.setGameContainerSize({
-			width: gridSnapshot.gridWidth,
-			height: gridSnapshot.gridHeight,
-		})
-		this.renderer.updateFieldOffsets()
-		this.renderer.renderTiles({
-			tilesSnapshots: this.field.getTilesSnapshots(),
-			gridSnapshot: gridSnapshot,
-		})
+		this.fieldManipulator.create({ columns, rows })
 		this.progressManager.setinitialValues({ goalScore, movesLimit })
 	}
 
@@ -197,7 +166,7 @@ export class GameBlast {
 			return
 		}
 
-		const tile = this.field.getTileById(id)
+		const tile = this.fieldManipulator.getTileById(id)
 		if (tile === undefined || tile.getIsBlocked()) {
 			return
 		}
