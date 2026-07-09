@@ -17,6 +17,8 @@ import { Progress } from "../helpers/progress"
 import { ProgressManager } from "../game-blast/progressManager"
 import { LevelGenerator } from "../game-blast/levelGenerator"
 import { GameRules } from "../game-blast/gameRules"
+import { FieldManipulator } from "../game-blast/fieldManipulator"
+import { AnimationsManager } from "../helpers/animationManager"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -97,11 +99,21 @@ export class GameView extends View {
 			getPoints: gameRules.getPoints.bind(gameRules),
 		})
 
+		const animationsManager = new AnimationsManager()
+		const renderer = new PhaserRenderer({
+			container: this.gameContainer,
+			getContainerOffset: this.getContainerOffset.bind(this),
+		})
+
+		const fieldManipulator = new FieldManipulator({
+			field,
+			grid,
+			renderer,
+			animationsManager,
+		})
+
 		this.gameBlast = new GameBlast({
-			renderer: new PhaserRenderer({
-				container: this.gameContainer,
-				getContainerOffset: this.getContainerOffset.bind(this),
-			}),
+			renderer,
 			setGameContainerSize: this.setGameContainerSize.bind(this),
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
@@ -111,6 +123,8 @@ export class GameView extends View {
 			progressManager,
 			gameRules,
 			levelGenerator,
+			fieldManipulator,
+			animationsManager,
 		})
 
 		this.setListeners()
