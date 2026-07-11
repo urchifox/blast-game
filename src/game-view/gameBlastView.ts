@@ -11,6 +11,8 @@ import {
 } from "../helpers/dom"
 import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
 import { BoosterName } from "../game-blast/boosters/booster"
+import { Field } from "../game-blast/field"
+import { Grid } from "../game-blast/grid"
 import { Progress } from "../helpers/progress"
 import { ProgressManager } from "../game-blast/progressManager"
 import { LevelGenerator } from "../game-blast/levelGenerator"
@@ -69,6 +71,11 @@ export class GameView extends View {
 			updateCounter: this.updateBoosterCounter.bind(this),
 			onActiveChange: this.toggleBoosterButtonActive.bind(this),
 		}
+		const grid = new Grid({
+			getContainerSize: this.getGameContainerSize.bind(this),
+		})
+		const field = new Field({ getFieldSnapshot: grid.getSnapshot.bind(grid) })
+
 		const scoreProgress = new Progress({
 			updateCounter: ({ currentValue, targetValue }) =>
 				this.updateScoreCounter({
@@ -99,9 +106,10 @@ export class GameView extends View {
 		})
 
 		const fieldManipulator = new FieldManipulator({
+			field,
+			grid,
 			renderer,
 			animationsManager,
-			getGameContainerSize: this.getGameContainerSize.bind(this),
 			setGameContainerSize: this.setGameContainerSize.bind(this),
 		})
 
