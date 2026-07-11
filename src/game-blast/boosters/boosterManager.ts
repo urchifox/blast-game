@@ -1,9 +1,8 @@
 import { BoosterHandlerBomb } from "./boosterHandlerBomb"
 import { Tile } from "../tile"
 import { BoosterHandlerTeleport } from "./boosterHandlerTeleport"
-import { TileClickHandlerResult } from "../types"
 import { BoosterCommonProps, BoosterName } from "./booster"
-import { BoosterHandler } from "./boosterHandler"
+import { BoosterHandler, BoosterHandlerResult } from "./boosterHandler"
 import { GameRules } from "../gameRules"
 import { FieldManipulator } from "../fieldManipulator"
 
@@ -14,7 +13,6 @@ type InnerFieldManipulator = Pick<
 
 export type BoosterManagerProps = {
 	innerFieldManipulator: InnerFieldManipulator
-	processRemovingTiles: (result: TileClickHandlerResult) => void
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
 }
@@ -25,14 +23,12 @@ export class BoosterManager {
 
 	constructor({
 		innerFieldManipulator,
-		processRemovingTiles,
 		boosterProps,
 		gameRules,
 	}: BoosterManagerProps) {
 		this.boostersHandlersMap = {
 			bomb: new BoosterHandlerBomb({
 				innerFieldManipulator,
-				processRemovingTiles,
 				boosterProps,
 				gameRules,
 			}),
@@ -57,14 +53,14 @@ export class BoosterManager {
 		}
 	}
 
-	maybeUseBooster(tile: Tile) {
+	maybeUseBooster(tile: Tile): BoosterHandlerResult {
 		for (const handler of this.boostersHandlers) {
-			const isBoosterUsed = handler.maybeUse(tile)
-			if (isBoosterUsed) {
-				return true
+			const result = handler.maybeUse(tile)
+			if (result.isUsed) {
+				return result
 			}
 		}
-		return false
+		return { isUsed: false, result: null }
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {

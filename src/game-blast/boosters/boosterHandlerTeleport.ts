@@ -3,6 +3,7 @@ import { BoosterHandler } from "./boosterHandler"
 import { Tile } from "../tile"
 import { GameRules } from "../gameRules"
 import { FieldManipulator } from "../fieldManipulator"
+import { TileClickHandlerResult } from "../types"
 
 type InnerFieldManipulator = Pick<FieldManipulator, "selectTile" | "swapTiles">
 
@@ -30,17 +31,18 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 		this.innerFieldManipulator = innerFieldManipulator
 	}
 
-	use(tile: Tile) {
+	use(tile: Tile): TileClickHandlerResult {
 		if (this.selectedTile === null) {
 			this.selectedTile = tile
 			this.innerFieldManipulator.selectTile(tile)
-			return
+			return null
 		}
 
 		const selectedTile = this.selectedTile
 		this.selectedTile = null
 		this.spend()
 		this.innerFieldManipulator.swapTiles(selectedTile, tile)
+		return null
 	}
 
 	override clear() {

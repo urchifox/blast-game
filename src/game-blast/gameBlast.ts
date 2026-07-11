@@ -55,8 +55,7 @@ export class GameBlast {
 		})
 
 		this.boosterManager = new BoosterManager({
-			innerFieldManipulator: this.fieldManipulator,
-			processRemovingTiles: this.processRemovingTiles.bind(this),
+			innerFieldManipulator: props.fieldManipulator,
 			boosterProps: props.boosterProps,
 			gameRules: props.gameRules,
 		})
@@ -132,14 +131,11 @@ export class GameBlast {
 			return
 		}
 
-		const isBoosterUsed = this.boosterManager.maybeUseBooster(tile)
-		if (isBoosterUsed) {
-			return
-		}
-
-		const result = this.tileClickManager.onClick(tile)
-
-		this.processRemovingTiles(result)
+		const boosterhandlerResult = this.boosterManager.maybeUseBooster(tile)
+		const handlerResult = boosterhandlerResult.isUsed
+			? boosterhandlerResult.result
+			: this.tileClickManager.onClick(tile)
+		this.processRemovingTiles(handlerResult)
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {

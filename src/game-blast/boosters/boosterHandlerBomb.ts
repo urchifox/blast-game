@@ -12,18 +12,15 @@ type InnerFieldManipulator = Pick<
 
 export type BoosterHandlerBombProps = {
 	innerFieldManipulator: InnerFieldManipulator
-	processRemovingTiles: (result: TileClickHandlerResult) => void
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
 }
 
 export class BoosterHandlerBomb extends BoosterHandler {
 	private readonly innerFieldManipulator: BoosterHandlerBombProps["innerFieldManipulator"]
-	private readonly processRemovingTiles: BoosterHandlerBombProps["processRemovingTiles"]
 
 	constructor({
 		innerFieldManipulator,
-		processRemovingTiles,
 		gameRules,
 		boosterProps,
 	}: BoosterHandlerBombProps) {
@@ -34,16 +31,15 @@ export class BoosterHandlerBomb extends BoosterHandler {
 			...boosterProps,
 		})
 		this.innerFieldManipulator = innerFieldManipulator
-		this.processRemovingTiles = processRemovingTiles
 	}
 
-	use(tile: Tile) {
+	use(tile: Tile): TileClickHandlerResult {
 		const { tiles, positions } = this.innerFieldManipulator.getTilesInRadius(
 			tile.getPosition(),
 			this.gameRules.BOOSTER_BOMB_RADIUS
 		)
 		if (tiles.size === 0) {
-			return
+			return null
 		}
 
 		this.spend()
@@ -51,10 +47,10 @@ export class BoosterHandlerBomb extends BoosterHandler {
 			tiles,
 			tile.getPosition()
 		)
-		this.processRemovingTiles({
+		return {
 			removedTiles: tiles,
 			removedPositions: positions,
 			removingPromise: removingPromise,
-		})
+		}
 	}
 }
