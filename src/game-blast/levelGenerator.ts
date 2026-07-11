@@ -1,7 +1,7 @@
 import { getRandomNumber } from "../helpers/random"
 import { GameRules } from "./gameRules"
 
-export type LevelManagerProps = {
+export type LevelGeneratorProps = {
 	gameRules: GameRules
 }
 
@@ -13,9 +13,9 @@ export type LevelData = {
 }
 
 export class LevelGenerator {
-	private readonly gameRules: LevelManagerProps["gameRules"]
+	private readonly gameRules: LevelGeneratorProps["gameRules"]
 
-	constructor(props: LevelManagerProps) {
+	constructor(props: LevelGeneratorProps) {
 		this.gameRules = props.gameRules
 	}
 
