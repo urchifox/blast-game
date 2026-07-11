@@ -2,13 +2,11 @@ import { isTileKindSpecial } from "./tile"
 import { GameRules } from "./gameRules"
 import { FieldManipulator } from "./fieldManipulator"
 
-type InnerFieldManipulator = Pick<
-	FieldManipulator,
-	"getTiles" | "getSameKindNeighbourTiles" | "shuffleField"
->
-
 export type CompletionManagerProps = {
-	innerFieldManipulator: InnerFieldManipulator
+	fieldManipulator: Pick<
+		FieldManipulator,
+		"getTiles" | "getSameKindNeighbourTiles" | "shuffleField"
+	>
 	gameRules: GameRules
 	openWinModal: () => void
 	openLossModal: () => void
@@ -18,7 +16,7 @@ export type CompletionManagerProps = {
 }
 
 export class CompletionManager {
-	private readonly innerFieldManipulator: CompletionManagerProps["innerFieldManipulator"]
+	private readonly fieldManipulator: CompletionManagerProps["fieldManipulator"]
 	private readonly gameRules: CompletionManagerProps["gameRules"]
 	private readonly openWinModal: CompletionManagerProps["openWinModal"]
 	private readonly openLossModal: CompletionManagerProps["openLossModal"]
@@ -30,7 +28,7 @@ export class CompletionManager {
 	private shuffleAttempts = 0
 
 	constructor(props: CompletionManagerProps) {
-		this.innerFieldManipulator = props.innerFieldManipulator
+		this.fieldManipulator = props.fieldManipulator
 		this.gameRules = props.gameRules
 		this.openWinModal = props.openWinModal
 		this.openLossModal = props.openLossModal
@@ -73,7 +71,7 @@ export class CompletionManager {
 		this.shuffleAttempts++
 		let attempts = 0
 		while (!this.isPossibleToMakeMove()) {
-			await this.innerFieldManipulator.shuffleField()
+			await this.fieldManipulator.shuffleField()
 			attempts++
 			// Prevent infinite loop
 			if (attempts >= 100) {
@@ -84,13 +82,13 @@ export class CompletionManager {
 	}
 
 	private isPossibleToMakeMove() {
-		const tiles = this.innerFieldManipulator.getTiles()
+		const tiles = this.fieldManipulator.getTiles()
 		return tiles.some((tile) => {
 			if (isTileKindSpecial(tile.getKind())) {
 				return true
 			}
 			const { tilesToRemove } =
-				this.innerFieldManipulator.getSameKindNeighbourTiles(tile)
+				this.fieldManipulator.getSameKindNeighbourTiles(tile)
 			return tilesToRemove.size > 1
 		})
 	}

@@ -5,16 +5,14 @@ import { GameRules } from "../gameRules"
 import { FieldManipulator } from "../fieldManipulator"
 import { TileRemovingInfo } from "../types"
 
-type InnerFieldManipulator = Pick<FieldManipulator, "selectTile" | "swapTiles">
-
 type BoosterHandlerTeleportProps = {
-	innerFieldManipulator: InnerFieldManipulator
+	fieldManipulator: Pick<FieldManipulator, "selectTile" | "swapTiles">
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
 }
 
 export class BoosterHandlerTeleport extends BoosterHandler {
-	private readonly innerFieldManipulator: BoosterHandlerTeleportProps["innerFieldManipulator"]
+	private readonly fieldManipulator: BoosterHandlerTeleportProps["fieldManipulator"]
 
 	private selectedTile: Tile | null = null
 
@@ -25,20 +23,20 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 			gameRules: props.gameRules,
 			...props.boosterProps,
 		})
-		this.innerFieldManipulator = props.innerFieldManipulator
+		this.fieldManipulator = props.fieldManipulator
 	}
 
 	use(tile: Tile): TileRemovingInfo {
 		if (this.selectedTile === null) {
 			this.selectedTile = tile
-			this.innerFieldManipulator.selectTile(tile)
+			this.fieldManipulator.selectTile(tile)
 			return null
 		}
 
 		const selectedTile = this.selectedTile
 		this.selectedTile = null
 		this.spend()
-		this.innerFieldManipulator.swapTiles(selectedTile, tile)
+		this.fieldManipulator.swapTiles(selectedTile, tile)
 		return null
 	}
 

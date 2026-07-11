@@ -4,35 +4,33 @@ import { TileRemovingInfo } from "../types"
 import { TileHandlerProps } from "./tileHandler"
 import { FieldManipulator } from "../fieldManipulator"
 
-type InnerFieldManipulator = Pick<
-	FieldManipulator,
-	"getTilesInRadius" | "removeTilesFromCenter"
->
-
 export type TileHandlerBombProps = {
-	innerFieldManipulator: InnerFieldManipulator
+	fieldManipulator: Pick<
+		FieldManipulator,
+		"getTilesInRadius" | "removeTilesFromCenter"
+	>
 } & TileHandlerProps
 
 export class TileHandlerBomb extends TileHandlerSpecial {
-	private readonly innerFieldManipulator: TileHandlerBombProps["innerFieldManipulator"]
+	private readonly fieldManipulator: TileHandlerBombProps["fieldManipulator"]
 
 	readonly comboSize = 6
 	readonly kind = "bomb"
 
 	constructor(props: TileHandlerBombProps) {
 		super({ gameRules: props.gameRules })
-		this.innerFieldManipulator = props.innerFieldManipulator
+		this.fieldManipulator = props.fieldManipulator
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {
-		const { tiles, positions } = this.innerFieldManipulator.getTilesInRadius(
+		const { tiles, positions } = this.fieldManipulator.getTilesInRadius(
 			tile.getPosition(),
 			this.gameRules.TILE_BOMB_RADIUS
 		)
 		if (tiles.size === 0) {
 			return null
 		}
-		const removingPromise = this.innerFieldManipulator.removeTilesFromCenter(
+		const removingPromise = this.fieldManipulator.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
 		)

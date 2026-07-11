@@ -11,27 +11,25 @@ import { TileClickHandler } from "../types"
 import { GameRules } from "../gameRules"
 import { FieldManipulator } from "../fieldManipulator"
 
-type InnerFieldManipulator = Pick<
-	FieldManipulator,
-	| "getTiles"
-	| "getTilesInRadius"
-	| "getTilesInRow"
-	| "getTilesInColumn"
-	| "getSameKindNeighbourTiles"
-	| "renderTile"
-	| "addTile"
-	| "removeTiles"
-	| "removeTilesFromCenter"
-	| "getPositions"
->
-
 export type TileClickManagerProps = {
-	innerFieldManipulator: InnerFieldManipulator
+	fieldManipulator: Pick<
+		FieldManipulator,
+		| "getTiles"
+		| "getTilesInRadius"
+		| "getTilesInRow"
+		| "getTilesInColumn"
+		| "getSameKindNeighbourTiles"
+		| "renderTile"
+		| "addTile"
+		| "removeTiles"
+		| "removeTilesFromCenter"
+		| "getPositions"
+	>
 	gameRules: GameRules
 }
 
 export class TileClickManager {
-	private readonly innerFieldManipulator: TileClickManagerProps["innerFieldManipulator"]
+	private readonly fieldManipulator: TileClickManagerProps["fieldManipulator"]
 
 	private tileHandlersSpecialMapByComboSize: Record<
 		number,
@@ -41,22 +39,22 @@ export class TileClickManager {
 	private rewardableComboSizesSorted: Array<number>
 
 	constructor(props: TileClickManagerProps) {
-		this.innerFieldManipulator = props.innerFieldManipulator
+		this.fieldManipulator = props.fieldManipulator
 		const tileHandlersSpecial: Array<TileHandlerSpecial> = [
 			new TileHandlerBomb({
-				innerFieldManipulator: props.innerFieldManipulator,
+				fieldManipulator: props.fieldManipulator,
 				gameRules: props.gameRules,
 			}),
 			new TileHandlerDynamite({
-				innerFieldManipulator: props.innerFieldManipulator,
+				fieldManipulator: props.fieldManipulator,
 				gameRules: props.gameRules,
 			}),
 			new TileHandlerRocketRow({
-				innerFieldManipulator: props.innerFieldManipulator,
+				fieldManipulator: props.fieldManipulator,
 				gameRules: props.gameRules,
 			}),
 			new TileHandlerRocketColumn({
-				innerFieldManipulator: props.innerFieldManipulator,
+				fieldManipulator: props.fieldManipulator,
 				gameRules: props.gameRules,
 			}),
 		]
@@ -88,7 +86,7 @@ export class TileClickManager {
 			.sort((a, b) => a - b)
 
 		const tileHandlerNormal = new TileHandlerNormal({
-			innerFieldManipulator: props.innerFieldManipulator,
+			fieldManipulator: props.fieldManipulator,
 			getComboPrize: this.getComboPrize.bind(this),
 			gameRules: props.gameRules,
 		})
@@ -133,7 +131,7 @@ export class TileClickManager {
 		}
 
 		const rewardHandler = pickRandomItem(rewardsHandlers)
-		const newTile = this.innerFieldManipulator.addTile({
+		const newTile = this.fieldManipulator.addTile({
 			kind: rewardHandler.kind,
 			position,
 		})

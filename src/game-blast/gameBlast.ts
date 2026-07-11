@@ -50,18 +50,18 @@ export class GameBlast {
 		this.animationsManager = props.animationsManager
 
 		this.tileClickManager = new TileClickManager({
-			innerFieldManipulator: this.fieldManipulator,
+			fieldManipulator: this.fieldManipulator,
 			gameRules: props.gameRules,
 		})
 
 		this.boosterManager = new BoosterManager({
-			innerFieldManipulator: props.fieldManipulator,
+			fieldManipulator: props.fieldManipulator,
 			boosterProps: props.boosterProps,
 			gameRules: props.gameRules,
 		})
 
 		this.completionManager = new CompletionManager({
-			innerFieldManipulator: this.fieldManipulator,
+			fieldManipulator: this.fieldManipulator,
 			gameRules: props.gameRules,
 			openWinModal: props.openWinModal,
 			openLossModal: props.openLossModal,

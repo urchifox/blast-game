@@ -7,13 +7,11 @@ import { BoosterHandlerResult } from "../types"
 import { GameRules } from "../gameRules"
 import { FieldManipulator } from "../fieldManipulator"
 
-type InnerFieldManipulator = Pick<
-	FieldManipulator,
-	"selectTile" | "swapTiles" | "getTilesInRadius" | "removeTilesFromCenter"
->
-
 export type BoosterManagerProps = {
-	innerFieldManipulator: InnerFieldManipulator
+	fieldManipulator: Pick<
+		FieldManipulator,
+		"selectTile" | "swapTiles" | "getTilesInRadius" | "removeTilesFromCenter"
+	>
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
 }
@@ -25,12 +23,12 @@ export class BoosterManager {
 	constructor(props: BoosterManagerProps) {
 		this.boostersHandlersMap = {
 			bomb: new BoosterHandlerBomb({
-				innerFieldManipulator: props.innerFieldManipulator,
+				fieldManipulator: props.fieldManipulator,
 				boosterProps: props.boosterProps,
 				gameRules: props.gameRules,
 			}),
 			teleport: new BoosterHandlerTeleport({
-				innerFieldManipulator: props.innerFieldManipulator,
+				fieldManipulator: props.fieldManipulator,
 				boosterProps: props.boosterProps,
 				gameRules: props.gameRules,
 			}),

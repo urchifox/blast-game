@@ -5,19 +5,17 @@ import { BoosterCommonProps } from "./booster"
 import { GameRules } from "../gameRules"
 import { FieldManipulator } from "../fieldManipulator"
 
-type InnerFieldManipulator = Pick<
-	FieldManipulator,
-	"getTilesInRadius" | "removeTilesFromCenter"
->
-
 export type BoosterHandlerBombProps = {
-	innerFieldManipulator: InnerFieldManipulator
+	fieldManipulator: Pick<
+		FieldManipulator,
+		"getTilesInRadius" | "removeTilesFromCenter"
+	>
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
 }
 
 export class BoosterHandlerBomb extends BoosterHandler {
-	private readonly innerFieldManipulator: BoosterHandlerBombProps["innerFieldManipulator"]
+	private readonly fieldManipulator: BoosterHandlerBombProps["fieldManipulator"]
 
 	constructor(props: BoosterHandlerBombProps) {
 		super({
@@ -26,11 +24,11 @@ export class BoosterHandlerBomb extends BoosterHandler {
 			gameRules: props.gameRules,
 			...props.boosterProps,
 		})
-		this.innerFieldManipulator = props.innerFieldManipulator
+		this.fieldManipulator = props.fieldManipulator
 	}
 
 	use(tile: Tile): TileRemovingInfo {
-		const { tiles, positions } = this.innerFieldManipulator.getTilesInRadius(
+		const { tiles, positions } = this.fieldManipulator.getTilesInRadius(
 			tile.getPosition(),
 			this.gameRules.BOOSTER_BOMB_RADIUS
 		)
@@ -39,7 +37,7 @@ export class BoosterHandlerBomb extends BoosterHandler {
 		}
 
 		this.spend()
-		const removingPromise = this.innerFieldManipulator.removeTilesFromCenter(
+		const removingPromise = this.fieldManipulator.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
 		)
