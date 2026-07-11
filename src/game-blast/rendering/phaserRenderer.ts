@@ -3,16 +3,18 @@ import Phaser from "phaser"
 import { PhaserScene } from "./phaserScene"
 import { Renderer, RendererParams, RendererResult } from "./renderer"
 
+export type PhaserRendererProps = {
+	container: HTMLElement
+	getContainerOffset: () => { offsetX: number; offsetY: number }
+}
+
 export class PhaserRenderer implements Renderer {
 	private readonly container: HTMLElement
 	private readonly game: Phaser.Game
 	private scene: PhaserScene
 	readonly readyPromise: Promise<void>
 
-	constructor(props: {
-		container: HTMLElement
-		getContainerOffset: () => { offsetX: number; offsetY: number }
-	}) {
+	constructor(props: PhaserRendererProps) {
 		this.container = props.container
 
 		const rendererScene = new PhaserScene({

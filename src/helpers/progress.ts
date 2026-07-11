@@ -1,3 +1,8 @@
+export type ProgressProps = {
+	updateCounter: (props: { currentValue: number; targetValue: number }) => void
+	isDirectionDown?: boolean
+}
+
 export class Progress {
 	private currentValue = 0
 	private targetValue = 0
@@ -7,13 +12,7 @@ export class Progress {
 		targetValue: number
 	}) => void
 
-	constructor(props: {
-		updateCounter: (props: {
-			currentValue: number
-			targetValue: number
-		}) => void
-		isDirectionDown?: boolean
-	}) {
+	constructor(props: ProgressProps) {
 		this.updateCounter = props.updateCounter
 		this.isDirectionDown = props.isDirectionDown ?? false
 	}

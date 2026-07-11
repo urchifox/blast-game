@@ -28,6 +28,11 @@ export type TilePosition = {
 	column: number
 }
 
+export type TileProps = {
+	kind: TileKind
+	position: TilePosition
+}
+
 export class Tile {
 	private readonly id: string = nanoid()
 	private readonly kind: TileKind
@@ -35,7 +40,7 @@ export class Tile {
 	private readonly image: string
 	private isBlocked = false
 
-	constructor(props: { kind: TileKind; position: TilePosition }) {
+	constructor(props: TileProps) {
 		this.kind = props.kind
 		this.position = props.position
 		this.image = `tile-${props.kind}`

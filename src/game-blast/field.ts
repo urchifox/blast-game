@@ -4,11 +4,15 @@ import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
 import { Tile, TileKind, TilePosition, TileSnapshot } from "./tile"
 
+export type FieldProps = {
+	getFieldSnapshot: () => GridSnapshot
+}
+
 export class Field {
 	private tilesByColumns: Array<Array<Tile | undefined>> = []
 
 	private readonly getFieldSnapshot: () => GridSnapshot
-	constructor(props: { getFieldSnapshot: () => GridSnapshot }) {
+	constructor(props: FieldProps) {
 		this.getFieldSnapshot = props.getFieldSnapshot
 	}
 

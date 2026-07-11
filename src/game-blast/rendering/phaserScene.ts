@@ -21,6 +21,10 @@ const tileTextureModules = import.meta.glob("../assets/img/*.png", {
 	import: "default",
 }) as Record<string, string>
 
+export type PhaserSceneProps = {
+	getContainerOffset: () => { offsetX: number; offsetY: number }
+}
+
 export class PhaserScene extends Phaser.Scene {
 	private readonly tilesMap = new Map<string, Phaser.GameObjects.Sprite>()
 	private readonly scaleTweens = new Map<
@@ -43,9 +47,7 @@ export class PhaserScene extends Phaser.Scene {
 		offsetY: number
 	}
 
-	constructor(props: {
-		getContainerOffset: () => { offsetX: number; offsetY: number }
-	}) {
+	constructor(props: PhaserSceneProps) {
 		super(SCENE_KEY)
 		this.getContainerOffset = props.getContainerOffset
 	}
