@@ -48,5 +48,5 @@ export default tseslint.config(
 			"no-duplicate-imports": ["warn"],
 			curly: ["warn", "all"],
 		},
-	},
+	}
 )

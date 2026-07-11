@@ -1,16 +1,16 @@
 /** @type {import('prettier').Config} */
 export default {
-	trailingComma: 'es5',
+	trailingComma: "es5",
 	useTabs: true,
-	arrowParens: 'always',
+	arrowParens: "always",
 	semi: false,
 	singleQuote: false,
 	overrides: [
 		{
-			files: '**/*.css',
+			files: "**/*.css",
 			options: {
 				printWidth: 1500,
 			},
 		},
 	],
-};
+}
