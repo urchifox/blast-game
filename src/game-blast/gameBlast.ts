@@ -158,9 +158,10 @@ export class GameBlast {
 			.then(() => fillEmptyPositionsPromise)
 			.then(() => this.completionManager.checkForMove())
 		this.animationsManager.animate(animationPromise)
-
-		const gameCompletionStatus = this.completionManager.checkGameCompletion()
-		this.processGameCompletion(gameCompletionStatus)
+		this.animationsManager.waitAllAnimations().then(() => {
+			const gameCompletionStatus = this.completionManager.checkGameCompletion()
+			this.processGameCompletion(gameCompletionStatus)
+		})
 	}
 
 	private processGameCompletion(gameCompletionStatus: GameCompletionStatus) {
