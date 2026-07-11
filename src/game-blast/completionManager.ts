@@ -1,6 +1,7 @@
 import { isTileKindSpecial } from "./tile"
 import { GameRules } from "./gameRules"
 import { FieldManipulator } from "./fieldManipulator"
+import { GameCompletionStatus } from "./types"
 
 export type CompletionManagerProps = {
 	fieldManipulator: Pick<
@@ -8,42 +9,35 @@ export type CompletionManagerProps = {
 		"getTiles" | "getSameKindNeighbourTiles" | "shuffleField"
 	>
 	gameRules: GameRules
-	openWinModal: () => void
-	openLossModal: () => void
 	isScoreTargetReached: () => boolean
 	isMovesTargetReached: () => boolean
-	waitAllAnimations: () => Promise<void>
 }
 
 export class CompletionManager {
 	private readonly fieldManipulator: CompletionManagerProps["fieldManipulator"]
 	private readonly gameRules: CompletionManagerProps["gameRules"]
-	private readonly openWinModal: CompletionManagerProps["openWinModal"]
-	private readonly openLossModal: CompletionManagerProps["openLossModal"]
 	private readonly isScoreTargetReached: CompletionManagerProps["isScoreTargetReached"]
 	private readonly isMovesTargetReached: CompletionManagerProps["isMovesTargetReached"]
-	private readonly waitAllAnimations: CompletionManagerProps["waitAllAnimations"]
 
 	private isCompleted = false
 	private shuffleAttempts = 0
+	private gameCompletionStatus: GameCompletionStatus =
+		GameCompletionStatus.IN_PROGRESS
 
 	constructor(props: CompletionManagerProps) {
 		this.fieldManipulator = props.fieldManipulator
 		this.gameRules = props.gameRules
-		this.openWinModal = props.openWinModal
-		this.openLossModal = props.openLossModal
 		this.isScoreTargetReached = props.isScoreTargetReached
 		this.isMovesTargetReached = props.isMovesTargetReached
-		this.waitAllAnimations = props.waitAllAnimations
 	}
 
 	isGameCompleted() {
 		return this.isCompleted
 	}
 
-	checkGameCompletion() {
+	checkGameCompletion(): GameCompletionStatus {
 		if (this.isCompleted) {
-			return
+			return this.gameCompletionStatus
 		}
 
 		if (this.isScoreTargetReached()) {
@@ -51,6 +45,8 @@ export class CompletionManager {
 		} else if (this.isMovesTargetReached()) {
 			this.lose()
 		}
+
+		return this.gameCompletionStatus
 	}
 
 	async checkForMove() {
@@ -94,21 +90,13 @@ export class CompletionManager {
 	}
 
 	private win() {
-		if (this.isCompleted) {
-			return
-		}
-
 		this.isCompleted = true
-		this.waitAllAnimations().then(() => this.openWinModal())
+		this.gameCompletionStatus = GameCompletionStatus.WIN
 	}
 
 	private lose() {
-		if (this.isCompleted) {
-			return
-		}
-
 		this.isCompleted = true
-		this.waitAllAnimations().then(() => this.openLossModal())
+		this.gameCompletionStatus = GameCompletionStatus.LOSS
 	}
 
 	clear() {

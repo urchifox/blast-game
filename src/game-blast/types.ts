@@ -12,3 +12,9 @@ export type TileRemovingInfo = {
 	removedPositions: Set<TilePosition>
 	removingPromise: Promise<void>
 } | null
+
+export enum GameCompletionStatus {
+	WIN = "win",
+	LOSS = "loss",
+	IN_PROGRESS = "in_progress",
+}

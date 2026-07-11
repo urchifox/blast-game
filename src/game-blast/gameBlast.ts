@@ -7,7 +7,7 @@ import { CompletionManager } from "./completionManager"
 import { ProgressManager } from "./progressManager"
 import { LevelData, LevelGenerator } from "./levelGenerator"
 import { GameRules } from "./gameRules"
-import { TileRemovingInfo } from "./types"
+import { GameCompletionStatus, TileRemovingInfo } from "./types"
 import { FieldManipulator } from "./fieldManipulator"
 
 type GameBlastProps = {
@@ -29,6 +29,8 @@ export class GameBlast {
 	private readonly progressManager: GameBlastProps["progressManager"]
 	private readonly renderer: GameBlastProps["renderer"]
 	private readonly animationsManager: GameBlastProps["animationsManager"]
+	private readonly openWinModal: GameBlastProps["openWinModal"]
+	private readonly openLossModal: GameBlastProps["openLossModal"]
 
 	private tileClickManager: TileClickManager
 	private boosterManager: BoosterManager
@@ -48,6 +50,8 @@ export class GameBlast {
 		this.progressManager = props.progressManager
 		this.renderer = props.renderer
 		this.animationsManager = props.animationsManager
+		this.openWinModal = props.openWinModal
+		this.openLossModal = props.openLossModal
 
 		this.tileClickManager = new TileClickManager({
 			fieldManipulator: this.fieldManipulator,
@@ -63,16 +67,11 @@ export class GameBlast {
 		this.completionManager = new CompletionManager({
 			fieldManipulator: this.fieldManipulator,
 			gameRules: props.gameRules,
-			openWinModal: props.openWinModal,
-			openLossModal: props.openLossModal,
 			isScoreTargetReached: this.progressManager.isScoreTargetReached.bind(
 				this.progressManager
 			),
 			isMovesTargetReached: this.progressManager.isMovesTargetReached.bind(
 				this.progressManager
-			),
-			waitAllAnimations: this.animationsManager.waitAllAnimations.bind(
-				this.animationsManager
 			),
 		})
 	}
@@ -160,6 +159,21 @@ export class GameBlast {
 			.then(() => this.completionManager.checkForMove())
 		this.animationsManager.animate(animationPromise)
 
-		this.completionManager.checkGameCompletion()
+		const gameCompletionStatus = this.completionManager.checkGameCompletion()
+		this.processGameCompletion(gameCompletionStatus)
+	}
+
+	private processGameCompletion(gameCompletionStatus: GameCompletionStatus) {
+		if (gameCompletionStatus === GameCompletionStatus.IN_PROGRESS) {
+			return
+		}
+
+		this.animationsManager.waitAllAnimations().then(() => {
+			if (gameCompletionStatus === GameCompletionStatus.WIN) {
+				this.openWinModal()
+			} else if (gameCompletionStatus === GameCompletionStatus.LOSS) {
+				this.openLossModal()
+			}
+		})
 	}
 }
