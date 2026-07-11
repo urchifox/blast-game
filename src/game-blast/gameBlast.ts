@@ -7,7 +7,7 @@ import { CompletionManager } from "./completionManager"
 import { ProgressManager } from "./progressManager"
 import { LevelData, LevelGenerator } from "./levelGenerator"
 import { GameRules } from "./gameRules"
-import { TileClickHandlerResult } from "./types"
+import { TileRemovingInfo } from "./types"
 import { FieldManipulator } from "./fieldManipulator"
 
 type GameBlastProps = {
@@ -131,23 +131,23 @@ export class GameBlast {
 			return
 		}
 
-		const boosterhandlerResult = this.boosterManager.maybeUseBooster(tile)
-		const handlerResult = boosterhandlerResult.isUsed
-			? boosterhandlerResult.result
+		const boosterHandlerResult = this.boosterManager.maybeUseBooster(tile)
+		const tileRemovingInfo = boosterHandlerResult.isUsed
+			? boosterHandlerResult.tileRemovingInfo
 			: this.tileClickManager.onClick(tile)
-		this.processRemovingTiles(handlerResult)
+		this.processRemovingTiles(tileRemovingInfo)
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {
 		this.boosterManager.onBoosterButtonClick(boosterName)
 	}
 
-	private processRemovingTiles(result: TileClickHandlerResult) {
-		if (result === null) {
+	private processRemovingTiles(tileRemovingInfo: TileRemovingInfo) {
+		if (tileRemovingInfo === null) {
 			return
 		}
 
-		const { removedTiles, removedPositions, removingPromise } = result
+		const { removedTiles, removedPositions, removingPromise } = tileRemovingInfo
 
 		const points = this.gameRules.getPoints(removedTiles.size)
 		this.progressManager.addProgress(points)

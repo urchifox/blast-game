@@ -1,6 +1,6 @@
 import { Tile } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
-import { TileClickHandlerResult } from "../types"
+import { TileRemovingInfo } from "../types"
 import { TileHandlerProps } from "./tileHandler"
 import { FieldManipulator } from "../fieldManipulator"
 
@@ -23,7 +23,7 @@ export class TileHandlerBomb extends TileHandlerSpecial {
 		this.innerFieldManipulator = innerFieldManipulator
 	}
 
-	onClick(tile: Tile): TileClickHandlerResult {
+	onClick(tile: Tile): TileRemovingInfo {
 		const { tiles, positions } = this.innerFieldManipulator.getTilesInRadius(
 			tile.getPosition(),
 			this.gameRules.TILE_BOMB_RADIUS

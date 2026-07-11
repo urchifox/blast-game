@@ -1,5 +1,5 @@
 import { TileHandler, TileHandlerProps } from "./tileHandler"
-import { TileClickHandlerResult } from "../types"
+import { TileRemovingInfo } from "../types"
 import { Tile, TilePosition } from "../tile"
 import { FieldManipulator } from "../fieldManipulator"
 
@@ -27,7 +27,7 @@ export class TileHandlerNormal extends TileHandler {
 		this.getComboPrize = getComboPrize
 	}
 
-	onClick(tile: Tile): TileClickHandlerResult {
+	onClick(tile: Tile): TileRemovingInfo {
 		const { tilesToRemove, positionsToRemove } =
 			this.innerFieldManipulator.getSameKindNeighbourTiles(tile)
 		if (tilesToRemove.size < this.gameRules.MIN_COMBO_SIZE) {

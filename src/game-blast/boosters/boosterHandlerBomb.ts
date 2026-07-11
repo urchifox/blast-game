@@ -1,6 +1,6 @@
 import { BoosterHandler } from "./boosterHandler"
 import { Tile } from "../tile"
-import { TileClickHandlerResult } from "../types"
+import { TileRemovingInfo } from "../types"
 import { BoosterCommonProps } from "./booster"
 import { GameRules } from "../gameRules"
 import { FieldManipulator } from "../fieldManipulator"
@@ -33,7 +33,7 @@ export class BoosterHandlerBomb extends BoosterHandler {
 		this.innerFieldManipulator = innerFieldManipulator
 	}
 
-	use(tile: Tile): TileClickHandlerResult {
+	use(tile: Tile): TileRemovingInfo {
 		const { tiles, positions } = this.innerFieldManipulator.getTilesInRadius(
 			tile.getPosition(),
 			this.gameRules.BOOSTER_BOMB_RADIUS

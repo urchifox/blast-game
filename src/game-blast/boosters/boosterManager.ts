@@ -60,7 +60,7 @@ export class BoosterManager {
 				return result
 			}
 		}
-		return { isUsed: false, result: null }
+		return { isUsed: false, tileRemovingInfo: null }
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {

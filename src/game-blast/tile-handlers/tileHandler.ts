@@ -1,6 +1,6 @@
 import { GameRules } from "../gameRules"
 import { Tile } from "../tile"
-import { TileClickHandlerResult } from "../types"
+import { TileRemovingInfo } from "../types"
 
 export type TileHandlerProps = {
 	gameRules: GameRules
@@ -13,5 +13,5 @@ export abstract class TileHandler {
 		this.gameRules = props.gameRules
 	}
 
-	abstract onClick(tile: Tile): TileClickHandlerResult
+	abstract onClick(tile: Tile): TileRemovingInfo
 }

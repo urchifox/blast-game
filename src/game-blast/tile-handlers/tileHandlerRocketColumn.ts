@@ -1,6 +1,6 @@
 import { Tile } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
-import { TileClickHandlerResult } from "../types"
+import { TileRemovingInfo } from "../types"
 import { TileHandlerProps } from "./tileHandler"
 import { FieldManipulator } from "../fieldManipulator"
 
@@ -26,7 +26,7 @@ export class TileHandlerRocketColumn extends TileHandlerSpecial {
 		this.innerFieldManipulator = innerFieldManipulator
 	}
 
-	onClick(tile: Tile): TileClickHandlerResult {
+	onClick(tile: Tile): TileRemovingInfo {
 		const { tiles, positions } = this.innerFieldManipulator.getTilesInColumn(
 			tile.getPosition().column
 		)
