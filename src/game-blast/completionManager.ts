@@ -102,5 +102,6 @@ export class CompletionManager {
 	clear() {
 		this.isCompleted = false
 		this.shuffleAttempts = 0
+		this.gameCompletionStatus = GameCompletionStatus.IN_PROGRESS
 	}
 }
