@@ -8,8 +8,8 @@ export class Field {
 	private tilesByColumns: Array<Array<Tile | undefined>> = []
 
 	private readonly getFieldSnapshot: () => GridSnapshot
-	constructor({ getFieldSnapshot }: { getFieldSnapshot: () => GridSnapshot }) {
-		this.getFieldSnapshot = getFieldSnapshot
+	constructor(props: { getFieldSnapshot: () => GridSnapshot }) {
+		this.getFieldSnapshot = props.getFieldSnapshot
 	}
 
 	generateTiles() {

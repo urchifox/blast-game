@@ -18,9 +18,9 @@ export class TileHandlerRocketRow extends TileHandlerSpecial {
 	readonly kind = "rockets-row"
 	private readonly innerFieldManipulator: TileHandlerRocketRowProps["innerFieldManipulator"]
 
-	constructor({ innerFieldManipulator, gameRules }: TileHandlerRocketRowProps) {
-		super({ gameRules })
-		this.innerFieldManipulator = innerFieldManipulator
+	constructor(props: TileHandlerRocketRowProps) {
+		super({ gameRules: props.gameRules })
+		this.innerFieldManipulator = props.innerFieldManipulator
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {

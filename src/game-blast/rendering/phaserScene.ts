@@ -43,13 +43,11 @@ export class PhaserScene extends Phaser.Scene {
 		offsetY: number
 	}
 
-	constructor({
-		getContainerOffset,
-	}: {
+	constructor(props: {
 		getContainerOffset: () => { offsetX: number; offsetY: number }
 	}) {
 		super(SCENE_KEY)
-		this.getContainerOffset = getContainerOffset
+		this.getContainerOffset = props.getContainerOffset
 	}
 
 	// #region Initialization

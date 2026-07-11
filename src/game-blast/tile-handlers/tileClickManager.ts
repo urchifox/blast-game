@@ -40,13 +40,25 @@ export class TileClickManager {
 	private tileClickHandlersMapByKind: Record<TileKind, TileClickHandler>
 	private rewardableComboSizesSorted: Array<number>
 
-	constructor({ innerFieldManipulator, gameRules }: TileClickManagerProps) {
-		this.innerFieldManipulator = innerFieldManipulator
+	constructor(props: TileClickManagerProps) {
+		this.innerFieldManipulator = props.innerFieldManipulator
 		const tileHandlersSpecial: Array<TileHandlerSpecial> = [
-			new TileHandlerBomb({ innerFieldManipulator, gameRules }),
-			new TileHandlerDynamite({ innerFieldManipulator, gameRules }),
-			new TileHandlerRocketRow({ innerFieldManipulator, gameRules }),
-			new TileHandlerRocketColumn({ innerFieldManipulator, gameRules }),
+			new TileHandlerBomb({
+				innerFieldManipulator: props.innerFieldManipulator,
+				gameRules: props.gameRules,
+			}),
+			new TileHandlerDynamite({
+				innerFieldManipulator: props.innerFieldManipulator,
+				gameRules: props.gameRules,
+			}),
+			new TileHandlerRocketRow({
+				innerFieldManipulator: props.innerFieldManipulator,
+				gameRules: props.gameRules,
+			}),
+			new TileHandlerRocketColumn({
+				innerFieldManipulator: props.innerFieldManipulator,
+				gameRules: props.gameRules,
+			}),
 		]
 
 		this.tileHandlersSpecialMapByComboSize = tileHandlersSpecial.reduce<
@@ -76,9 +88,9 @@ export class TileClickManager {
 			.sort((a, b) => a - b)
 
 		const tileHandlerNormal = new TileHandlerNormal({
-			innerFieldManipulator,
+			innerFieldManipulator: props.innerFieldManipulator,
 			getComboPrize: this.getComboPrize.bind(this),
-			gameRules,
+			gameRules: props.gameRules,
 		})
 
 		TILES_KINDS_NORMAL.forEach((kind) => {

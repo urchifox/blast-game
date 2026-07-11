@@ -18,12 +18,9 @@ export class TileHandlerRocketColumn extends TileHandlerSpecial {
 	readonly kind = "rockets-column"
 	private readonly innerFieldManipulator: TileHandlerRocketColumnProps["innerFieldManipulator"]
 
-	constructor({
-		innerFieldManipulator,
-		gameRules,
-	}: TileHandlerRocketColumnProps) {
-		super({ gameRules })
-		this.innerFieldManipulator = innerFieldManipulator
+	constructor(props: TileHandlerRocketColumnProps) {
+		super({ gameRules: props.gameRules })
+		this.innerFieldManipulator = props.innerFieldManipulator
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {

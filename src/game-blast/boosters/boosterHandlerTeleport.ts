@@ -17,18 +17,14 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 	private readonly innerFieldManipulator: BoosterHandlerTeleportProps["innerFieldManipulator"]
 	private selectedTile: Tile | null = null
 
-	constructor({
-		boosterProps,
-		innerFieldManipulator,
-		gameRules,
-	}: BoosterHandlerTeleportProps) {
+	constructor(props: BoosterHandlerTeleportProps) {
 		super({
 			name: "teleport",
-			initialValue: gameRules.BOOSTER_TELEPORT_COUNT,
-			gameRules,
-			...boosterProps,
+			initialValue: props.gameRules.BOOSTER_TELEPORT_COUNT,
+			gameRules: props.gameRules,
+			...props.boosterProps,
 		})
-		this.innerFieldManipulator = innerFieldManipulator
+		this.innerFieldManipulator = props.innerFieldManipulator
 	}
 
 	use(tile: Tile): TileRemovingInfo {

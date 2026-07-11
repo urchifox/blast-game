@@ -18,9 +18,9 @@ export class TileHandlerDynamite extends TileHandlerSpecial {
 	readonly kind = "dynamite"
 	private readonly innerFieldManipulator: TileHandlerDynamiteProps["innerFieldManipulator"]
 
-	constructor({ innerFieldManipulator, gameRules }: TileHandlerDynamiteProps) {
-		super({ gameRules })
-		this.innerFieldManipulator = innerFieldManipulator
+	constructor(props: TileHandlerDynamiteProps) {
+		super({ gameRules: props.gameRules })
+		this.innerFieldManipulator = props.innerFieldManipulator
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {

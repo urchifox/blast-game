@@ -18,9 +18,9 @@ export class TileHandlerBomb extends TileHandlerSpecial {
 	readonly kind = "bomb"
 	private readonly innerFieldManipulator: TileHandlerBombProps["innerFieldManipulator"]
 
-	constructor({ innerFieldManipulator, gameRules }: TileHandlerBombProps) {
-		super({ gameRules })
-		this.innerFieldManipulator = innerFieldManipulator
+	constructor(props: TileHandlerBombProps) {
+		super({ gameRules: props.gameRules })
+		this.innerFieldManipulator = props.innerFieldManipulator
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {

@@ -29,22 +29,14 @@ export class CompletionManager {
 	private isCompleted = false
 	private shuffleAttempts = 0
 
-	constructor({
-		innerFieldManipulator,
-		gameRules,
-		openWinModal,
-		openLossModal,
-		isScoreTargetReached,
-		isMovesTargetReached,
-		waitAllAnimations,
-	}: CompletionManagerProps) {
-		this.innerFieldManipulator = innerFieldManipulator
-		this.gameRules = gameRules
-		this.openWinModal = openWinModal
-		this.openLossModal = openLossModal
-		this.isScoreTargetReached = isScoreTargetReached
-		this.isMovesTargetReached = isMovesTargetReached
-		this.waitAllAnimations = waitAllAnimations
+	constructor(props: CompletionManagerProps) {
+		this.innerFieldManipulator = props.innerFieldManipulator
+		this.gameRules = props.gameRules
+		this.openWinModal = props.openWinModal
+		this.openLossModal = props.openLossModal
+		this.isScoreTargetReached = props.isScoreTargetReached
+		this.isMovesTargetReached = props.isMovesTargetReached
+		this.waitAllAnimations = props.waitAllAnimations
 	}
 
 	isGameCompleted() {

@@ -13,11 +13,11 @@ export class PhaserRenderer implements Renderer {
 		container: HTMLElement
 		getContainerOffset: () => { offsetX: number; offsetY: number }
 	}) {
-		const { container, getContainerOffset } = props
+		this.container = props.container
 
-		this.container = container
-
-		const rendererScene = new PhaserScene({ getContainerOffset })
+		const rendererScene = new PhaserScene({
+			getContainerOffset: props.getContainerOffset,
+		})
 
 		this.game = new Phaser.Game({
 			type: Phaser.AUTO,

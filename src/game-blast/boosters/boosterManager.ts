@@ -22,21 +22,17 @@ export class BoosterManager {
 	private boostersHandlersMap: Record<BoosterName, BoosterHandler>
 	private boostersHandlers: Array<BoosterHandler>
 
-	constructor({
-		innerFieldManipulator,
-		boosterProps,
-		gameRules,
-	}: BoosterManagerProps) {
+	constructor(props: BoosterManagerProps) {
 		this.boostersHandlersMap = {
 			bomb: new BoosterHandlerBomb({
-				innerFieldManipulator,
-				boosterProps,
-				gameRules,
+				innerFieldManipulator: props.innerFieldManipulator,
+				boosterProps: props.boosterProps,
+				gameRules: props.gameRules,
 			}),
 			teleport: new BoosterHandlerTeleport({
-				innerFieldManipulator,
-				boosterProps,
-				gameRules,
+				innerFieldManipulator: props.innerFieldManipulator,
+				boosterProps: props.boosterProps,
+				gameRules: props.gameRules,
 			}),
 		}
 		this.boostersHandlers = Object.values(this.boostersHandlersMap)

@@ -35,10 +35,10 @@ export class Tile {
 	private readonly image: string
 	private isBlocked = false
 
-	constructor({ kind, position }: { kind: TileKind; position: TilePosition }) {
-		this.kind = kind
-		this.position = position
-		this.image = `tile-${kind}`
+	constructor(props: { kind: TileKind; position: TilePosition }) {
+		this.kind = props.kind
+		this.position = props.position
+		this.image = `tile-${props.kind}`
 	}
 
 	getIsBlocked(): boolean {

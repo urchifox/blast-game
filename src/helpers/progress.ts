@@ -7,18 +7,15 @@ export class Progress {
 		targetValue: number
 	}) => void
 
-	constructor({
-		updateCounter,
-		isDirectionDown = false,
-	}: {
+	constructor(props: {
 		updateCounter: (props: {
 			currentValue: number
 			targetValue: number
 		}) => void
 		isDirectionDown?: boolean
 	}) {
-		this.updateCounter = updateCounter
-		this.isDirectionDown = isDirectionDown
+		this.updateCounter = props.updateCounter
+		this.isDirectionDown = props.isDirectionDown ?? false
 	}
 
 	clear() {

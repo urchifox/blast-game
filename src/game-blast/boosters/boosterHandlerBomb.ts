@@ -19,18 +19,14 @@ export type BoosterHandlerBombProps = {
 export class BoosterHandlerBomb extends BoosterHandler {
 	private readonly innerFieldManipulator: BoosterHandlerBombProps["innerFieldManipulator"]
 
-	constructor({
-		innerFieldManipulator,
-		gameRules,
-		boosterProps,
-	}: BoosterHandlerBombProps) {
+	constructor(props: BoosterHandlerBombProps) {
 		super({
 			name: "bomb",
-			initialValue: gameRules.BOOSTER_BOMBS_COUNT,
-			gameRules,
-			...boosterProps,
+			initialValue: props.gameRules.BOOSTER_BOMBS_COUNT,
+			gameRules: props.gameRules,
+			...props.boosterProps,
 		})
-		this.innerFieldManipulator = innerFieldManipulator
+		this.innerFieldManipulator = props.innerFieldManipulator
 	}
 
 	use(tile: Tile): TileRemovingInfo {

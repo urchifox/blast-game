@@ -38,8 +38,7 @@ export class Grid {
 	constructor(props: {
 		getContainerSize: () => { width: number; height: number }
 	}) {
-		const { getContainerSize } = props
-		this.getContainerSize = getContainerSize
+		this.getContainerSize = props.getContainerSize
 	}
 
 	getSnapshot(): GridSnapshot {

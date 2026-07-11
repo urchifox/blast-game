@@ -17,14 +17,10 @@ export class TileHandlerNormal extends TileHandler {
 	private readonly innerFieldManipulator: TileHandlerNormalProps["innerFieldManipulator"]
 	private readonly getComboPrize: TileHandlerNormalProps["getComboPrize"]
 
-	constructor({
-		innerFieldManipulator,
-		getComboPrize,
-		gameRules,
-	}: TileHandlerNormalProps) {
-		super({ gameRules })
-		this.innerFieldManipulator = innerFieldManipulator
-		this.getComboPrize = getComboPrize
+	constructor(props: TileHandlerNormalProps) {
+		super({ gameRules: props.gameRules })
+		this.innerFieldManipulator = props.innerFieldManipulator
+		this.getComboPrize = props.getComboPrize
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {

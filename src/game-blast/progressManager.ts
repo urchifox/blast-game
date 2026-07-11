@@ -9,9 +9,9 @@ export class ProgressManager {
 	private readonly scoreProgress: Progress
 	private readonly movesProgress: Progress
 
-	constructor({ scoreProgress, movesProgress }: ProgressManagerProps) {
-		this.scoreProgress = scoreProgress
-		this.movesProgress = movesProgress
+	constructor(props: ProgressManagerProps) {
+		this.scoreProgress = props.scoreProgress
+		this.movesProgress = props.movesProgress
 	}
 
 	clear() {
