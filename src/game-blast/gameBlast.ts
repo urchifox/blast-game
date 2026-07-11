@@ -116,7 +116,7 @@ export class GameBlast {
 		const { columns, rows, goalScore, movesLimit } = this.levelData
 		this.boosterManager.setInitialValue()
 		this.fieldManipulator.create({ columns, rows })
-		this.progressManager.setinitialValues({ goalScore, movesLimit })
+		this.progressManager.setInitialValues({ goalScore, movesLimit })
 	}
 
 	// #endregion

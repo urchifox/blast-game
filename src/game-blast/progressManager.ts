@@ -19,7 +19,7 @@ export class ProgressManager {
 		this.movesProgress.clear()
 	}
 
-	setinitialValues({
+	setInitialValues({
 		goalScore,
 		movesLimit,
 	}: {
