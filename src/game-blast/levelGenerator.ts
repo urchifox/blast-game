@@ -3,7 +3,6 @@ import { GameRules } from "./gameRules"
 
 export type LevelManagerProps = {
 	gameRules: GameRules
-	getPoints(removedTilesNumber: number): number
 }
 
 export type LevelData = {
@@ -15,11 +14,9 @@ export type LevelData = {
 
 export class LevelGenerator {
 	private readonly gameRules: LevelManagerProps["gameRules"]
-	private readonly getPoints: LevelManagerProps["getPoints"]
 
-	constructor({ gameRules, getPoints }: LevelManagerProps) {
-		this.gameRules = gameRules
-		this.getPoints = getPoints
+	constructor(props: LevelManagerProps) {
+		this.gameRules = props.gameRules
 	}
 
 	generateLevelData() {
@@ -45,7 +42,7 @@ export class LevelGenerator {
 			min: this.gameRules.MIN_AVG_COMBO,
 			max: this.gameRules.MAX_AVG_COMBO,
 		})
-		const avgScorePerMove = this.getPoints(avgCombo)
+		const avgScorePerMove = this.gameRules.getPoints(avgCombo)
 		const moves = targetScore / avgScorePerMove
 
 		return Math.ceil(moves)

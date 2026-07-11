@@ -96,7 +96,6 @@ export class GameView extends View {
 		})
 		const levelGenerator = new LevelGenerator({
 			gameRules,
-			getPoints: gameRules.getPoints.bind(gameRules),
 		})
 
 		const animationsManager = new AnimationsManager()
