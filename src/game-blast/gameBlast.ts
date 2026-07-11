@@ -82,8 +82,8 @@ export class GameBlast {
 		await this.startNewLevel()
 	}
 
-	destroy() {
-		this.clearLevel()
+	async destroy() {
+		await this.clearLevel()
 		this.renderer.destroy()
 	}
 

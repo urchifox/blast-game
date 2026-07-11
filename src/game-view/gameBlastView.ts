@@ -136,10 +136,10 @@ export class GameView extends View {
 		window.addEventListener("resize", this.handleWindowResize)
 	}
 
-	override unmount() {
-		super.unmount()
-		this.gameBlast?.destroy()
+	override async unmount() {
 		window.removeEventListener("resize", this.handleWindowResize)
+		await this.gameBlast?.destroy()
+		super.unmount()
 	}
 
 	private handleWindowResize = this.onResize.bind(this)
