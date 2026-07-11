@@ -7,7 +7,7 @@ export type TileHandlerProps = {
 }
 
 export abstract class TileHandler {
-	readonly gameRules: TileHandlerProps["gameRules"]
+	protected readonly gameRules: TileHandlerProps["gameRules"]
 
 	constructor(props: TileHandlerProps) {
 		this.gameRules = props.gameRules

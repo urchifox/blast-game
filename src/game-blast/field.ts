@@ -9,9 +9,10 @@ export type FieldProps = {
 }
 
 export class Field {
+	private readonly getFieldSnapshot: FieldProps["getFieldSnapshot"]
+
 	private tilesByColumns: Array<Array<Tile | undefined>> = []
 
-	private readonly getFieldSnapshot: () => GridSnapshot
 	constructor(props: FieldProps) {
 		this.getFieldSnapshot = props.getFieldSnapshot
 	}

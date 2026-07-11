@@ -9,7 +9,8 @@ export type PhaserRendererProps = {
 }
 
 export class PhaserRenderer implements Renderer {
-	private readonly container: HTMLElement
+	private readonly container: PhaserRendererProps["container"]
+
 	private readonly game: Phaser.Game
 	private scene: PhaserScene
 	readonly readyPromise: Promise<void>

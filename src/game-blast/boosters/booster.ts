@@ -15,11 +15,12 @@ export type BoosterCustomProps = {
 export type BoosterProps = BoosterCommonProps & BoosterCustomProps
 
 export class Booster {
-	readonly name: BoosterName
-	private readonly initialValue: number
+	private readonly name: BoosterProps["name"]
+	private readonly initialValue: BoosterProps["initialValue"]
+	private readonly onActiveChange?: BoosterProps["onActiveChange"]
+
 	private readonly progress: Progress
 	private isActive = false
-	private readonly onActiveChange?: BoosterCommonProps["onActiveChange"]
 
 	constructor(props: BoosterProps) {
 		this.name = props.name

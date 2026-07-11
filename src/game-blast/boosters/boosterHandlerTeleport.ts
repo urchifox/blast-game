@@ -15,6 +15,7 @@ type BoosterHandlerTeleportProps = {
 
 export class BoosterHandlerTeleport extends BoosterHandler {
 	private readonly innerFieldManipulator: BoosterHandlerTeleportProps["innerFieldManipulator"]
+
 	private selectedTile: Tile | null = null
 
 	constructor(props: BoosterHandlerTeleportProps) {

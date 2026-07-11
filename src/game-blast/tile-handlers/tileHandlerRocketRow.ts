@@ -14,9 +14,10 @@ export type TileHandlerRocketRowProps = {
 } & TileHandlerProps
 
 export class TileHandlerRocketRow extends TileHandlerSpecial {
+	private readonly innerFieldManipulator: TileHandlerRocketRowProps["innerFieldManipulator"]
+
 	readonly comboSize = 4
 	readonly kind = "rockets-row"
-	private readonly innerFieldManipulator: TileHandlerRocketRowProps["innerFieldManipulator"]
 
 	constructor(props: TileHandlerRocketRowProps) {
 		super({ gameRules: props.gameRules })

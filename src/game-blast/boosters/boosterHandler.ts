@@ -8,7 +8,8 @@ export type BoosterHandlerProps = {
 } & BoosterProps
 
 export abstract class BoosterHandler {
-	readonly gameRules: BoosterHandlerProps["gameRules"]
+	protected readonly gameRules: BoosterHandlerProps["gameRules"]
+
 	private readonly booster: Booster
 
 	constructor(props: BoosterHandlerProps) {

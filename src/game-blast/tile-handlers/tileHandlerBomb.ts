@@ -14,9 +14,10 @@ export type TileHandlerBombProps = {
 } & TileHandlerProps
 
 export class TileHandlerBomb extends TileHandlerSpecial {
+	private readonly innerFieldManipulator: TileHandlerBombProps["innerFieldManipulator"]
+
 	readonly comboSize = 6
 	readonly kind = "bomb"
-	private readonly innerFieldManipulator: TileHandlerBombProps["innerFieldManipulator"]
 
 	constructor(props: TileHandlerBombProps) {
 		super({ gameRules: props.gameRules })

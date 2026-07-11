@@ -34,9 +34,10 @@ export type TileProps = {
 }
 
 export class Tile {
+	private readonly kind: TileProps["kind"]
+	private readonly position: TileProps["position"]
+
 	private readonly id: string = nanoid()
-	private readonly kind: TileKind
-	private position: TilePosition
 	private readonly image: string
 	private isBlocked = false
 

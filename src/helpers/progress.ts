@@ -4,13 +4,13 @@ export type ProgressProps = {
 }
 
 export class Progress {
+	private readonly isDirectionDown: NonNullable<
+		ProgressProps["isDirectionDown"]
+	>
+	private readonly updateCounter: ProgressProps["updateCounter"]
+
 	private currentValue = 0
 	private targetValue = 0
-	private readonly isDirectionDown: boolean
-	private readonly updateCounter: (props: {
-		currentValue: number
-		targetValue: number
-	}) => void
 
 	constructor(props: ProgressProps) {
 		this.updateCounter = props.updateCounter

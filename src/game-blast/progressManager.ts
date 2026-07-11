@@ -6,8 +6,8 @@ export type ProgressManagerProps = {
 }
 
 export class ProgressManager {
-	private readonly scoreProgress: Progress
-	private readonly movesProgress: Progress
+	private readonly scoreProgress: ProgressManagerProps["scoreProgress"]
+	private readonly movesProgress: ProgressManagerProps["movesProgress"]
 
 	constructor(props: ProgressManagerProps) {
 		this.scoreProgress = props.scoreProgress
