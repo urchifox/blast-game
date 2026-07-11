@@ -1,16 +1,11 @@
 import { Booster, BoosterProps } from "./booster"
 import { Tile } from "../tile"
 import { GameRules } from "../gameRules"
-import { TileRemovingInfo } from "../types"
+import { BoosterHandlerResult, TileRemovingInfo } from "../types"
 
 export type BoosterHandlerProps = {
 	gameRules: GameRules
 } & BoosterProps
-
-export type BoosterHandlerResult = {
-	isUsed: boolean
-	tileRemovingInfo: TileRemovingInfo
-}
 
 export abstract class BoosterHandler {
 	readonly gameRules: BoosterHandlerProps["gameRules"]
