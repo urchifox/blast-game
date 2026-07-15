@@ -159,22 +159,23 @@ export class GameBlast {
 			.then(() => this.completionManager.checkForMove())
 		this.animationsManager.animate(animationPromise)
 		this.animationsManager.waitAllAnimations().then(() => {
-			const gameCompletionStatus = this.completionManager.checkGameCompletion()
-			this.processGameCompletion(gameCompletionStatus)
+			this.processGameCompletion()
 		})
 	}
 
-	private processGameCompletion(gameCompletionStatus: GameCompletionStatus) {
-		if (gameCompletionStatus === GameCompletionStatus.IN_PROGRESS) {
-			return
-		}
-
-		this.animationsManager.waitAllAnimations().then(() => {
-			if (gameCompletionStatus === GameCompletionStatus.WIN) {
+	private processGameCompletion() {
+		const gameCompletionStatus = this.completionManager.checkGameCompletion()
+		switch (gameCompletionStatus) {
+			case GameCompletionStatus.IN_PROGRESS:
+				return
+			case GameCompletionStatus.WIN:
 				this.openWinModal()
-			} else if (gameCompletionStatus === GameCompletionStatus.LOSS) {
+				break
+			case GameCompletionStatus.LOSS:
 				this.openLossModal()
-			}
-		})
+				break
+			default:
+				return
+		}
 	}
 }
