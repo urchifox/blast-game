@@ -176,7 +176,7 @@ export class Presenter {
 
 	// #region Field Manipulation
 
-	fillEmptyPositions(positions: Set<TilePosition>) {
+	async fillEmptyPositions(positions: Set<TilePosition>) {
 		const { movedTiles, newTiles } = this.field.fillEmptyPositions(positions)
 
 		const temporaryBlockedTiles = new Set<Tile>()
@@ -213,21 +213,19 @@ export class Presenter {
 			)
 		}
 
-		return this.renderer
-			.fallTilesToCurrentPositions({
-				tilesSnapshots: Array.from(movedTiles).map((tile) =>
-					tile.getSnapshot()
+		try {
+			await this.renderer.fallTilesToCurrentPositions({
+				tilesSnapshots: Array.from(movedTiles).map((tile_1) =>
+					tile_1.getSnapshot()
 				),
 				gridSnapshot,
 			})
-			.then(() => {
-				return Promise.all(renderTasks)
-			})
-			.then(() => {
-				for (const blockedTile of temporaryBlockedTiles) {
-					blockedTile.setIsBlocked(false)
-				}
-			})
+			await Promise.all(renderTasks)
+		} finally {
+			for (const blockedTile of temporaryBlockedTiles) {
+				blockedTile.setIsBlocked(false)
+			}
+		}
 	}
 
 	shuffleField() {
