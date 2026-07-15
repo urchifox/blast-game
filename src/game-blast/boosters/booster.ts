@@ -15,26 +15,22 @@ export type BoosterCustomProps = {
 export type BoosterProps = BoosterCommonProps & BoosterCustomProps
 
 export class Booster {
-	readonly name: BoosterName
-	private readonly initialValue: number
+	private readonly name: BoosterProps["name"]
+	private readonly initialValue: BoosterProps["initialValue"]
+	private readonly onActiveChange?: BoosterProps["onActiveChange"]
+
 	private readonly progress: Progress
 	private isActive = false
-	private readonly onActiveChange?: BoosterCommonProps["onActiveChange"]
 
-	constructor({
-		name,
-		initialValue,
-		updateCounter,
-		onActiveChange,
-	}: BoosterProps) {
-		this.name = name
-		this.initialValue = initialValue
+	constructor(props: BoosterProps) {
+		this.name = props.name
+		this.initialValue = props.initialValue
 		this.progress = new Progress({
 			updateCounter: ({ currentValue }) =>
-				updateCounter(this.name, currentValue),
+				props.updateCounter(this.name, currentValue),
 			isDirectionDown: true,
 		})
-		this.onActiveChange = onActiveChange
+		this.onActiveChange = props.onActiveChange
 		this.progress.setTargetValue(0)
 	}
 

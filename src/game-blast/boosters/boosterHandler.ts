@@ -1,14 +1,23 @@
 import { Booster, BoosterProps } from "./booster"
 import { Tile } from "../tile"
+import { GameRules } from "../gameRules"
+import { BoosterHandlerResult, TileRemovingInfo } from "../types"
+
+export type BoosterHandlerProps = {
+	gameRules: GameRules
+} & BoosterProps
 
 export abstract class BoosterHandler {
+	protected readonly gameRules: BoosterHandlerProps["gameRules"]
+
 	private readonly booster: Booster
 
-	constructor(props: BoosterProps) {
+	constructor(props: BoosterHandlerProps) {
+		this.gameRules = props.gameRules
 		this.booster = new Booster(props)
 	}
 
-	abstract use(tile: Tile): void
+	abstract use(tile: Tile): TileRemovingInfo
 
 	clear() {
 		this.booster.clear()
@@ -19,12 +28,11 @@ export abstract class BoosterHandler {
 		this.booster.renderCounter()
 	}
 
-	maybeUse(tile: Tile) {
+	maybeUse(tile: Tile): BoosterHandlerResult {
 		if (this.booster.isActivated()) {
-			this.use(tile)
-			return true
+			return { isUsed: true, tileRemovingInfo: this.use(tile) }
 		}
-		return false
+		return { isUsed: false, tileRemovingInfo: null }
 	}
 
 	tryActivate() {

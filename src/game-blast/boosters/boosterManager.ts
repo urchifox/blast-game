@@ -1,51 +1,36 @@
 import { BoosterHandlerBomb } from "./boosterHandlerBomb"
-import { TilePosition, Tile } from "../tile"
+import { Tile } from "../tile"
 import { BoosterHandlerTeleport } from "./boosterHandlerTeleport"
-import { TileClickHandlerResult } from "../types"
 import { BoosterCommonProps, BoosterName } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
+import { BoosterHandlerResult } from "../types"
+import { GameRules } from "../gameRules"
+import { FieldManipulator } from "../fieldManipulator"
 
 export type BoosterManagerProps = {
-	selectTile: (tile: Tile) => void
-	swapTiles: (tile1: Tile, tile2: Tile) => void
-	getTilesInRadius: (
-		position: TilePosition,
-		radius: number
-	) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
-	removeTilesFromCenter: (
-		tiles: Set<Tile>,
-		centerPosition: TilePosition
-	) => Promise<void>
-	processRemovingTiles: (result: TileClickHandlerResult) => void
+	fieldManipulator: Pick<
+		FieldManipulator,
+		"selectTile" | "swapTiles" | "getTilesInRadius" | "removeTilesFromCenter"
+	>
 	boosterProps: BoosterCommonProps
+	gameRules: GameRules
 }
 
 export class BoosterManager {
 	private boostersHandlersMap: Record<BoosterName, BoosterHandler>
 	private boostersHandlers: Array<BoosterHandler>
 
-	constructor({
-		selectTile,
-		swapTiles,
-		getTilesInRadius,
-		removeTilesFromCenter,
-		processRemovingTiles,
-		boosterProps,
-	}: BoosterManagerProps) {
+	constructor(props: BoosterManagerProps) {
 		this.boostersHandlersMap = {
 			bomb: new BoosterHandlerBomb({
-				boosterProps,
-				getTilesInRadius,
-				removeTilesFromCenter,
-				processRemovingTiles,
+				fieldManipulator: props.fieldManipulator,
+				boosterProps: props.boosterProps,
+				gameRules: props.gameRules,
 			}),
 			teleport: new BoosterHandlerTeleport({
-				boosterProps,
-				selectTile,
-				swapTiles,
+				fieldManipulator: props.fieldManipulator,
+				boosterProps: props.boosterProps,
+				gameRules: props.gameRules,
 			}),
 		}
 		this.boostersHandlers = Object.values(this.boostersHandlersMap)
@@ -63,14 +48,14 @@ export class BoosterManager {
 		}
 	}
 
-	maybeUseBooster(tile: Tile) {
+	maybeUseBooster(tile: Tile): BoosterHandlerResult {
 		for (const handler of this.boostersHandlers) {
-			const isBoosterUsed = handler.maybeUse(tile)
-			if (isBoosterUsed) {
-				return true
+			const result = handler.maybeUse(tile)
+			if (result.isUsed) {
+				return result
 			}
 		}
-		return false
+		return { isUsed: false, tileRemovingInfo: null }
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {

@@ -1,64 +1,50 @@
-import { BoosterCommonProps } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
-import { BOOSTER_BOMB_RADIUS, BOOSTER_BOMBS_COUNT } from "../config"
-import { Tile, TilePosition } from "../tile"
-import { TileClickHandlerResult } from "../types"
+import { Tile } from "../tile"
+import { TileRemovingInfo } from "../types"
+import { BoosterCommonProps } from "./booster"
+import { GameRules } from "../gameRules"
+import { FieldManipulator } from "../fieldManipulator"
 
 export type BoosterHandlerBombProps = {
-	getTilesInRadius: (
-		position: TilePosition,
-		radius: number
-	) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
-	removeTilesFromCenter: (
-		tiles: Set<Tile>,
-		centerPosition: TilePosition
-	) => Promise<void>
-	processRemovingTiles: (result: TileClickHandlerResult) => void
+	fieldManipulator: Pick<
+		FieldManipulator,
+		"getTilesInRadius" | "removeTilesFromCenter"
+	>
 	boosterProps: BoosterCommonProps
+	gameRules: GameRules
 }
 
 export class BoosterHandlerBomb extends BoosterHandler {
-	private getTilesInRadius: BoosterHandlerBombProps["getTilesInRadius"]
-	private removeTilesFromCenter: BoosterHandlerBombProps["removeTilesFromCenter"]
-	private processRemovingTiles: BoosterHandlerBombProps["processRemovingTiles"]
+	private readonly fieldManipulator: BoosterHandlerBombProps["fieldManipulator"]
 
-	constructor({
-		getTilesInRadius,
-		removeTilesFromCenter,
-		processRemovingTiles,
-		boosterProps,
-	}: BoosterHandlerBombProps) {
+	constructor(props: BoosterHandlerBombProps) {
 		super({
 			name: "bomb",
-			initialValue: BOOSTER_BOMBS_COUNT,
-			...boosterProps,
+			initialValue: props.gameRules.BOOSTER_BOMBS_COUNT,
+			gameRules: props.gameRules,
+			...props.boosterProps,
 		})
-		this.getTilesInRadius = getTilesInRadius
-		this.removeTilesFromCenter = removeTilesFromCenter
-		this.processRemovingTiles = processRemovingTiles
+		this.fieldManipulator = props.fieldManipulator
 	}
 
-	use(tile: Tile) {
-		const { tiles, positions } = this.getTilesInRadius(
+	use(tile: Tile): TileRemovingInfo {
+		const { tiles, positions } = this.fieldManipulator.getTilesInRadius(
 			tile.getPosition(),
-			BOOSTER_BOMB_RADIUS
+			this.gameRules.BOOSTER_BOMB_RADIUS
 		)
 		if (tiles.size === 0) {
-			return
+			return null
 		}
 
 		this.spend()
-		const removingPromise = this.removeTilesFromCenter(
+		const removingPromise = this.fieldManipulator.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
 		)
-		this.processRemovingTiles({
+		return {
 			removedTiles: tiles,
 			removedPositions: positions,
 			removingPromise: removingPromise,
-		})
+		}
 	}
 }

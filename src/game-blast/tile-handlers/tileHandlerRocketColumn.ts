@@ -1,48 +1,35 @@
-import { Tile, TilePosition } from "../tile"
+import { Tile } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
-import { TileClickHandlerResult } from "../types"
+import { TileRemovingInfo } from "../types"
+import { TileHandlerProps } from "./tileHandler"
+import { FieldManipulator } from "../fieldManipulator"
 
 export type TileHandlerRocketColumnProps = {
-	getTilesInRadius: (
-		position: TilePosition,
-		radius: number
-	) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
-	removeTilesFromCenter: (
-		tiles: Set<Tile>,
-		centerPosition: TilePosition
-	) => Promise<void>
-	getTilesInColumn: (column: number) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
-}
+	fieldManipulator: Pick<
+		FieldManipulator,
+		"getTilesInColumn" | "removeTilesFromCenter"
+	>
+} & TileHandlerProps
 
 export class TileHandlerRocketColumn extends TileHandlerSpecial {
+	private readonly fieldManipulator: TileHandlerRocketColumnProps["fieldManipulator"]
+
 	readonly comboSize = 4
 	readonly kind = "rockets-column"
-	private removeTilesFromCenter: TileHandlerRocketColumnProps["removeTilesFromCenter"]
-	private getTilesInColumn: TileHandlerRocketColumnProps["getTilesInColumn"]
 
-	constructor({
-		getTilesInColumn,
-		removeTilesFromCenter,
-	}: TileHandlerRocketColumnProps) {
-		super()
-		this.removeTilesFromCenter = removeTilesFromCenter
-		this.getTilesInColumn = getTilesInColumn
+	constructor(props: TileHandlerRocketColumnProps) {
+		super({ gameRules: props.gameRules })
+		this.fieldManipulator = props.fieldManipulator
 	}
 
-	onClick(tile: Tile): TileClickHandlerResult {
-		const { tiles, positions } = this.getTilesInColumn(
+	onClick(tile: Tile): TileRemovingInfo {
+		const { tiles, positions } = this.fieldManipulator.getTilesInColumn(
 			tile.getPosition().column
 		)
 		if (tiles.size === 0) {
 			return null
 		}
-		const removingPromise = this.removeTilesFromCenter(
+		const removingPromise = this.fieldManipulator.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
 		)

@@ -21,7 +21,13 @@ type GridSizes = {
 	tileGapY: number
 }
 
+export type GridProps = {
+	getContainerSize: () => { width: number; height: number }
+}
+
 export class Grid {
+	private readonly getContainerSize: GridProps["getContainerSize"]
+
 	private rows?: number
 	private columns?: number
 
@@ -33,13 +39,8 @@ export class Grid {
 	private tileGapX?: number
 	private tileGapY?: number
 
-	private getContainerSize: () => { width: number; height: number }
-
-	constructor(props: {
-		getContainerSize: () => { width: number; height: number }
-	}) {
-		const { getContainerSize } = props
-		this.getContainerSize = getContainerSize
+	constructor(props: GridProps) {
+		this.getContainerSize = props.getContainerSize
 	}
 
 	getSnapshot(): GridSnapshot {

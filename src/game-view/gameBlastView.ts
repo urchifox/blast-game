@@ -14,6 +14,11 @@ import { BoosterName } from "../game-blast/boosters/booster"
 import { Field } from "../game-blast/field"
 import { Grid } from "../game-blast/grid"
 import { Progress } from "../helpers/progress"
+import { ProgressManager } from "../game-blast/progressManager"
+import { LevelGenerator } from "../game-blast/levelGenerator"
+import { GameRules } from "../game-blast/gameRules"
+import { FieldManipulator } from "../game-blast/fieldManipulator"
+import { AnimationsManager } from "../helpers/animationManager"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -60,6 +65,8 @@ export class GameView extends View {
 			},
 		}
 
+		const gameRules = new GameRules()
+
 		const boosterProps = {
 			updateCounter: this.updateBoosterCounter.bind(this),
 			onActiveChange: this.toggleBoosterButtonActive.bind(this),
@@ -68,6 +75,7 @@ export class GameView extends View {
 			getContainerSize: this.getGameContainerSize.bind(this),
 		})
 		const field = new Field({ getFieldSnapshot: grid.getSnapshot.bind(grid) })
+
 		const scoreProgress = new Progress({
 			updateCounter: ({ currentValue, targetValue }) =>
 				this.updateScoreCounter({
@@ -82,20 +90,38 @@ export class GameView extends View {
 					movesLimit: targetValue,
 				}),
 		})
-
-		this.gameBlast = new GameBlast({
-			renderer: new PhaserRenderer({
-				container: this.gameContainer,
-				getContainerOffset: this.getContainerOffset.bind(this),
-			}),
-			setGameContainerSize: this.setGameContainerSize.bind(this),
-			openWinModal: this.openWinModal.bind(this),
-			openLossModal: this.openLossModal.bind(this),
-			boosterProps,
-			grid,
-			field,
+		const progressManager = new ProgressManager({
 			scoreProgress,
 			movesProgress,
+		})
+		const levelGenerator = new LevelGenerator({
+			gameRules,
+		})
+
+		const animationsManager = new AnimationsManager()
+		const renderer = new PhaserRenderer({
+			container: this.gameContainer,
+			getContainerOffset: this.getContainerOffset.bind(this),
+		})
+
+		const fieldManipulator = new FieldManipulator({
+			field,
+			grid,
+			renderer,
+			animationsManager,
+			setGameContainerSize: this.setGameContainerSize.bind(this),
+		})
+
+		this.gameBlast = new GameBlast({
+			fieldManipulator,
+			gameRules,
+			levelGenerator,
+			progressManager,
+			renderer,
+			animationsManager,
+			boosterProps,
+			openWinModal: this.openWinModal.bind(this),
+			openLossModal: this.openLossModal.bind(this),
 		})
 
 		this.setListeners()
@@ -110,10 +136,10 @@ export class GameView extends View {
 		window.addEventListener("resize", this.handleWindowResize)
 	}
 
-	override unmount() {
-		super.unmount()
-		this.gameBlast?.destroy()
+	override async unmount() {
 		window.removeEventListener("resize", this.handleWindowResize)
+		await this.gameBlast?.destroy()
+		super.unmount()
 	}
 
 	private handleWindowResize = this.onResize.bind(this)

@@ -1,41 +1,34 @@
-import { Tile, TilePosition } from "../tile"
+import { Tile } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
-import { TileClickHandlerResult } from "../types"
+import { TileRemovingInfo } from "../types"
+import { TileHandlerProps } from "./tileHandler"
+import { FieldManipulator } from "../fieldManipulator"
 
 export type TileHandlerDynamiteProps = {
-	removeTilesFromCenter: (
-		tiles: Set<Tile>,
-		centerPosition: TilePosition
-	) => Promise<void>
-	getTiles: () => Array<Tile>
-	getPositions: () => Array<TilePosition>
-}
+	fieldManipulator: Pick<
+		FieldManipulator,
+		"removeTilesFromCenter" | "getTiles" | "getPositions"
+	>
+} & TileHandlerProps
 
 export class TileHandlerDynamite extends TileHandlerSpecial {
+	private readonly fieldManipulator: TileHandlerDynamiteProps["fieldManipulator"]
+
 	readonly comboSize = 8
 	readonly kind = "dynamite"
-	private removeTilesFromCenter: TileHandlerDynamiteProps["removeTilesFromCenter"]
-	private getTiles: TileHandlerDynamiteProps["getTiles"]
-	private getPositions: TileHandlerDynamiteProps["getPositions"]
 
-	constructor({
-		removeTilesFromCenter,
-		getTiles,
-		getPositions,
-	}: TileHandlerDynamiteProps) {
-		super()
-		this.removeTilesFromCenter = removeTilesFromCenter
-		this.getTiles = getTiles
-		this.getPositions = getPositions
+	constructor(props: TileHandlerDynamiteProps) {
+		super({ gameRules: props.gameRules })
+		this.fieldManipulator = props.fieldManipulator
 	}
 
-	onClick(tile: Tile): TileClickHandlerResult {
-		const tiles = new Set(this.getTiles())
-		const positions = new Set(this.getPositions())
+	onClick(tile: Tile): TileRemovingInfo {
+		const tiles = new Set(this.fieldManipulator.getTiles())
+		const positions = new Set(this.fieldManipulator.getPositions())
 		if (tiles.size === 0) {
 			return null
 		}
-		const removingPromise = this.removeTilesFromCenter(
+		const removingPromise = this.fieldManipulator.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
 		)

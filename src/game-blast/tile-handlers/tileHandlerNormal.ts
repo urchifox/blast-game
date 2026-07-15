@@ -1,45 +1,34 @@
-import { TileHandler } from "./tileHandler"
-import { TileClickHandlerResult } from "../types"
+import { TileHandler, TileHandlerProps } from "./tileHandler"
+import { TileRemovingInfo } from "../types"
 import { Tile, TilePosition } from "../tile"
-import { MIN_COMBO_SIZE } from "../config"
+import { FieldManipulator } from "../fieldManipulator"
 
 export type TileHandlerNormalProps = {
-	getSameKindNeighbourTiles: (tile: Tile) => {
-		tilesToRemove: Set<Tile>
-		positionsToRemove: Set<TilePosition>
-	}
-	removeTiles: (tiles: Set<Tile>) => Promise<void>
+	fieldManipulator: Pick<
+		FieldManipulator,
+		"getSameKindNeighbourTiles" | "removeTiles" | "renderTile"
+	>
 	getComboPrize: (comboSize: number, position: TilePosition) => Tile | undefined
-	renderTile: (tile: Tile) => Promise<void>
-}
+} & TileHandlerProps
 
 export class TileHandlerNormal extends TileHandler {
-	private getSameKindNeighbourTiles: TileHandlerNormalProps["getSameKindNeighbourTiles"]
-	private removeTiles: TileHandlerNormalProps["removeTiles"]
-	private getComboPrize: TileHandlerNormalProps["getComboPrize"]
-	private renderTile: TileHandlerNormalProps["renderTile"]
+	private readonly fieldManipulator: TileHandlerNormalProps["fieldManipulator"]
+	private readonly getComboPrize: TileHandlerNormalProps["getComboPrize"]
 
-	constructor({
-		getSameKindNeighbourTiles,
-		removeTiles,
-		getComboPrize,
-		renderTile,
-	}: TileHandlerNormalProps) {
-		super()
-		this.getSameKindNeighbourTiles = getSameKindNeighbourTiles
-		this.removeTiles = removeTiles
-		this.getComboPrize = getComboPrize
-		this.renderTile = renderTile
+	constructor(props: TileHandlerNormalProps) {
+		super({ gameRules: props.gameRules })
+		this.fieldManipulator = props.fieldManipulator
+		this.getComboPrize = props.getComboPrize
 	}
 
-	onClick(tile: Tile): TileClickHandlerResult {
+	onClick(tile: Tile): TileRemovingInfo {
 		const { tilesToRemove, positionsToRemove } =
-			this.getSameKindNeighbourTiles(tile)
-		if (tilesToRemove.size < MIN_COMBO_SIZE) {
+			this.fieldManipulator.getSameKindNeighbourTiles(tile)
+		if (tilesToRemove.size < this.gameRules.MIN_COMBO_SIZE) {
 			return null
 		}
 
-		const removeTilesPromise = this.removeTiles(tilesToRemove)
+		const removeTilesPromise = this.fieldManipulator.removeTiles(tilesToRemove)
 		const newTile = this.getComboPrize(tilesToRemove.size, tile.getPosition())
 
 		return {
@@ -47,7 +36,7 @@ export class TileHandlerNormal extends TileHandler {
 			removedPositions: positionsToRemove,
 			removingPromise: removeTilesPromise.then(() => {
 				if (newTile !== undefined) {
-					return this.renderTile(newTile)
+					return this.fieldManipulator.renderTile(newTile)
 				}
 			}),
 		}

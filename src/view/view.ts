@@ -30,7 +30,7 @@ export abstract class View {
 		this.appRoot.appendChild(this.element)
 	}
 
-	unmount() {
+	unmount(): void | Promise<void> {
 		this.isMounted = false
 		this.element.remove()
 	}

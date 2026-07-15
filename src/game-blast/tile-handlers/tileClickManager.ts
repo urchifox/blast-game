@@ -8,45 +8,29 @@ import { TileHandlerRocketColumn } from "./tileHandlerRocketColumn"
 import { TileHandlerRocketRow } from "./tileHandlerRocketRow"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileClickHandler } from "../types"
+import { GameRules } from "../gameRules"
+import { FieldManipulator } from "../fieldManipulator"
 
 export type TileClickManagerProps = {
-	getTiles: () => Array<Tile>
-	getTilesInRadius: (
-		position: TilePosition,
-		radius: number
-	) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
-	getTilesInRow: (row: number) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
-	getTilesInColumn: (column: number) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
-	getSameKindNeighbourTiles: (tile: Tile) => {
-		tilesToRemove: Set<Tile>
-		positionsToRemove: Set<TilePosition>
-	}
-	renderTile: (tile: Tile) => Promise<void>
-	addTile: ({
-		kind,
-		position,
-	}: {
-		kind: TileKind
-		position: TilePosition
-	}) => Tile
-	removeTiles: (tiles: Set<Tile>) => Promise<void>
-	removeTilesFromCenter: (
-		tiles: Set<Tile>,
-		centerPosition: TilePosition
-	) => Promise<void>
-	getPositions: () => Array<TilePosition>
+	fieldManipulator: Pick<
+		FieldManipulator,
+		| "getTiles"
+		| "getTilesInRadius"
+		| "getTilesInRow"
+		| "getTilesInColumn"
+		| "getSameKindNeighbourTiles"
+		| "renderTile"
+		| "addTile"
+		| "removeTiles"
+		| "removeTilesFromCenter"
+		| "getPositions"
+	>
+	gameRules: GameRules
 }
 
 export class TileClickManager {
+	private readonly fieldManipulator: TileClickManagerProps["fieldManipulator"]
+
 	private tileHandlersSpecialMapByComboSize: Record<
 		number,
 		Array<TileHandlerSpecial>
@@ -54,41 +38,24 @@ export class TileClickManager {
 	private tileClickHandlersMapByKind: Record<TileKind, TileClickHandler>
 	private rewardableComboSizesSorted: Array<number>
 
-	private addTile: TileClickManagerProps["addTile"]
-
-	constructor({
-		getTiles,
-		getTilesInRadius,
-		getTilesInRow,
-		getTilesInColumn,
-		getSameKindNeighbourTiles,
-		renderTile,
-		addTile,
-		removeTiles,
-		removeTilesFromCenter,
-		getPositions,
-	}: TileClickManagerProps) {
-		this.addTile = addTile
-
+	constructor(props: TileClickManagerProps) {
+		this.fieldManipulator = props.fieldManipulator
 		const tileHandlersSpecial: Array<TileHandlerSpecial> = [
 			new TileHandlerBomb({
-				getTilesInRadius,
-				removeTilesFromCenter,
+				fieldManipulator: props.fieldManipulator,
+				gameRules: props.gameRules,
 			}),
 			new TileHandlerDynamite({
-				removeTilesFromCenter,
-				getTiles,
-				getPositions,
+				fieldManipulator: props.fieldManipulator,
+				gameRules: props.gameRules,
 			}),
 			new TileHandlerRocketRow({
-				getTilesInRow,
-				removeTilesFromCenter,
-				getTilesInRadius,
+				fieldManipulator: props.fieldManipulator,
+				gameRules: props.gameRules,
 			}),
 			new TileHandlerRocketColumn({
-				getTilesInColumn,
-				removeTilesFromCenter,
-				getTilesInRadius,
+				fieldManipulator: props.fieldManipulator,
+				gameRules: props.gameRules,
 			}),
 		]
 
@@ -119,10 +86,9 @@ export class TileClickManager {
 			.sort((a, b) => a - b)
 
 		const tileHandlerNormal = new TileHandlerNormal({
-			getSameKindNeighbourTiles,
-			removeTiles,
+			fieldManipulator: props.fieldManipulator,
 			getComboPrize: this.getComboPrize.bind(this),
-			renderTile,
+			gameRules: props.gameRules,
 		})
 
 		TILES_KINDS_NORMAL.forEach((kind) => {
@@ -165,7 +131,7 @@ export class TileClickManager {
 		}
 
 		const rewardHandler = pickRandomItem(rewardsHandlers)
-		const newTile = this.addTile({
+		const newTile = this.fieldManipulator.addTile({
 			kind: rewardHandler.kind,
 			position,
 		})
