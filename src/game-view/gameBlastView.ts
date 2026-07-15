@@ -17,8 +17,9 @@ import { Progress } from "../helpers/progress"
 import { ProgressManager } from "../game-blast/progressManager"
 import { LevelGenerator } from "../game-blast/levelGenerator"
 import { GameRules } from "../game-blast/gameRules"
-import { FieldManipulator } from "../game-blast/fieldManipulator"
+import { Presenter } from "../game-blast/presenter"
 import { AnimationsManager } from "../helpers/animationManager"
+import { FieldQueries } from "../game-blast/fieldQueries"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -104,7 +105,9 @@ export class GameView extends View {
 			getContainerOffset: this.getContainerOffset.bind(this),
 		})
 
-		const fieldManipulator = new FieldManipulator({
+		const fieldQueries = new FieldQueries({ field })
+
+		const presenter = new Presenter({
 			field,
 			grid,
 			renderer,
@@ -113,12 +116,11 @@ export class GameView extends View {
 		})
 
 		this.gameBlast = new GameBlast({
-			fieldManipulator,
+			fieldQueries,
+			presenter,
 			gameRules,
 			levelGenerator,
 			progressManager,
-			renderer,
-			animationsManager,
 			boosterProps,
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),

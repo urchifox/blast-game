@@ -130,14 +130,21 @@ export class Field {
 	getTilesInColumn(column: number) {
 		const tilesInColumn = this.tilesByColumns[column]
 		const tiles = new Set<Tile>()
+		const stringifiedPositions = new Set<string>()
 		const positions = new Set<TilePosition>()
 
 		for (const tile of tilesInColumn) {
 			if (tile === undefined) {
 				continue
 			}
+			const position = tile.getPosition()
+			const stringifiedPosition = JSON.stringify(position)
+			if (stringifiedPositions.has(stringifiedPosition)) {
+				continue
+			}
+			stringifiedPositions.add(stringifiedPosition)
+			positions.add(position)
 			tiles.add(tile)
-			positions.add(tile.getPosition())
 		}
 
 		return { tiles, positions }
@@ -145,14 +152,21 @@ export class Field {
 
 	getTilesInRow(row: number) {
 		const tiles = new Set<Tile>()
+		const stringifiedPositions = new Set<string>()
 		const positions = new Set<TilePosition>()
 
 		for (const tile of this.getTiles()) {
 			if (tile === undefined || tile.getPosition().row !== row) {
 				continue
 			}
+			const position = tile.getPosition()
+			const stringifiedPosition = JSON.stringify(position)
+			if (stringifiedPositions.has(stringifiedPosition)) {
+				continue
+			}
+			stringifiedPositions.add(stringifiedPosition)
+			positions.add(position)
 			tiles.add(tile)
-			positions.add(tile.getPosition())
 		}
 
 		return { tiles, positions }
@@ -167,6 +181,7 @@ export class Field {
 		const maxRow = Math.min(rows - 1, centerRow + radius)
 
 		const tiles = new Set<Tile>()
+		const stringifiedPositions = new Set<string>()
 		const positions = new Set<TilePosition>()
 
 		for (let column = minColumn; column <= maxColumn; column++) {
@@ -175,8 +190,14 @@ export class Field {
 				if (tile === undefined) {
 					continue
 				}
-				tiles.add(tile)
+				const position = { column, row }
+				const stringifiedPosition = JSON.stringify(position)
+				if (stringifiedPositions.has(stringifiedPosition)) {
+					continue
+				}
+				stringifiedPositions.add(stringifiedPosition)
 				positions.add({ column, row })
+				tiles.add(tile)
 			}
 		}
 

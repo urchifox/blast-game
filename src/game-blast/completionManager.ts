@@ -1,20 +1,20 @@
 import { isTileKindSpecial } from "./tile"
 import { GameRules } from "./gameRules"
-import { FieldManipulator } from "./fieldManipulator"
+import { Presenter } from "./presenter"
 import { GameCompletionStatus } from "./types"
+import { FieldQueries } from "./fieldQueries"
 
 export type CompletionManagerProps = {
-	fieldManipulator: Pick<
-		FieldManipulator,
-		"getTiles" | "getSameKindNeighbourTiles" | "shuffleField"
-	>
+	fieldQueries: FieldQueries
+	presenter: Pick<Presenter, "getSameKindNeighbourTiles" | "shuffleField">
 	gameRules: GameRules
 	isScoreTargetReached: () => boolean
 	isMovesTargetReached: () => boolean
 }
 
 export class CompletionManager {
-	private readonly fieldManipulator: CompletionManagerProps["fieldManipulator"]
+	private readonly fieldQueries: CompletionManagerProps["fieldQueries"]
+	private readonly presenter: CompletionManagerProps["presenter"]
 	private readonly gameRules: CompletionManagerProps["gameRules"]
 	private readonly isScoreTargetReached: CompletionManagerProps["isScoreTargetReached"]
 	private readonly isMovesTargetReached: CompletionManagerProps["isMovesTargetReached"]
@@ -25,7 +25,8 @@ export class CompletionManager {
 		GameCompletionStatus.IN_PROGRESS
 
 	constructor(props: CompletionManagerProps) {
-		this.fieldManipulator = props.fieldManipulator
+		this.fieldQueries = props.fieldQueries
+		this.presenter = props.presenter
 		this.gameRules = props.gameRules
 		this.isScoreTargetReached = props.isScoreTargetReached
 		this.isMovesTargetReached = props.isMovesTargetReached
@@ -78,7 +79,7 @@ export class CompletionManager {
 		this.shuffleAttempts++
 		let attempts = 0
 		while (!this.isPossibleToMakeMove()) {
-			await this.fieldManipulator.shuffleField()
+			await this.presenter.shuffleField()
 			attempts++
 			// Prevent infinite loop
 			if (attempts >= 100) {
@@ -90,14 +91,13 @@ export class CompletionManager {
 	}
 
 	private isPossibleToMakeMove() {
-		const tiles = this.fieldManipulator.getTiles()
+		const tiles = this.fieldQueries.getTiles()
 		return tiles.some((tile) => {
 			if (isTileKindSpecial(tile.getKind())) {
 				return true
 			}
-			const { tilesToRemove } =
-				this.fieldManipulator.getSameKindNeighbourTiles(tile)
-			return tilesToRemove.size > 1
+			const { tiles } = this.presenter.getSameKindNeighbourTiles(tile)
+			return tiles.size > 1
 		})
 	}
 

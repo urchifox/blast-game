@@ -3,19 +3,19 @@ import { Tile } from "../tile"
 import { TileRemovingInfo } from "../types"
 import { BoosterCommonProps } from "./booster"
 import { GameRules } from "../gameRules"
-import { FieldManipulator } from "../fieldManipulator"
+import { Presenter } from "../presenter"
+import { FieldQueries } from "../fieldQueries"
 
 export type BoosterHandlerBombProps = {
-	fieldManipulator: Pick<
-		FieldManipulator,
-		"getTilesInRadius" | "removeTilesFromCenter"
-	>
+	fieldQueries: FieldQueries
+	presenter: Pick<Presenter, "removeTilesFromCenter">
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
 }
 
 export class BoosterHandlerBomb extends BoosterHandler {
-	private readonly fieldManipulator: BoosterHandlerBombProps["fieldManipulator"]
+	private readonly fieldQueries: BoosterHandlerBombProps["fieldQueries"]
+	private readonly presenter: BoosterHandlerBombProps["presenter"]
 
 	constructor(props: BoosterHandlerBombProps) {
 		super({
@@ -24,11 +24,12 @@ export class BoosterHandlerBomb extends BoosterHandler {
 			gameRules: props.gameRules,
 			...props.boosterProps,
 		})
-		this.fieldManipulator = props.fieldManipulator
+		this.fieldQueries = props.fieldQueries
+		this.presenter = props.presenter
 	}
 
 	use(tile: Tile): TileRemovingInfo {
-		const { tiles, positions } = this.fieldManipulator.getTilesInRadius(
+		const { tiles, positions } = this.fieldQueries.getTilesInRadius(
 			tile.getPosition(),
 			this.gameRules.BOOSTER_BOMB_RADIUS
 		)
@@ -37,7 +38,7 @@ export class BoosterHandlerBomb extends BoosterHandler {
 		}
 
 		this.spend()
-		const removingPromise = this.fieldManipulator.removeTilesFromCenter(
+		const removingPromise = this.presenter.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
 		)

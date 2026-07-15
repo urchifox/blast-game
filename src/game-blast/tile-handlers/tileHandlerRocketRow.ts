@@ -2,34 +2,35 @@ import { Tile } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileRemovingInfo } from "../types"
 import { TileHandlerProps } from "./tileHandler"
-import { FieldManipulator } from "../fieldManipulator"
+import { Presenter } from "../presenter"
+import { FieldQueries } from "../fieldQueries"
 
 export type TileHandlerRocketRowProps = {
-	fieldManipulator: Pick<
-		FieldManipulator,
-		"getTilesInRow" | "removeTilesFromCenter"
-	>
+	fieldQueries: FieldQueries
+	presenter: Pick<Presenter, "removeTilesFromCenter">
 } & TileHandlerProps
 
 export class TileHandlerRocketRow extends TileHandlerSpecial {
-	private readonly fieldManipulator: TileHandlerRocketRowProps["fieldManipulator"]
+	private readonly fieldQueries: TileHandlerRocketRowProps["fieldQueries"]
+	private readonly presenter: TileHandlerRocketRowProps["presenter"]
 
 	readonly comboSize = 4
 	readonly kind = "rockets-row"
 
 	constructor(props: TileHandlerRocketRowProps) {
 		super({ gameRules: props.gameRules })
-		this.fieldManipulator = props.fieldManipulator
+		this.fieldQueries = props.fieldQueries
+		this.presenter = props.presenter
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {
-		const { tiles, positions } = this.fieldManipulator.getTilesInRow(
+		const { tiles, positions } = this.fieldQueries.getTilesInRow(
 			tile.getPosition().row
 		)
 		if (tiles.size === 0) {
 			return null
 		}
-		const removingPromise = this.fieldManipulator.removeTilesFromCenter(
+		const removingPromise = this.presenter.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
 		)
