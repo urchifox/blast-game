@@ -2,18 +2,18 @@ import { isTileKindSpecial } from "./tile"
 import { GameRules } from "./gameRules"
 import { Presenter } from "./presenter"
 import { GameCompletionStatus } from "./types"
+import { FieldQueries } from "./fieldQueries"
 
 export type CompletionManagerProps = {
-	presenter: Pick<
-		Presenter,
-		"getTiles" | "getSameKindNeighbourTiles" | "shuffleField"
-	>
+	fieldQueries: FieldQueries
+	presenter: Pick<Presenter, "getSameKindNeighbourTiles" | "shuffleField">
 	gameRules: GameRules
 	isScoreTargetReached: () => boolean
 	isMovesTargetReached: () => boolean
 }
 
 export class CompletionManager {
+	private readonly fieldQueries: CompletionManagerProps["fieldQueries"]
 	private readonly presenter: CompletionManagerProps["presenter"]
 	private readonly gameRules: CompletionManagerProps["gameRules"]
 	private readonly isScoreTargetReached: CompletionManagerProps["isScoreTargetReached"]
@@ -25,6 +25,7 @@ export class CompletionManager {
 		GameCompletionStatus.IN_PROGRESS
 
 	constructor(props: CompletionManagerProps) {
+		this.fieldQueries = props.fieldQueries
 		this.presenter = props.presenter
 		this.gameRules = props.gameRules
 		this.isScoreTargetReached = props.isScoreTargetReached
@@ -90,7 +91,7 @@ export class CompletionManager {
 	}
 
 	private isPossibleToMakeMove() {
-		const tiles = this.presenter.getTiles()
+		const tiles = this.fieldQueries.getTiles()
 		return tiles.some((tile) => {
 			if (isTileKindSpecial(tile.getKind())) {
 				return true

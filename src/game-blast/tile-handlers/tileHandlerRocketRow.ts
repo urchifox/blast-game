@@ -3,12 +3,15 @@ import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileRemovingInfo } from "../types"
 import { TileHandlerProps } from "./tileHandler"
 import { Presenter } from "../presenter"
+import { FieldQueries } from "../fieldQueries"
 
 export type TileHandlerRocketRowProps = {
-	presenter: Pick<Presenter, "getTilesInRow" | "removeTilesFromCenter">
+	fieldQueries: FieldQueries
+	presenter: Pick<Presenter, "removeTilesFromCenter">
 } & TileHandlerProps
 
 export class TileHandlerRocketRow extends TileHandlerSpecial {
+	private readonly fieldQueries: TileHandlerRocketRowProps["fieldQueries"]
 	private readonly presenter: TileHandlerRocketRowProps["presenter"]
 
 	readonly comboSize = 4
@@ -16,11 +19,12 @@ export class TileHandlerRocketRow extends TileHandlerSpecial {
 
 	constructor(props: TileHandlerRocketRowProps) {
 		super({ gameRules: props.gameRules })
+		this.fieldQueries = props.fieldQueries
 		this.presenter = props.presenter
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {
-		const { tiles, positions } = this.presenter.getTilesInRow(
+		const { tiles, positions } = this.fieldQueries.getTilesInRow(
 			tile.getPosition().row
 		)
 		if (tiles.size === 0) {

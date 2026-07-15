@@ -240,32 +240,6 @@ export class Presenter {
 
 	// #endregion
 
-	// #region Getters
-
-	getPositions() {
-		return this.field.getPositions()
-	}
-
-	getTiles() {
-		return this.field.getTiles()
-	}
-
-	getTilesInRadius(position: TilePosition, radius: number) {
-		return this.field.getTilesInRadius(position, radius)
-	}
-
-	getTilesInRow(row: number) {
-		return this.field.getTilesInRow(row)
-	}
-
-	getTilesInColumn(column: number) {
-		return this.field.getTilesInColumn(column)
-	}
-
-	getTileById(id: string) {
-		return this.field.getTileById(id)
-	}
-
 	getSameKindNeighbourTiles(tile: Tile) {
 		const position = tile.getPosition()
 		const kind = tile.getKind()
@@ -299,6 +273,4 @@ export class Presenter {
 
 		return { tilesToRemove, positionsToRemove }
 	}
-
-	// #endregion
 }

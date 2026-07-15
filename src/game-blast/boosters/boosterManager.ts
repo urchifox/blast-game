@@ -6,11 +6,13 @@ import { BoosterHandler } from "./boosterHandler"
 import { BoosterHandlerResult } from "../types"
 import { GameRules } from "../gameRules"
 import { Presenter } from "../presenter"
+import { FieldQueries } from "../fieldQueries"
 
 export type BoosterManagerProps = {
+	fieldQueries: FieldQueries
 	presenter: Pick<
 		Presenter,
-		"selectTile" | "swapTiles" | "getTilesInRadius" | "removeTilesFromCenter"
+		"selectTile" | "swapTiles" | "removeTilesFromCenter"
 	>
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
@@ -23,6 +25,7 @@ export class BoosterManager {
 	constructor(props: BoosterManagerProps) {
 		this.boostersHandlersMap = {
 			bomb: new BoosterHandlerBomb({
+				fieldQueries: props.fieldQueries,
 				presenter: props.presenter,
 				boosterProps: props.boosterProps,
 				gameRules: props.gameRules,

@@ -10,20 +10,17 @@ import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileClickHandler } from "../types"
 import { GameRules } from "../gameRules"
 import { Presenter } from "../presenter"
+import { FieldQueries } from "../fieldQueries"
 
 export type TileClickManagerProps = {
+	fieldQueries: FieldQueries
 	presenter: Pick<
 		Presenter,
-		| "getTiles"
-		| "getTilesInRadius"
-		| "getTilesInRow"
-		| "getTilesInColumn"
 		| "getSameKindNeighbourTiles"
 		| "renderTile"
 		| "addTile"
 		| "removeTiles"
 		| "removeTilesFromCenter"
-		| "getPositions"
 	>
 	gameRules: GameRules
 }
@@ -42,18 +39,22 @@ export class TileClickManager {
 		this.presenter = props.presenter
 		const tileHandlersSpecial: Array<TileHandlerSpecial> = [
 			new TileHandlerBomb({
+				fieldQueries: props.fieldQueries,
 				presenter: props.presenter,
 				gameRules: props.gameRules,
 			}),
 			new TileHandlerDynamite({
+				fieldQueries: props.fieldQueries,
 				presenter: props.presenter,
 				gameRules: props.gameRules,
 			}),
 			new TileHandlerRocketRow({
+				fieldQueries: props.fieldQueries,
 				presenter: props.presenter,
 				gameRules: props.gameRules,
 			}),
 			new TileHandlerRocketColumn({
+				fieldQueries: props.fieldQueries,
 				presenter: props.presenter,
 				gameRules: props.gameRules,
 			}),

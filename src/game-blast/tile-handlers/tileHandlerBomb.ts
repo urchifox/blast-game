@@ -3,12 +3,15 @@ import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileRemovingInfo } from "../types"
 import { TileHandlerProps } from "./tileHandler"
 import { Presenter } from "../presenter"
+import { FieldQueries } from "../fieldQueries"
 
 export type TileHandlerBombProps = {
-	presenter: Pick<Presenter, "getTilesInRadius" | "removeTilesFromCenter">
+	fieldQueries: FieldQueries
+	presenter: Pick<Presenter, "removeTilesFromCenter">
 } & TileHandlerProps
 
 export class TileHandlerBomb extends TileHandlerSpecial {
+	private readonly fieldQueries: TileHandlerBombProps["fieldQueries"]
 	private readonly presenter: TileHandlerBombProps["presenter"]
 
 	readonly comboSize = 6
@@ -16,11 +19,12 @@ export class TileHandlerBomb extends TileHandlerSpecial {
 
 	constructor(props: TileHandlerBombProps) {
 		super({ gameRules: props.gameRules })
+		this.fieldQueries = props.fieldQueries
 		this.presenter = props.presenter
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {
-		const { tiles, positions } = this.presenter.getTilesInRadius(
+		const { tiles, positions } = this.fieldQueries.getTilesInRadius(
 			tile.getPosition(),
 			this.gameRules.TILE_BOMB_RADIUS
 		)

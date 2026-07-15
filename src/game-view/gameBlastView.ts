@@ -19,6 +19,7 @@ import { LevelGenerator } from "../game-blast/levelGenerator"
 import { GameRules } from "../game-blast/gameRules"
 import { Presenter } from "../game-blast/presenter"
 import { AnimationsManager } from "../helpers/animationManager"
+import { FieldQueries } from "../game-blast/fieldQueries"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -104,6 +105,8 @@ export class GameView extends View {
 			getContainerOffset: this.getContainerOffset.bind(this),
 		})
 
+		const fieldQueries = new FieldQueries({ field })
+
 		const presenter = new Presenter({
 			field,
 			grid,
@@ -113,6 +116,7 @@ export class GameView extends View {
 		})
 
 		this.gameBlast = new GameBlast({
+			fieldQueries,
 			presenter,
 			gameRules,
 			levelGenerator,

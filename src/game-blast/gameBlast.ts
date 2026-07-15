@@ -7,8 +7,10 @@ import { LevelData, LevelGenerator } from "./levelGenerator"
 import { GameRules } from "./gameRules"
 import { GameCompletionStatus, TileRemovingInfo } from "./types"
 import { Presenter } from "./presenter"
+import { FieldQueries } from "./fieldQueries"
 
 type GameBlastProps = {
+	fieldQueries: FieldQueries
 	presenter: Presenter
 	gameRules: GameRules
 	levelGenerator: LevelGenerator
@@ -19,6 +21,7 @@ type GameBlastProps = {
 }
 
 export class GameBlast {
+	private readonly fieldQueries: GameBlastProps["fieldQueries"]
 	private readonly presenter: GameBlastProps["presenter"]
 	private readonly gameRules: GameBlastProps["gameRules"]
 	private readonly levelGenerator: GameBlastProps["levelGenerator"]
@@ -38,6 +41,7 @@ export class GameBlast {
 	}
 
 	constructor(props: GameBlastProps) {
+		this.fieldQueries = props.fieldQueries
 		this.presenter = props.presenter
 		this.gameRules = props.gameRules
 		this.levelGenerator = props.levelGenerator
@@ -46,17 +50,20 @@ export class GameBlast {
 		this.openLossModal = props.openLossModal
 
 		this.tileClickManager = new TileClickManager({
+			fieldQueries: this.fieldQueries,
 			presenter: this.presenter,
 			gameRules: props.gameRules,
 		})
 
 		this.boosterManager = new BoosterManager({
+			fieldQueries: this.fieldQueries,
 			presenter: props.presenter,
 			boosterProps: props.boosterProps,
 			gameRules: props.gameRules,
 		})
 
 		this.completionManager = new CompletionManager({
+			fieldQueries: this.fieldQueries,
 			presenter: this.presenter,
 			gameRules: props.gameRules,
 			isScoreTargetReached: this.progressManager.isScoreTargetReached.bind(
@@ -116,7 +123,7 @@ export class GameBlast {
 			return
 		}
 
-		const tile = this.presenter.getTileById(id)
+		const tile = this.fieldQueries.getTileById(id)
 		if (tile === undefined || tile.getIsBlocked()) {
 			return
 		}
