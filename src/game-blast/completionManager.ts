@@ -49,21 +49,32 @@ export class CompletionManager {
 		return this.gameCompletionStatus
 	}
 
-	async checkForMove() {
+	checkForMove() {
+		const isNewMovePossible = this.isNewMovePossible()
+		if (!isNewMovePossible) {
+			this.lose()
+		}
+	}
+
+	private async isNewMovePossible(): Promise<boolean> {
 		if (this.isCompleted) {
-			return
+			return false
 		}
 
 		const isPossibleToMakeMove = this.isPossibleToMakeMove()
 		if (isPossibleToMakeMove) {
-			return
+			return true
 		}
 
 		if (this.shuffleAttempts >= this.gameRules.MAX_SHUFFLE_ATTEMPTS) {
-			this.lose()
-			return
+			return false
 		}
 
+		const isNewMovePossible = await this.shuffleForNewMove()
+		return isNewMovePossible
+	}
+
+	private async shuffleForNewMove() {
 		this.shuffleAttempts++
 		let attempts = 0
 		while (!this.isPossibleToMakeMove()) {
@@ -71,10 +82,11 @@ export class CompletionManager {
 			attempts++
 			// Prevent infinite loop
 			if (attempts >= 100) {
-				this.lose()
-				return
+				return false
 			}
 		}
+
+		return true
 	}
 
 	private isPossibleToMakeMove() {
