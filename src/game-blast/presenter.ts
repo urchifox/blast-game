@@ -43,10 +43,45 @@ export class Presenter {
 		this.renderer.destroy()
 	}
 
+	async clear() {
+		await this.renderer.clearTiles()
+		this.field.clearTiles()
+		this.animationsManager.clear()
+	}
+
+	create({ columns, rows }: { columns: number; rows: number }) {
+		this.setGameContainerSize(null)
+		this.grid.createGrid({ columns, rows })
+		this.field.generateTiles()
+		const gridSnapshot = this.grid.getSnapshot()
+		this.setGameContainerSize({
+			width: gridSnapshot.gridWidth,
+			height: gridSnapshot.gridHeight,
+		})
+		this.renderer.updateFieldOffsets()
+		this.renderer.renderTiles({
+			tilesSnapshots: this.field.getTilesSnapshots(),
+			gridSnapshot: gridSnapshot,
+		})
+	}
+
+	updateGameSize() {
+		this.setGameContainerSize(null)
+		const gridSnapshot = this.grid.updateGridSizes()
+		this.setGameContainerSize({
+			width: gridSnapshot.gridWidth,
+			height: gridSnapshot.gridHeight,
+		})
+		const tilesSnapshots = this.field.getTilesSnapshots()
+		this.renderer.resize({ tilesSnapshots, gridSnapshot })
+	}
+
 	async animate(promise: Promise<void>) {
 		this.animationsManager.animate(promise)
 		await this.animationsManager.waitAllAnimations()
 	}
+
+	// #region Tiles Manipulation
 
 	selectTile(tile: Tile) {
 		this.renderer.selectTile({
@@ -55,65 +90,15 @@ export class Presenter {
 		})
 	}
 
-	swapTiles(tile1: Tile, tile2: Tile) {
-		this.field.swapTiles(tile1, tile2)
-
-		const promiseSelection = this.renderer
-			.selectTile({
-				tileSnapshot: tile2.getSnapshot(),
-				gridSnapshot: this.grid.getSnapshot(),
-			})
-			.then(() => {
-				return this.renderer.swapTiles({
-					tilesSnapshots: [tile1.getSnapshot(), tile2.getSnapshot()],
-					gridSnapshot: this.grid.getSnapshot(),
-				})
-			})
-			.then(() => {
-				return Promise.all([
-					this.renderer.unselectTile({
-						tileSnapshot: tile1.getSnapshot(),
-						gridSnapshot: this.grid.getSnapshot(),
-					}),
-					this.renderer.unselectTile({
-						tileSnapshot: tile2.getSnapshot(),
-						gridSnapshot: this.grid.getSnapshot(),
-					}),
-				])
-			})
-			.then(() => {})
-
-		this.animationsManager.animate(promiseSelection)
+	addTile({ kind, position }: { kind: TileKind; position: TilePosition }) {
+		return this.field.addTile({ kind, position })
 	}
 
-	getSameKindNeighbourTiles(tile: Tile) {
-		const position = tile.getPosition()
-		const kind = tile.getKind()
-
-		const tilesToRemove = new Set<Tile>([tile])
-		const positionsToRemove = new Set<TilePosition>([position])
-
-		for (const tileToRemove of tilesToRemove) {
-			const neighborPositions = this.grid.getNeighbourPositions(
-				tileToRemove.getPosition()
-			)
-			for (const neighborPosition of neighborPositions) {
-				if (positionsToRemove.has(neighborPosition)) {
-					continue
-				}
-				const neighborTile = this.field.getTile(neighborPosition)
-				if (
-					neighborTile !== undefined &&
-					neighborTile.getKind() === kind &&
-					!neighborTile.getIsBlocked()
-				) {
-					tilesToRemove.add(neighborTile)
-					positionsToRemove.add(neighborPosition)
-				}
-			}
-		}
-
-		return { tilesToRemove, positionsToRemove }
+	renderTile(tile: Tile) {
+		return this.renderer.renderTiles({
+			tilesSnapshots: [tile.getSnapshot()],
+			gridSnapshot: this.grid.getSnapshot(),
+		})
 	}
 
 	removeTiles(tiles: Set<Tile>): Promise<void> {
@@ -166,6 +151,41 @@ export class Presenter {
 			}
 		})()
 	}
+
+	swapTiles(tile1: Tile, tile2: Tile) {
+		this.field.swapTiles(tile1, tile2)
+
+		const promiseSelection = this.renderer
+			.selectTile({
+				tileSnapshot: tile2.getSnapshot(),
+				gridSnapshot: this.grid.getSnapshot(),
+			})
+			.then(() => {
+				return this.renderer.swapTiles({
+					tilesSnapshots: [tile1.getSnapshot(), tile2.getSnapshot()],
+					gridSnapshot: this.grid.getSnapshot(),
+				})
+			})
+			.then(() => {
+				return Promise.all([
+					this.renderer.unselectTile({
+						tileSnapshot: tile1.getSnapshot(),
+						gridSnapshot: this.grid.getSnapshot(),
+					}),
+					this.renderer.unselectTile({
+						tileSnapshot: tile2.getSnapshot(),
+						gridSnapshot: this.grid.getSnapshot(),
+					}),
+				])
+			})
+			.then(() => {})
+
+		this.animationsManager.animate(promiseSelection)
+	}
+
+	// #endregion
+
+	// #region Field Manipulation
 
 	fillEmptyPositions(positions: Set<TilePosition>) {
 		const { movedTiles, newTiles } = this.field.fillEmptyPositions(positions)
@@ -231,45 +251,9 @@ export class Presenter {
 		return this.animationsManager.animate(shuffleFieldPromise)
 	}
 
-	async clear() {
-		await this.renderer.clearTiles()
-		this.field.clearTiles()
-		this.animationsManager.clear()
-	}
+	// #endregion
 
-	renderTile(tile: Tile) {
-		return this.renderer.renderTiles({
-			tilesSnapshots: [tile.getSnapshot()],
-			gridSnapshot: this.grid.getSnapshot(),
-		})
-	}
-
-	updateGameSize() {
-		this.setGameContainerSize(null)
-		const gridSnapshot = this.grid.updateGridSizes()
-		this.setGameContainerSize({
-			width: gridSnapshot.gridWidth,
-			height: gridSnapshot.gridHeight,
-		})
-		const tilesSnapshots = this.field.getTilesSnapshots()
-		this.renderer.resize({ tilesSnapshots, gridSnapshot })
-	}
-
-	create({ columns, rows }: { columns: number; rows: number }) {
-		this.setGameContainerSize(null)
-		this.grid.createGrid({ columns, rows })
-		this.field.generateTiles()
-		const gridSnapshot = this.grid.getSnapshot()
-		this.setGameContainerSize({
-			width: gridSnapshot.gridWidth,
-			height: gridSnapshot.gridHeight,
-		})
-		this.renderer.updateFieldOffsets()
-		this.renderer.renderTiles({
-			tilesSnapshots: this.field.getTilesSnapshots(),
-			gridSnapshot: gridSnapshot,
-		})
-	}
+	// #region Getters
 
 	getPositions() {
 		return this.field.getPositions()
@@ -295,7 +279,35 @@ export class Presenter {
 		return this.field.getTileById(id)
 	}
 
-	addTile({ kind, position }: { kind: TileKind; position: TilePosition }) {
-		return this.field.addTile({ kind, position })
+	getSameKindNeighbourTiles(tile: Tile) {
+		const position = tile.getPosition()
+		const kind = tile.getKind()
+
+		const tilesToRemove = new Set<Tile>([tile])
+		const positionsToRemove = new Set<TilePosition>([position])
+
+		for (const tileToRemove of tilesToRemove) {
+			const neighborPositions = this.grid.getNeighbourPositions(
+				tileToRemove.getPosition()
+			)
+			for (const neighborPosition of neighborPositions) {
+				if (positionsToRemove.has(neighborPosition)) {
+					continue
+				}
+				const neighborTile = this.field.getTile(neighborPosition)
+				if (
+					neighborTile !== undefined &&
+					neighborTile.getKind() === kind &&
+					!neighborTile.getIsBlocked()
+				) {
+					tilesToRemove.add(neighborTile)
+					positionsToRemove.add(neighborPosition)
+				}
+			}
+		}
+
+		return { tilesToRemove, positionsToRemove }
 	}
+
+	// #endregion
 }
