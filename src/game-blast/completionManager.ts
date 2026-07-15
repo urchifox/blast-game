@@ -49,8 +49,8 @@ export class CompletionManager {
 		return this.gameCompletionStatus
 	}
 
-	checkForMove() {
-		const isNewMovePossible = this.isNewMovePossible()
+	async checkForMove() {
+		const isNewMovePossible = await this.isNewMovePossible()
 		if (!isNewMovePossible) {
 			this.lose()
 		}
