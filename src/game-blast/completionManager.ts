@@ -96,8 +96,8 @@ export class CompletionManager {
 			if (isTileKindSpecial(tile.getKind())) {
 				return true
 			}
-			const { tilesToRemove } = this.presenter.getSameKindNeighbourTiles(tile)
-			return tilesToRemove.size > 1
+			const { tiles } = this.presenter.getSameKindNeighbourTiles(tile)
+			return tiles.size > 1
 		})
 	}
 

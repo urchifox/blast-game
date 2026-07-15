@@ -244,17 +244,17 @@ export class Presenter {
 		const position = tile.getPosition()
 		const kind = tile.getKind()
 
-		const tilesToRemove = new Set<Tile>([tile])
-		const stringifiedPositionsToRemove = new Set<string>()
-		const positionsToRemove = new Set<TilePosition>([position])
+		const tiles = new Set<Tile>([tile])
+		const stringifiedPositions = new Set<string>()
+		const positions = new Set<TilePosition>([position])
 
-		for (const tileToRemove of tilesToRemove) {
+		for (const tileToRemove of tiles) {
 			const neighborPositions = this.grid.getNeighbourPositions(
 				tileToRemove.getPosition()
 			)
 			for (const neighborPosition of neighborPositions) {
 				const stringifiedPosition = JSON.stringify(neighborPosition)
-				if (stringifiedPositionsToRemove.has(stringifiedPosition)) {
+				if (stringifiedPositions.has(stringifiedPosition)) {
 					continue
 				}
 
@@ -264,13 +264,13 @@ export class Presenter {
 					neighborTile.getKind() === kind &&
 					!neighborTile.getIsBlocked()
 				) {
-					tilesToRemove.add(neighborTile)
-					stringifiedPositionsToRemove.add(stringifiedPosition)
-					positionsToRemove.add(neighborPosition)
+					tiles.add(neighborTile)
+					stringifiedPositions.add(stringifiedPosition)
+					positions.add(neighborPosition)
 				}
 			}
 		}
 
-		return { tilesToRemove, positionsToRemove }
+		return { tiles, positions }
 	}
 }

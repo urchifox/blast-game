@@ -22,18 +22,17 @@ export class TileHandlerNormal extends TileHandler {
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {
-		const { tilesToRemove, positionsToRemove } =
-			this.presenter.getSameKindNeighbourTiles(tile)
-		if (tilesToRemove.size < this.gameRules.MIN_COMBO_SIZE) {
+		const { tiles, positions } = this.presenter.getSameKindNeighbourTiles(tile)
+		if (tiles.size < this.gameRules.MIN_COMBO_SIZE) {
 			return null
 		}
 
-		const removeTilesPromise = this.presenter.removeTiles(tilesToRemove)
-		const newTile = this.getComboPrize(tilesToRemove.size, tile.getPosition())
+		const removeTilesPromise = this.presenter.removeTiles(tiles)
+		const newTile = this.getComboPrize(tiles.size, tile.getPosition())
 
 		return {
-			removedTiles: tilesToRemove,
-			removedPositions: positionsToRemove,
+			removedTiles: tiles,
+			removedPositions: positions,
 			removingPromise: removeTilesPromise.then(() => {
 				if (newTile !== undefined) {
 					return this.presenter.renderTile(newTile)
