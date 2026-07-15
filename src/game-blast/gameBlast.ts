@@ -145,7 +145,7 @@ export class GameBlast {
 		const animationPromise = removingPromise
 			.then(() => this.presenter.fillEmptyPositions(removedPositions))
 			.then(() => this.completionManager.checkForMove())
-		this.presenter.animate(animationPromise).then(() => {
+		this.presenter.animateAndWaitForAll(animationPromise).then(() => {
 			this.processGameCompletion()
 		})
 	}

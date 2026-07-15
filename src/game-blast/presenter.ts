@@ -76,7 +76,7 @@ export class Presenter {
 		this.renderer.resize({ tilesSnapshots, gridSnapshot })
 	}
 
-	async animate(promise: Promise<void>) {
+	async animateAndWaitForAll(promise: Promise<void>) {
 		this.animationsManager.animate(promise)
 		await this.animationsManager.waitAllAnimations()
 	}
