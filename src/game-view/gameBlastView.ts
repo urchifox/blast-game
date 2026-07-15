@@ -117,7 +117,6 @@ export class GameView extends View {
 			gameRules,
 			levelGenerator,
 			progressManager,
-			animationsManager,
 			boosterProps,
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),

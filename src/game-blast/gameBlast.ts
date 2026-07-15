@@ -1,5 +1,4 @@
 import { BoosterName, BoosterCommonProps } from "./boosters/booster"
-import { AnimationsManager } from "../helpers/animationManager"
 import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { BoosterManager } from "./boosters/boosterManager"
 import { CompletionManager } from "./completionManager"
@@ -14,7 +13,6 @@ type GameBlastProps = {
 	gameRules: GameRules
 	levelGenerator: LevelGenerator
 	progressManager: ProgressManager
-	animationsManager: AnimationsManager
 	boosterProps: BoosterCommonProps
 	openWinModal: () => void
 	openLossModal: () => void
@@ -25,7 +23,6 @@ export class GameBlast {
 	private readonly gameRules: GameBlastProps["gameRules"]
 	private readonly levelGenerator: GameBlastProps["levelGenerator"]
 	private readonly progressManager: GameBlastProps["progressManager"]
-	private readonly animationsManager: GameBlastProps["animationsManager"]
 	private readonly openWinModal: GameBlastProps["openWinModal"]
 	private readonly openLossModal: GameBlastProps["openLossModal"]
 
@@ -45,7 +42,6 @@ export class GameBlast {
 		this.gameRules = props.gameRules
 		this.levelGenerator = props.levelGenerator
 		this.progressManager = props.progressManager
-		this.animationsManager = props.animationsManager
 		this.openWinModal = props.openWinModal
 		this.openLossModal = props.openLossModal
 
@@ -152,8 +148,7 @@ export class GameBlast {
 		const animationPromise = removingPromise
 			.then(() => fillEmptyPositionsPromise)
 			.then(() => this.completionManager.checkForMove())
-		this.animationsManager.animate(animationPromise)
-		this.animationsManager.waitAllAnimations().then(() => {
+		this.presenter.animate(animationPromise).then(() => {
 			this.processGameCompletion()
 		})
 	}

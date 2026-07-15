@@ -43,6 +43,11 @@ export class Presenter {
 		this.renderer.destroy()
 	}
 
+	async animate(promise: Promise<void>) {
+		this.animationsManager.animate(promise)
+		await this.animationsManager.waitAllAnimations()
+	}
+
 	selectTile(tile: Tile) {
 		this.renderer.selectTile({
 			tileSnapshot: tile.getSnapshot(),
