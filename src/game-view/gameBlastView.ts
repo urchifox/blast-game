@@ -17,7 +17,7 @@ import { Progress } from "../helpers/progress"
 import { ProgressManager } from "../game-blast/progressManager"
 import { LevelGenerator } from "../game-blast/levelGenerator"
 import { GameRules } from "../game-blast/gameRules"
-import { FieldManipulator } from "../game-blast/fieldManipulator"
+import { Presenter } from "../game-blast/presenter"
 import { AnimationsManager } from "../helpers/animationManager"
 
 export class GameView extends View {
@@ -104,7 +104,7 @@ export class GameView extends View {
 			getContainerOffset: this.getContainerOffset.bind(this),
 		})
 
-		const fieldManipulator = new FieldManipulator({
+		const presenter = new Presenter({
 			field,
 			grid,
 			renderer,
@@ -113,7 +113,7 @@ export class GameView extends View {
 		})
 
 		this.gameBlast = new GameBlast({
-			fieldManipulator,
+			presenter,
 			gameRules,
 			levelGenerator,
 			progressManager,

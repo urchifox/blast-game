@@ -2,33 +2,33 @@ import { Tile } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileRemovingInfo } from "../types"
 import { TileHandlerProps } from "./tileHandler"
-import { FieldManipulator } from "../fieldManipulator"
+import { Presenter } from "../presenter"
 
 export type TileHandlerDynamiteProps = {
-	fieldManipulator: Pick<
-		FieldManipulator,
+	presenter: Pick<
+		Presenter,
 		"removeTilesFromCenter" | "getTiles" | "getPositions"
 	>
 } & TileHandlerProps
 
 export class TileHandlerDynamite extends TileHandlerSpecial {
-	private readonly fieldManipulator: TileHandlerDynamiteProps["fieldManipulator"]
+	private readonly presenter: TileHandlerDynamiteProps["presenter"]
 
 	readonly comboSize = 8
 	readonly kind = "dynamite"
 
 	constructor(props: TileHandlerDynamiteProps) {
 		super({ gameRules: props.gameRules })
-		this.fieldManipulator = props.fieldManipulator
+		this.presenter = props.presenter
 	}
 
 	onClick(tile: Tile): TileRemovingInfo {
-		const tiles = new Set(this.fieldManipulator.getTiles())
-		const positions = new Set(this.fieldManipulator.getPositions())
+		const tiles = new Set(this.presenter.getTiles())
+		const positions = new Set(this.presenter.getPositions())
 		if (tiles.size === 0) {
 			return null
 		}
-		const removingPromise = this.fieldManipulator.removeTilesFromCenter(
+		const removingPromise = this.presenter.removeTilesFromCenter(
 			tiles,
 			tile.getPosition()
 		)

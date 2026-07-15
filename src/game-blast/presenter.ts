@@ -6,7 +6,7 @@ import { wait } from "../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./config"
 import { AnimationsManager } from "../helpers/animationManager"
 
-type FieldManipulatorProps = {
+type PresenterProps = {
 	field: Field
 	grid: Grid
 	renderer: Renderer
@@ -19,14 +19,14 @@ type FieldManipulatorProps = {
 	) => void
 }
 
-export class FieldManipulator {
-	private readonly field: FieldManipulatorProps["field"]
-	private readonly grid: FieldManipulatorProps["grid"]
-	private readonly renderer: FieldManipulatorProps["renderer"]
-	private readonly animationsManager: FieldManipulatorProps["animationsManager"]
-	private readonly setGameContainerSize: FieldManipulatorProps["setGameContainerSize"]
+export class Presenter {
+	private readonly field: PresenterProps["field"]
+	private readonly grid: PresenterProps["grid"]
+	private readonly renderer: PresenterProps["renderer"]
+	private readonly animationsManager: PresenterProps["animationsManager"]
+	private readonly setGameContainerSize: PresenterProps["setGameContainerSize"]
 
-	constructor(props: FieldManipulatorProps) {
+	constructor(props: PresenterProps) {
 		this.field = props.field
 		this.grid = props.grid
 		this.renderer = props.renderer

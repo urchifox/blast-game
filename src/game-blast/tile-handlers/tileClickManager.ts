@@ -9,11 +9,11 @@ import { TileHandlerRocketRow } from "./tileHandlerRocketRow"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileClickHandler } from "../types"
 import { GameRules } from "../gameRules"
-import { FieldManipulator } from "../fieldManipulator"
+import { Presenter } from "../presenter"
 
 export type TileClickManagerProps = {
-	fieldManipulator: Pick<
-		FieldManipulator,
+	presenter: Pick<
+		Presenter,
 		| "getTiles"
 		| "getTilesInRadius"
 		| "getTilesInRow"
@@ -29,7 +29,7 @@ export type TileClickManagerProps = {
 }
 
 export class TileClickManager {
-	private readonly fieldManipulator: TileClickManagerProps["fieldManipulator"]
+	private readonly presenter: TileClickManagerProps["presenter"]
 
 	private tileHandlersSpecialMapByComboSize: Record<
 		number,
@@ -39,22 +39,22 @@ export class TileClickManager {
 	private rewardableComboSizesSorted: Array<number>
 
 	constructor(props: TileClickManagerProps) {
-		this.fieldManipulator = props.fieldManipulator
+		this.presenter = props.presenter
 		const tileHandlersSpecial: Array<TileHandlerSpecial> = [
 			new TileHandlerBomb({
-				fieldManipulator: props.fieldManipulator,
+				presenter: props.presenter,
 				gameRules: props.gameRules,
 			}),
 			new TileHandlerDynamite({
-				fieldManipulator: props.fieldManipulator,
+				presenter: props.presenter,
 				gameRules: props.gameRules,
 			}),
 			new TileHandlerRocketRow({
-				fieldManipulator: props.fieldManipulator,
+				presenter: props.presenter,
 				gameRules: props.gameRules,
 			}),
 			new TileHandlerRocketColumn({
-				fieldManipulator: props.fieldManipulator,
+				presenter: props.presenter,
 				gameRules: props.gameRules,
 			}),
 		]
@@ -86,7 +86,7 @@ export class TileClickManager {
 			.sort((a, b) => a - b)
 
 		const tileHandlerNormal = new TileHandlerNormal({
-			fieldManipulator: props.fieldManipulator,
+			presenter: props.presenter,
 			getComboPrize: this.getComboPrize.bind(this),
 			gameRules: props.gameRules,
 		})
@@ -131,7 +131,7 @@ export class TileClickManager {
 		}
 
 		const rewardHandler = pickRandomItem(rewardsHandlers)
-		const newTile = this.fieldManipulator.addTile({
+		const newTile = this.presenter.addTile({
 			kind: rewardHandler.kind,
 			position,
 		})

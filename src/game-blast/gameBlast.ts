@@ -8,10 +8,10 @@ import { ProgressManager } from "./progressManager"
 import { LevelData, LevelGenerator } from "./levelGenerator"
 import { GameRules } from "./gameRules"
 import { GameCompletionStatus, TileRemovingInfo } from "./types"
-import { FieldManipulator } from "./fieldManipulator"
+import { Presenter } from "./presenter"
 
 type GameBlastProps = {
-	fieldManipulator: FieldManipulator
+	presenter: Presenter
 	gameRules: GameRules
 	levelGenerator: LevelGenerator
 	progressManager: ProgressManager
@@ -23,7 +23,7 @@ type GameBlastProps = {
 }
 
 export class GameBlast {
-	private readonly fieldManipulator: GameBlastProps["fieldManipulator"]
+	private readonly presenter: GameBlastProps["presenter"]
 	private readonly gameRules: GameBlastProps["gameRules"]
 	private readonly levelGenerator: GameBlastProps["levelGenerator"]
 	private readonly progressManager: GameBlastProps["progressManager"]
@@ -44,7 +44,7 @@ export class GameBlast {
 	}
 
 	constructor(props: GameBlastProps) {
-		this.fieldManipulator = props.fieldManipulator
+		this.presenter = props.presenter
 		this.gameRules = props.gameRules
 		this.levelGenerator = props.levelGenerator
 		this.progressManager = props.progressManager
@@ -54,18 +54,18 @@ export class GameBlast {
 		this.openLossModal = props.openLossModal
 
 		this.tileClickManager = new TileClickManager({
-			fieldManipulator: this.fieldManipulator,
+			presenter: this.presenter,
 			gameRules: props.gameRules,
 		})
 
 		this.boosterManager = new BoosterManager({
-			fieldManipulator: props.fieldManipulator,
+			presenter: props.presenter,
 			boosterProps: props.boosterProps,
 			gameRules: props.gameRules,
 		})
 
 		this.completionManager = new CompletionManager({
-			fieldManipulator: this.fieldManipulator,
+			presenter: this.presenter,
 			gameRules: props.gameRules,
 			isScoreTargetReached: this.progressManager.isScoreTargetReached.bind(
 				this.progressManager
@@ -88,14 +88,14 @@ export class GameBlast {
 	}
 
 	private async clearLevel() {
-		await this.fieldManipulator.clear()
+		await this.presenter.clear()
 		this.progressManager.clear()
 		this.boosterManager.clear()
 		this.completionManager.clear()
 	}
 
 	onResize() {
-		this.fieldManipulator.updateGameSize()
+		this.presenter.updateGameSize()
 	}
 
 	// #region Level creation
@@ -114,7 +114,7 @@ export class GameBlast {
 	private createLevel() {
 		const { columns, rows, goalScore, movesLimit } = this.levelData
 		this.boosterManager.setInitialValue()
-		this.fieldManipulator.create({ columns, rows })
+		this.presenter.create({ columns, rows })
 		this.progressManager.setInitialValues({ goalScore, movesLimit })
 	}
 
@@ -125,7 +125,7 @@ export class GameBlast {
 			return
 		}
 
-		const tile = this.fieldManipulator.getTileById(id)
+		const tile = this.presenter.getTileById(id)
 		if (tile === undefined || tile.getIsBlocked()) {
 			return
 		}
@@ -152,7 +152,7 @@ export class GameBlast {
 		this.progressManager.addProgress(points)
 
 		const fillEmptyPositionsPromise =
-			this.fieldManipulator.fillEmptyPositions(removedPositions)
+			this.presenter.fillEmptyPositions(removedPositions)
 
 		const animationPromise = removingPromise
 			.then(() => fillEmptyPositionsPromise)

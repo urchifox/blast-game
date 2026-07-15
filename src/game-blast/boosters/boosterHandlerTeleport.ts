@@ -2,17 +2,17 @@ import { BoosterCommonProps } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { Tile } from "../tile"
 import { GameRules } from "../gameRules"
-import { FieldManipulator } from "../fieldManipulator"
+import { Presenter } from "../presenter"
 import { TileRemovingInfo } from "../types"
 
 type BoosterHandlerTeleportProps = {
-	fieldManipulator: Pick<FieldManipulator, "selectTile" | "swapTiles">
+	presenter: Pick<Presenter, "selectTile" | "swapTiles">
 	boosterProps: BoosterCommonProps
 	gameRules: GameRules
 }
 
 export class BoosterHandlerTeleport extends BoosterHandler {
-	private readonly fieldManipulator: BoosterHandlerTeleportProps["fieldManipulator"]
+	private readonly presenter: BoosterHandlerTeleportProps["presenter"]
 
 	private selectedTile: Tile | null = null
 
@@ -23,20 +23,20 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 			gameRules: props.gameRules,
 			...props.boosterProps,
 		})
-		this.fieldManipulator = props.fieldManipulator
+		this.presenter = props.presenter
 	}
 
 	use(tile: Tile): TileRemovingInfo {
 		if (this.selectedTile === null) {
 			this.selectedTile = tile
-			this.fieldManipulator.selectTile(tile)
+			this.presenter.selectTile(tile)
 			return null
 		}
 
 		const selectedTile = this.selectedTile
 		this.selectedTile = null
 		this.spend()
-		this.fieldManipulator.swapTiles(selectedTile, tile)
+		this.presenter.swapTiles(selectedTile, tile)
 		return null
 	}
 
