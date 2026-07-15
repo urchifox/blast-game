@@ -142,11 +142,8 @@ export class GameBlast {
 		const points = this.gameRules.getPoints(removedTiles.size)
 		this.progressManager.addProgress(points)
 
-		const fillEmptyPositionsPromise =
-			this.presenter.fillEmptyPositions(removedPositions)
-
 		const animationPromise = removingPromise
-			.then(() => fillEmptyPositionsPromise)
+			.then(() => this.presenter.fillEmptyPositions(removedPositions))
 			.then(() => this.completionManager.checkForMove())
 		this.presenter.animate(animationPromise).then(() => {
 			this.processGameCompletion()

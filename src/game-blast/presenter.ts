@@ -101,7 +101,7 @@ export class Presenter {
 		})
 	}
 
-	removeTiles(tiles: Set<Tile>): Promise<void> {
+	async removeTiles(tiles: Set<Tile>): Promise<void> {
 		const ids = new Set<string>()
 		for (const tile of tiles) {
 			const removedTileId = tile.getId()
@@ -110,17 +110,14 @@ export class Presenter {
 			ids.add(removedTileId)
 		}
 
-		return new Promise<void>((resolve) => {
-			ids.forEach((id) => {
-				this.renderer.removeTile(id)
-			})
-			wait(TILE_DELAY_BETWEEN_REMOVALS_MS).then(() => {
-				resolve()
-			})
+		ids.forEach((id) => {
+			this.renderer.removeTile(id)
 		})
+
+		await wait(TILE_DELAY_BETWEEN_REMOVALS_MS)
 	}
 
-	removeTilesFromCenter(
+	async removeTilesFromCenter(
 		tiles: Set<Tile>,
 		centerPosition: TilePosition
 	): Promise<void> {
@@ -139,17 +136,9 @@ export class Presenter {
 			(a, b) => a[0] - b[0]
 		)
 
-		const animationPromises = new Set<Promise<void>>()
 		for (const [_, tiles] of sortedGroupedTiles) {
-			const removeTilesPromise = this.removeTiles(tiles)
-			animationPromises.add(removeTilesPromise)
+			await this.removeTiles(tiles)
 		}
-
-		return (async () => {
-			for (const promise of animationPromises) {
-				await promise
-			}
-		})()
 	}
 
 	swapTiles(tile1: Tile, tile2: Tile) {
@@ -284,6 +273,7 @@ export class Presenter {
 		const kind = tile.getKind()
 
 		const tilesToRemove = new Set<Tile>([tile])
+		const stringifiedPositionsToRemove = new Set<string>()
 		const positionsToRemove = new Set<TilePosition>([position])
 
 		for (const tileToRemove of tilesToRemove) {
@@ -291,9 +281,11 @@ export class Presenter {
 				tileToRemove.getPosition()
 			)
 			for (const neighborPosition of neighborPositions) {
-				if (positionsToRemove.has(neighborPosition)) {
+				const stringifiedPosition = JSON.stringify(neighborPosition)
+				if (stringifiedPositionsToRemove.has(stringifiedPosition)) {
 					continue
 				}
+
 				const neighborTile = this.field.getTile(neighborPosition)
 				if (
 					neighborTile !== undefined &&
@@ -301,6 +293,7 @@ export class Presenter {
 					!neighborTile.getIsBlocked()
 				) {
 					tilesToRemove.add(neighborTile)
+					stringifiedPositionsToRemove.add(stringifiedPosition)
 					positionsToRemove.add(neighborPosition)
 				}
 			}
