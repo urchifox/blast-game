@@ -1,5 +1,4 @@
 import { BoosterName, BoosterCommonProps } from "./boosters/booster"
-import { Renderer } from "./rendering/renderer"
 import { AnimationsManager } from "../helpers/animationManager"
 import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { BoosterManager } from "./boosters/boosterManager"
@@ -15,7 +14,6 @@ type GameBlastProps = {
 	gameRules: GameRules
 	levelGenerator: LevelGenerator
 	progressManager: ProgressManager
-	renderer: Renderer
 	animationsManager: AnimationsManager
 	boosterProps: BoosterCommonProps
 	openWinModal: () => void
@@ -27,7 +25,6 @@ export class GameBlast {
 	private readonly gameRules: GameBlastProps["gameRules"]
 	private readonly levelGenerator: GameBlastProps["levelGenerator"]
 	private readonly progressManager: GameBlastProps["progressManager"]
-	private readonly renderer: GameBlastProps["renderer"]
 	private readonly animationsManager: GameBlastProps["animationsManager"]
 	private readonly openWinModal: GameBlastProps["openWinModal"]
 	private readonly openLossModal: GameBlastProps["openLossModal"]
@@ -48,7 +45,6 @@ export class GameBlast {
 		this.gameRules = props.gameRules
 		this.levelGenerator = props.levelGenerator
 		this.progressManager = props.progressManager
-		this.renderer = props.renderer
 		this.animationsManager = props.animationsManager
 		this.openWinModal = props.openWinModal
 		this.openLossModal = props.openLossModal
@@ -77,14 +73,13 @@ export class GameBlast {
 	}
 
 	async init() {
-		this.renderer.setOnTileClick(this.onTileClick.bind(this))
-		await this.renderer.init()
+		await this.presenter.init(this.onTileClick.bind(this))
 		await this.startNewLevel()
 	}
 
 	async destroy() {
 		await this.clearLevel()
-		this.renderer.destroy()
+		this.presenter.destroy()
 	}
 
 	private async clearLevel() {

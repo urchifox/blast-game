@@ -34,6 +34,15 @@ export class Presenter {
 		this.setGameContainerSize = props.setGameContainerSize
 	}
 
+	async init(onTileClick: (id: string) => void) {
+		this.renderer.setOnTileClick(onTileClick)
+		await this.renderer.init()
+	}
+
+	destroy() {
+		this.renderer.destroy()
+	}
+
 	selectTile(tile: Tile) {
 		this.renderer.selectTile({
 			tileSnapshot: tile.getSnapshot(),
