@@ -141,7 +141,7 @@ export class Presenter {
 		}
 	}
 
-	swapTiles(tile1: Tile, tile2: Tile) {
+	async swapTiles(tile1: Tile, tile2: Tile) {
 		this.field.swapTiles(tile1, tile2)
 
 		const promiseSelection = this.renderer
@@ -169,7 +169,7 @@ export class Presenter {
 			})
 			.then(() => {})
 
-		this.animationsManager.animate(promiseSelection)
+		await this.animationsManager.animate(promiseSelection)
 	}
 
 	// #endregion

@@ -36,8 +36,12 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 		const selectedTile = this.selectedTile
 		this.selectedTile = null
 		this.spend()
-		this.presenter.swapTiles(selectedTile, tile)
-		return null
+		const promise = this.presenter.swapTiles(selectedTile, tile)
+		return {
+			removedTiles: new Set(),
+			removedPositions: new Set(),
+			removingPromise: promise,
+		}
 	}
 
 	override clear() {
