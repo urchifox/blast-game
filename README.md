@@ -10,6 +10,7 @@ Play the deployed build: https://urchifox.github.io/blast-game/
   - Domain and game flow:
     - `gameBlast.ts`: main game orchestration — level lifecycle, tile clicks, win/loss UI.
     - `presenter.ts`: field/grid mutations and related animations (select, swap, remove, fill, shuffle, resize).
+    - `fieldQueries.ts`: read-only board lookups (tiles, positions, radius/row/column queries) used by orchestration and handlers.
     - `completionManager.ts`: win/loss checks, no-move detection, and shuffle-for-new-move.
     - `progressManager.ts`: score and moves progress wiring.
     - `levelGenerator.ts`: random level parameters (size, goal score, moves).
@@ -45,10 +46,12 @@ Play the deployed build: https://urchifox.github.io/blast-game/
 - **Rendering is abstracted behind an interface**
   - The `Renderer` contract isolates game flow from a concrete engine API.
   - Phaser-specific code is constrained to `rendering/phaser*`.
+  - Only `Presenter` talks to the renderer and animations manager; `GameBlast` never receives them directly.
 
 - **Domain model is class-based**
   - `Tile`, `Field`, and `Grid` encapsulate state and behavior with explicit responsibilities.
-  - `Presenter` sits between those models and the renderer so orchestration code does not touch both directly.
+  - `Presenter` performs board mutations and drives matching animations.
+  - `FieldQueries` exposes read-only access to the field so click/booster/completion code can query tiles without depending on mutation/render APIs.
 
 - **Game flow is split by responsibility**
   - `GameBlast` coordinates; `CompletionManager`, `ProgressManager`, `LevelGenerator`, and `GameRules` own their slices of logic.
@@ -59,7 +62,7 @@ Play the deployed build: https://urchifox.github.io/blast-game/
   - Handlers return `TileRemovingInfo` instead of driving side effects through callbacks.
 
 - **Dependencies are injected at construction**
-  - `GameView` builds collaborators (`Presenter`, `GameRules`, `LevelGenerator`, `ProgressManager`, renderer, etc.) and passes them into `GameBlast`.
+  - `GameView` builds collaborators (`Field`, `Grid`, `FieldQueries`, `Presenter` with renderer and animations manager, `GameRules`, `LevelGenerator`, `ProgressManager`, etc.) and passes the orchestration-facing ones into `GameBlast`.
 
 - **Event-driven game flow**
   - User interaction triggers rule evaluation, model updates, and render updates in sequence.
