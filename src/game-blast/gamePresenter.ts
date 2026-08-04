@@ -122,19 +122,9 @@ export class GamePresenter implements Presenter {
 		tiles: Set<Tile>,
 		centerPosition: TilePosition
 	): Promise<void> {
-		const { column: centerColumn, row: centerRow } = centerPosition
-		const groupedTiles = new Map<number, Set<Tile>>()
-		for (const tile of tiles) {
-			const distance = Math.max(
-				Math.abs(tile.getPosition().column - centerColumn),
-				Math.abs(tile.getPosition().row - centerRow)
-			)
-			const tiles = groupedTiles.get(distance) || new Set<Tile>()
-			tiles.add(tile)
-			groupedTiles.set(distance, tiles)
-		}
-		const sortedGroupedTiles = Array.from(groupedTiles.entries()).sort(
-			(a, b) => a[0] - b[0]
+		const sortedGroupedTiles = this.field.getTilesGroupedFromCenter(
+			tiles,
+			centerPosition
 		)
 
 		for (const [_, tiles] of sortedGroupedTiles) {
