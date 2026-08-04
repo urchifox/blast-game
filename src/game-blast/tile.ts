@@ -1,5 +1,4 @@
 import { TILES_KINDS_NORMAL, TILES_KINDS_SPECIAL } from "./config"
-import { getRandomId } from "../helpers/random"
 
 export type TileSnapshot = {
 	id: string
@@ -31,19 +30,21 @@ export type TilePosition = {
 export type TileProps = {
 	kind: TileKind
 	position: TilePosition
+	id: string
 }
 
 export class Tile {
 	private readonly kind: TileProps["kind"]
 	private readonly position: TileProps["position"]
 
-	private readonly id: string = getRandomId()
+	private readonly id: string
 	private readonly image: string
 	private isBlocked = false
 
 	constructor(props: TileProps) {
 		this.kind = props.kind
 		this.position = props.position
+		this.id = props.id
 		this.image = `tile-${props.kind}`
 	}
 

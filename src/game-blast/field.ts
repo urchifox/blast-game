@@ -1,20 +1,30 @@
 import { shuffle } from "../helpers/array"
-import { pickRandomItem } from "../helpers/random"
+import {
+	IdGenerator,
+	pickRandomItem,
+	RandomizationFunction,
+} from "../helpers/random"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
 import { Tile, TileKind, TilePosition, TileSnapshot } from "./tile"
 
 export type FieldProps = {
 	getFieldSnapshot: () => GridSnapshot
+	randomizationFunction: RandomizationFunction
+	createId: IdGenerator
 }
 
 export class Field {
 	private readonly getFieldSnapshot: FieldProps["getFieldSnapshot"]
+	private readonly randomizationFunction: FieldProps["randomizationFunction"]
+	private readonly createId: FieldProps["createId"]
 
 	private tilesByColumns: Array<Array<Tile | undefined>> = []
 
 	constructor(props: FieldProps) {
 		this.getFieldSnapshot = props.getFieldSnapshot
+		this.randomizationFunction = props.randomizationFunction
+		this.createId = props.createId
 	}
 
 	generateTiles() {
@@ -23,9 +33,12 @@ export class Field {
 		for (let column = 0; column < columns; column++) {
 			this.tilesByColumns[column] = []
 			for (let row = 0; row < rows; row++) {
-				const kind = pickRandomItem(TILES_KINDS_NORMAL)
+				const kind = pickRandomItem(
+					TILES_KINDS_NORMAL,
+					this.randomizationFunction
+				)
 				const position = { row, column }
-				const tile = new Tile({ kind, position })
+				const tile = new Tile({ kind, position, id: this.createId() })
 				this.tilesByColumns[column].push(tile)
 			}
 		}
@@ -76,10 +89,13 @@ export class Field {
 			)
 
 			while (this.tilesByColumns[column].length < rows) {
-				const kind = pickRandomItem(TILES_KINDS_NORMAL)
+				const kind = pickRandomItem(
+					TILES_KINDS_NORMAL,
+					this.randomizationFunction
+				)
 				const row = rows - this.tilesByColumns[column].length - 1
 				const position = { row, column }
-				const tile = new Tile({ kind, position })
+				const tile = new Tile({ kind, position, id: this.createId() })
 				this.tilesByColumns[column].unshift(tile)
 				newTiles.add(tile)
 			}
@@ -100,7 +116,7 @@ export class Field {
 	}
 
 	addTile({ kind, position }: { kind: TileKind; position: TilePosition }) {
-		const tile = new Tile({ kind, position })
+		const tile = new Tile({ kind, position, id: this.createId() })
 		return this.placeTile(tile)
 	}
 
@@ -207,7 +223,9 @@ export class Field {
 	shuffle() {
 		const tiles = this.getTiles()
 		const positions = this.getPositions(tiles)
-		const shuffledPositions = shuffle(positions)
+		const shuffledPositions = shuffle(positions, {
+			randomizationFunction: this.randomizationFunction,
+		})
 		for (const [index, tile] of tiles.entries()) {
 			const position = shuffledPositions[index]
 			tile.setPosition(position)

@@ -1,6 +1,8 @@
+import { RandomizationFunction } from "./random"
+
 export function shuffle<T>(
 	array: Array<T>,
-	options?: { randomizationFunction?: () => number }
+	options?: { randomizationFunction?: RandomizationFunction }
 ): T[] {
 	const randomizationFunction = options?.randomizationFunction ?? Math.random
 	let currentIndex = array.length,

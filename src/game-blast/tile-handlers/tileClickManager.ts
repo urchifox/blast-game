@@ -1,4 +1,4 @@
-import { pickRandomItem } from "../../helpers/random"
+import { pickRandomItem, RandomizationFunction } from "../../helpers/random"
 import { TILES_KINDS_NORMAL } from "../config"
 import { Tile, TileKind, TilePosition } from "../tile"
 import { TileHandlerBomb } from "./tileHandlerBomb"
@@ -19,10 +19,12 @@ export type TileClickManagerProps = {
 		"renderTile" | "addTile" | "removeTiles" | "removeTilesFromCenter"
 	>
 	gameRules: GameRules
+	randomizationFunction: RandomizationFunction
 }
 
 export class TileClickManager {
 	private readonly presenter: TileClickManagerProps["presenter"]
+	private readonly randomizationFunction: TileClickManagerProps["randomizationFunction"]
 
 	private tileHandlersSpecialMapByComboSize: Record<
 		number,
@@ -33,6 +35,7 @@ export class TileClickManager {
 
 	constructor(props: TileClickManagerProps) {
 		this.presenter = props.presenter
+		this.randomizationFunction = props.randomizationFunction
 		const tileHandlersSpecial: Array<TileHandlerSpecial> = [
 			new TileHandlerBomb({
 				fieldQueries: props.fieldQueries,
@@ -128,7 +131,10 @@ export class TileClickManager {
 			return
 		}
 
-		const rewardHandler = pickRandomItem(rewardsHandlers)
+		const rewardHandler = pickRandomItem(
+			rewardsHandlers,
+			this.randomizationFunction
+		)
 		const newTile = this.presenter.addTile({
 			kind: rewardHandler.kind,
 			position,

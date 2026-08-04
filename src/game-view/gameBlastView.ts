@@ -20,6 +20,7 @@ import { GameRules } from "../game-blast/gameRules"
 import { GamePresenter } from "../game-blast/gamePresenter"
 import { AnimationsManager } from "../helpers/animationManager"
 import { FieldQueries } from "../game-blast/fieldQueries"
+import { createId } from "../helpers/random"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -67,6 +68,7 @@ export class GameView extends View {
 		}
 
 		const gameRules = new GameRules()
+		const randomizationFunction = Math.random
 
 		const boosterProps = {
 			updateCounter: this.updateBoosterCounter.bind(this),
@@ -75,7 +77,11 @@ export class GameView extends View {
 		const grid = new Grid({
 			getContainerSize: this.getGameContainerSize.bind(this),
 		})
-		const field = new Field({ getFieldSnapshot: grid.getSnapshot.bind(grid) })
+		const field = new Field({
+			getFieldSnapshot: grid.getSnapshot.bind(grid),
+			randomizationFunction,
+			createId,
+		})
 
 		const scoreProgress = new Progress({
 			updateCounter: ({ currentValue, targetValue }) =>
@@ -97,6 +103,7 @@ export class GameView extends View {
 		})
 		const levelGenerator = new LevelGenerator({
 			gameRules,
+			randomizationFunction,
 		})
 
 		const animationsManager = new AnimationsManager()
@@ -122,6 +129,7 @@ export class GameView extends View {
 			levelGenerator,
 			progressManager,
 			boosterProps,
+			randomizationFunction,
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
 		})

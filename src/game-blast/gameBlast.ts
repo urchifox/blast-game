@@ -1,3 +1,4 @@
+import { RandomizationFunction } from "../helpers/random"
 import { BoosterName, BoosterCommonProps } from "./boosters/booster"
 import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { BoosterManager } from "./boosters/boosterManager"
@@ -16,6 +17,7 @@ type GameBlastProps = {
 	levelGenerator: LevelGenerator
 	progressManager: ProgressManager
 	boosterProps: BoosterCommonProps
+	randomizationFunction: RandomizationFunction
 	openWinModal: () => void
 	openLossModal: () => void
 }
@@ -53,6 +55,7 @@ export class GameBlast {
 			fieldQueries: this.fieldQueries,
 			presenter: this.presenter,
 			gameRules: props.gameRules,
+			randomizationFunction: props.randomizationFunction,
 		})
 
 		this.boosterManager = new BoosterManager({
