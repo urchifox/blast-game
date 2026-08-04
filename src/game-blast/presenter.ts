@@ -11,10 +11,6 @@ export type Presenter = {
 	fillEmptyPositions: (positions: Set<TilePosition>) => Promise<void>
 	animateAndWaitForAll: (promise: Promise<void>) => Promise<void>
 
-	getSameKindNeighbourTiles: (tile: Tile) => {
-		tiles: Set<Tile>
-		positions: Set<TilePosition>
-	}
 	selectTile: (tile: Tile) => void
 	swapTiles: (tile1: Tile, tile2: Tile) => Promise<void>
 	addTile: (props: { kind: TileKind; position: TilePosition }) => Tile

@@ -240,38 +240,4 @@ export class GamePresenter implements Presenter {
 	}
 
 	// #endregion
-
-	getSameKindNeighbourTiles(tile: Tile) {
-		const position = tile.getPosition()
-		const kind = tile.getKind()
-
-		const tiles = new Set<Tile>([tile])
-		const stringifiedPositions = new Set<string>()
-		const positions = new Set<TilePosition>([position])
-
-		for (const tileToRemove of tiles) {
-			const neighborPositions = this.grid.getNeighbourPositions(
-				tileToRemove.getPosition()
-			)
-			for (const neighborPosition of neighborPositions) {
-				const stringifiedPosition = JSON.stringify(neighborPosition)
-				if (stringifiedPositions.has(stringifiedPosition)) {
-					continue
-				}
-
-				const neighborTile = this.field.getTile(neighborPosition)
-				if (
-					neighborTile !== undefined &&
-					neighborTile.getKind() === kind &&
-					!neighborTile.getIsBlocked()
-				) {
-					tiles.add(neighborTile)
-					stringifiedPositions.add(stringifiedPosition)
-					positions.add(neighborPosition)
-				}
-			}
-		}
-
-		return { tiles, positions }
-	}
 }

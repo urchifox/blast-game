@@ -6,7 +6,7 @@ import { Presenter } from "./presenter"
 
 export type CompletionManagerProps = {
 	fieldQueries: FieldQueries
-	presenter: Pick<Presenter, "getSameKindNeighbourTiles" | "shuffleField">
+	presenter: Pick<Presenter, "shuffleField">
 	gameRules: GameRules
 	isScoreTargetReached: () => boolean
 	isMovesTargetReached: () => boolean
@@ -96,7 +96,7 @@ export class CompletionManager {
 			if (isTileKindSpecial(tile.getKind())) {
 				return true
 			}
-			const { tiles } = this.presenter.getSameKindNeighbourTiles(tile)
+			const { tiles } = this.fieldQueries.getSameKindNeighbourTiles(tile)
 			return tiles.size > 1
 		})
 	}

@@ -105,7 +105,7 @@ export class GameView extends View {
 			getContainerOffset: this.getContainerOffset.bind(this),
 		})
 
-		const fieldQueries = new FieldQueries({ field })
+		const fieldQueries = new FieldQueries({ field, grid })
 
 		const presenter = new GamePresenter({
 			field,

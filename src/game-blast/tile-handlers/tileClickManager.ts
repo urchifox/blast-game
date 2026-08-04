@@ -16,11 +16,7 @@ export type TileClickManagerProps = {
 	fieldQueries: FieldQueries
 	presenter: Pick<
 		Presenter,
-		| "getSameKindNeighbourTiles"
-		| "renderTile"
-		| "addTile"
-		| "removeTiles"
-		| "removeTilesFromCenter"
+		"renderTile" | "addTile" | "removeTiles" | "removeTilesFromCenter"
 	>
 	gameRules: GameRules
 }
@@ -87,6 +83,7 @@ export class TileClickManager {
 			.sort((a, b) => a - b)
 
 		const tileHandlerNormal = new TileHandlerNormal({
+			fieldQueries: props.fieldQueries,
 			presenter: props.presenter,
 			getComboPrize: this.getComboPrize.bind(this),
 			gameRules: props.gameRules,
