@@ -1,0 +1,267 @@
+---
+description: "Unit testing standard for this project, based on Vladimir Khorikov's Unit Testing: Principles, Practices, and Patterns."
+globs: ["src/**/*.test.ts", "src/**/*.spec.ts"]
+alwaysApply: false
+---
+
+# Unit Testing Standard
+
+Every test you write or suggest must follow the principles below. These rules define the project's testing standard and take precedence over common testing conventions when they conflict.
+
+Runner: **Vitest**. Test files should be colocated with the source file they cover.
+
+---
+
+# 1. Definition of a Good Unit Test
+
+A unit test must satisfy all three conditions:
+
+- It verifies a single **unit of behavior** — an observable business outcome, not a method or implementation detail.
+- It runs fast (entirely in memory, without real timers, browser APIs, databases, filesystems or network communication).
+- It runs in complete isolation from other tests. Tests must never depend on execution order or shared mutable state.
+
+This project follows the **classical (Detroit) school of unit testing**.
+
+Always verify observable behavior through the public API.
+
+Never verify implementation details such as:
+
+- private method calls;
+- internal call sequences;
+- internal state that is not externally observable.
+
+---
+
+# 2. The Four Pillars of Unit Testing
+
+Every test should maximize the following qualities:
+
+1. Protection against regressions.
+2. Resistance to refactoring.
+3. Fast feedback.
+4. Maintainability.
+
+These qualities often compete with each other.
+
+When trade-offs are necessary, prioritize **resistance to refactoring** by testing externally observable behavior rather than implementation details.
+
+A test that frequently breaks after behavior-preserving refactoring is considered a poor test.
+
+---
+
+# 3. Classify Code Before Testing It
+
+Before writing a test, determine which category the code belongs to.
+
+## Domain Model
+
+Characteristics:
+
+- contains business rules;
+- contains algorithms;
+- has meaningful domain complexity;
+- has few collaborators.
+
+This category provides the highest return on investment for unit testing and should receive the highest priority.
+
+---
+
+## Trivial Code
+
+Characteristics:
+
+- no branching;
+- no business logic;
+- simple data transformation;
+- getters/setters;
+- DTO mapping.
+
+Dedicated tests are generally unnecessary.
+
+---
+
+## Controllers / Orchestrators
+
+Characteristics:
+
+- coordinate multiple collaborators;
+- contain little or no business logic.
+
+Prefer lightweight integration tests over extensive unit tests.
+
+---
+
+## Overcomplicated Code
+
+Characteristics:
+
+- significant business logic;
+- many collaborators.
+
+Such code should be **refactored before testing**.
+
+Separate:
+
+- pure business logic;
+- orchestration;
+- infrastructure.
+
+Apply the **Humble Object Pattern** where appropriate.
+
+Avoid writing heavily mocked tests around code that should first be redesigned.
+
+---
+
+# 4. Unit Tests vs Integration Tests
+
+## Unit Test
+
+A unit test exercises business logic in complete isolation from infrastructure.
+
+Unit tests must not depend on:
+
+- rendering;
+- browser APIs;
+- network;
+- filesystem;
+- databases;
+- framework runtime.
+
+---
+
+## Integration Test
+
+An integration test verifies collaboration between components or communication with infrastructure.
+
+Integration tests are appropriate when validating:
+
+- interaction between multiple modules;
+- framework integration;
+- infrastructure integration;
+- application startup.
+
+Do not label an integration test as a unit test.
+
+---
+
+# 5. Test Doubles
+
+Understand the difference between stubs and mocks.
+
+## Stubs
+
+Use stubs to provide input to the system under test.
+
+Stubs are encouraged.
+
+---
+
+## Mocks
+
+Mocks verify interactions.
+
+Use mocks **only for unmanaged external dependencies**, such as:
+
+- external services;
+- browser APIs;
+- databases;
+- file systems;
+- network communication;
+- third-party libraries.
+
+Do **not** mock business objects that belong to the project itself.
+
+Prefer using real domain objects whenever practical.
+
+Do not mock the class currently being tested.
+
+Avoid partial mocks.
+
+---
+
+# 6. Test Structure
+
+Every test follows the Arrange–Act–Assert pattern.
+
+- Arrange
+- Act
+- Assert
+
+Guidelines:
+
+- one logical Act step per test;
+- no branching (`if`, `switch`) inside test bodies;
+- avoid loops inside tests;
+- prefer parameterized tests over loops;
+- multiple assertions are acceptable when they verify the same behavior.
+
+---
+
+# 7. Naming
+
+Test names describe observable behavior.
+
+They should be understandable without reading the implementation.
+
+Describe business rules rather than implementation.
+
+Prefer:
+
+> "awards more points for a larger combo"
+
+Avoid:
+
+> "getPoints_returnsExpectedValue"
+
+---
+
+# 8. Test Data
+
+Prefer explicit object creation over hidden shared fixtures.
+
+Each test should clearly show only the data relevant to that behavior.
+
+Avoid overly generic factories with dozens of optional parameters.
+
+Avoid shared mutable state.
+
+Each test should create only the data it requires.
+
+---
+
+# 9. Designing Code for Testability
+
+Testability is an architectural requirement.
+
+Business logic should be independent from infrastructure.
+
+Separate:
+
+- business rules;
+- orchestration;
+- infrastructure;
+- presentation.
+
+Dependencies should be injected.
+
+Depend on abstractions rather than concrete implementations.
+
+If code cannot be tested according to these principles, improve the design before writing tests.
+
+Never weaken the architecture merely to make testing easier.
+
+---
+
+# 10. What Not To Do
+
+Do not:
+
+- write tests solely to increase coverage;
+- test trivial code;
+- assert internal implementation details;
+- access private members through casts or reflection;
+- mock business logic;
+- create brittle tests that fail after harmless refactoring;
+- leave flaky tests in the suite;
+- introduce real infrastructure into unit tests.
+  

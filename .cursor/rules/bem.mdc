@@ -1,0 +1,21 @@
+---
+globs: ["src/**/*.css", "src/**/*.html"]
+alwaysApply: false
+---
+
+# BEM Rules
+
+## Naming
+
+- Use the BEM methodology for HTML and CSS.
+- Use the format `block`.
+- Use the format `block__element`.
+- Use the format `block--modifier`.
+- Use the format `block__element--modifier`.
+
+## Structure
+
+- Do not reference elements outside their block.
+- Avoid creating dependencies between unrelated blocks.
+- Modifiers must describe state or variation, not structure.
+- Keep blocks reusable and independent.
