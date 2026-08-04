@@ -1,5 +1,5 @@
-import { nanoid } from "nanoid"
 import { TILES_KINDS_NORMAL, TILES_KINDS_SPECIAL } from "./config"
+import { getRandomId } from "../helpers/random"
 
 export type TileSnapshot = {
 	id: string
@@ -37,7 +37,7 @@ export class Tile {
 	private readonly kind: TileProps["kind"]
 	private readonly position: TileProps["position"]
 
-	private readonly id: string = nanoid()
+	private readonly id: string = getRandomId()
 	private readonly image: string
 	private isBlocked = false
 

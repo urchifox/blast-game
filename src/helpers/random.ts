@@ -1,3 +1,5 @@
+import { nanoid } from "nanoid"
+
 export function pickRandomItem<Item>(
 	array: Array<Item> | Readonly<Array<Item>>
 ): Item {
@@ -23,4 +25,8 @@ export function getRandomNumber({
 
 	const stepsCount = Math.floor((max - min) / step)
 	return min + Math.floor(Math.random() * (stepsCount + 1)) * step
+}
+
+export function getRandomId() {
+	return nanoid()
 }
