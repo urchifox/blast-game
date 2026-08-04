@@ -2,8 +2,8 @@ import { Tile } from "../tile"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileRemovingInfo } from "../types"
 import { TileHandlerProps } from "./tileHandler"
-import { Presenter } from "../presenter"
 import { FieldQueries } from "../fieldQueries"
+import { Presenter } from "../presenter"
 
 export type TileHandlerRocketRowProps = {
 	fieldQueries: FieldQueries

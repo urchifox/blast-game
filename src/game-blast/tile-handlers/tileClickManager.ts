@@ -9,8 +9,8 @@ import { TileHandlerRocketRow } from "./tileHandlerRocketRow"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileClickHandler } from "../types"
 import { GameRules } from "../gameRules"
-import { Presenter } from "../presenter"
 import { FieldQueries } from "../fieldQueries"
+import { Presenter } from "../presenter"
 
 export type TileClickManagerProps = {
 	fieldQueries: FieldQueries

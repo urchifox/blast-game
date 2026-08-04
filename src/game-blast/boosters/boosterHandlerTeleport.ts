@@ -2,8 +2,8 @@ import { BoosterCommonProps } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { Tile } from "../tile"
 import { GameRules } from "../gameRules"
-import { Presenter } from "../presenter"
 import { TileRemovingInfo } from "../types"
+import { Presenter } from "../presenter"
 
 type BoosterHandlerTeleportProps = {
 	presenter: Pick<Presenter, "selectTile" | "swapTiles">

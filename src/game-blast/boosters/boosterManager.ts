@@ -5,8 +5,8 @@ import { BoosterCommonProps, BoosterName } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { BoosterHandlerResult } from "../types"
 import { GameRules } from "../gameRules"
-import { Presenter } from "../presenter"
 import { FieldQueries } from "../fieldQueries"
+import { Presenter } from "../presenter"
 
 export type BoosterManagerProps = {
 	fieldQueries: FieldQueries

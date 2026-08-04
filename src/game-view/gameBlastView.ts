@@ -17,7 +17,7 @@ import { Progress } from "../helpers/progress"
 import { ProgressManager } from "../game-blast/progressManager"
 import { LevelGenerator } from "../game-blast/levelGenerator"
 import { GameRules } from "../game-blast/gameRules"
-import { Presenter } from "../game-blast/presenter"
+import { GamePresenter } from "../game-blast/gamePresenter"
 import { AnimationsManager } from "../helpers/animationManager"
 import { FieldQueries } from "../game-blast/fieldQueries"
 
@@ -107,7 +107,7 @@ export class GameView extends View {
 
 		const fieldQueries = new FieldQueries({ field })
 
-		const presenter = new Presenter({
+		const presenter = new GamePresenter({
 			field,
 			grid,
 			renderer,

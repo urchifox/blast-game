@@ -6,8 +6,8 @@ import { ProgressManager } from "./progressManager"
 import { LevelData, LevelGenerator } from "./levelGenerator"
 import { GameRules } from "./gameRules"
 import { GameCompletionStatus, TileRemovingInfo } from "./types"
-import { Presenter } from "./presenter"
 import { FieldQueries } from "./fieldQueries"
+import { Presenter } from "./presenter"
 
 type GameBlastProps = {
 	fieldQueries: FieldQueries

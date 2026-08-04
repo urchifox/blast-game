@@ -3,8 +3,8 @@ import { Tile } from "../tile"
 import { TileRemovingInfo } from "../types"
 import { BoosterCommonProps } from "./booster"
 import { GameRules } from "../gameRules"
-import { Presenter } from "../presenter"
 import { FieldQueries } from "../fieldQueries"
+import { Presenter } from "../presenter"
 
 export type BoosterHandlerBombProps = {
 	fieldQueries: FieldQueries

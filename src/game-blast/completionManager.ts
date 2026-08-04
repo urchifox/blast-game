@@ -1,8 +1,8 @@
 import { isTileKindSpecial } from "./tile"
 import { GameRules } from "./gameRules"
-import { Presenter } from "./presenter"
 import { GameCompletionStatus } from "./types"
 import { FieldQueries } from "./fieldQueries"
+import { Presenter } from "./presenter"
 
 export type CompletionManagerProps = {
 	fieldQueries: FieldQueries
