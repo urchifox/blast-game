@@ -10,10 +10,10 @@ import { GameRules } from "./gameRules"
 import { LevelGenerator } from "./levelGenerator"
 import { ProgressManager } from "./progressManager"
 import { PhaserRenderer } from "./rendering/phaserRenderer"
-import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { Grid } from "./grid"
 import { boosterManagerFactory } from "./boosters/boosterManagerFactory"
 import { BoosterName } from "./types"
+import { tileClickManagerFactory } from "./tile-handlers/tileClickManagerFactory"
 
 export type GameBlastFactoryProps = {
 	gameContainer: HTMLElement
@@ -64,7 +64,7 @@ export function gameBlastFactory(props: GameBlastFactoryProps) {
 		setGameContainerSize: props.setGameContainerSize,
 	})
 
-	const tileClickManager = new TileClickManager({
+	const tileClickManager = tileClickManagerFactory({
 		fieldQueries: fieldQueries,
 		presenter: presenter,
 		gameRules: gameRules,

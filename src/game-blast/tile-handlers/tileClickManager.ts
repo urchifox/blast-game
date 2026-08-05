@@ -1,25 +1,16 @@
 import { pickRandomItem, RandomizationFunction } from "../../helpers/random"
 import { TILES_KINDS_NORMAL } from "../config"
 import { Tile, TileKind, TilePosition } from "../tile"
-import { TileHandlerBomb } from "./tileHandlerBomb"
-import { TileHandlerDynamite } from "./tileHandlerDynamite"
 import { TileHandlerNormal } from "./tileHandlerNormal"
-import { TileHandlerRocketColumn } from "./tileHandlerRocketColumn"
-import { TileHandlerRocketRow } from "./tileHandlerRocketRow"
 import { TileHandlerSpecial } from "./tileHandlerSpecial"
 import { TileClickHandler } from "../types"
-import { GameRules } from "../gameRules"
-import { FieldQueries } from "../fieldQueries"
 import { Presenter } from "../presenter"
 
 export type TileClickManagerProps = {
-	fieldQueries: FieldQueries
-	presenter: Pick<
-		Presenter,
-		"renderTile" | "addTile" | "removeTiles" | "removeTilesFromCenter"
-	>
-	gameRules: GameRules
+	presenter: Pick<Presenter, "renderTile" | "addTile">
 	randomizationFunction: RandomizationFunction
+	tileHandlerNormal: TileHandlerNormal
+	tileHandlersSpecial: Array<TileHandlerSpecial>
 }
 
 export class TileClickManager {
@@ -36,30 +27,8 @@ export class TileClickManager {
 	constructor(props: TileClickManagerProps) {
 		this.presenter = props.presenter
 		this.randomizationFunction = props.randomizationFunction
-		const tileHandlersSpecial: Array<TileHandlerSpecial> = [
-			new TileHandlerBomb({
-				fieldQueries: props.fieldQueries,
-				presenter: props.presenter,
-				gameRules: props.gameRules,
-			}),
-			new TileHandlerDynamite({
-				fieldQueries: props.fieldQueries,
-				presenter: props.presenter,
-				gameRules: props.gameRules,
-			}),
-			new TileHandlerRocketRow({
-				fieldQueries: props.fieldQueries,
-				presenter: props.presenter,
-				gameRules: props.gameRules,
-			}),
-			new TileHandlerRocketColumn({
-				fieldQueries: props.fieldQueries,
-				presenter: props.presenter,
-				gameRules: props.gameRules,
-			}),
-		]
 
-		this.tileHandlersSpecialMapByComboSize = tileHandlersSpecial.reduce<
+		this.tileHandlersSpecialMapByComboSize = props.tileHandlersSpecial.reduce<
 			Record<number, Array<TileHandlerSpecial>>
 		>((map, handler) => {
 			if (map[handler.comboSize] === undefined) {
@@ -69,7 +38,7 @@ export class TileClickManager {
 			return map
 		}, {})
 
-		this.tileClickHandlersMapByKind = tileHandlersSpecial.reduce<
+		this.tileClickHandlersMapByKind = props.tileHandlersSpecial.reduce<
 			Record<TileKind, TileClickHandler>
 		>(
 			(map, handler) => {
@@ -85,16 +54,26 @@ export class TileClickManager {
 			.map((key) => parseInt(key))
 			.sort((a, b) => a - b)
 
-		const tileHandlerNormal = new TileHandlerNormal({
-			fieldQueries: props.fieldQueries,
-			presenter: props.presenter,
-			getComboPrize: this.getComboPrize.bind(this),
-			gameRules: props.gameRules,
-		})
-
 		TILES_KINDS_NORMAL.forEach((kind) => {
-			this.tileClickHandlersMapByKind[kind] =
-				tileHandlerNormal.onClick.bind(tileHandlerNormal)
+			this.tileClickHandlersMapByKind[kind] = (tile: Tile) => {
+				const result = props.tileHandlerNormal.onClick(tile)
+				if (result === null) {
+					return result
+				}
+				const newTile = this.getComboPrize(
+					result.removedTiles.size,
+					tile.getPosition()
+				)
+				if (newTile === undefined) {
+					return result
+				}
+				return {
+					...result,
+					removingPromise: result.removingPromise.then(() =>
+						this.presenter.renderTile(newTile)
+					),
+				}
+			}
 		})
 	}
 
