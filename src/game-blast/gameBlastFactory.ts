@@ -18,14 +18,6 @@ import { Layout } from "./layout"
 
 export type GameBlastFactoryProps = {
 	gameContainer: HTMLElement
-	getGameContainerSize: () => { width: number; height: number }
-	getContainerOffset: () => { offsetX: number; offsetY: number }
-	setGameContainerSize: (
-		sizes: {
-			width: number
-			height: number
-		} | null
-	) => void
 
 	updateBoosterCounter: (booster: BoosterName, currentValue: number) => void
 	toggleBoosterButtonActive: (booster: BoosterName, active: boolean) => void
@@ -40,9 +32,8 @@ export type GameBlastFactoryProps = {
 export function gameBlastFactory(props: GameBlastFactoryProps) {
 	const gameRules = new GameRules()
 	const randomizationFunction = Math.random
-
 	const layout = new Layout({
-		getGameContainerSize: props.getGameContainerSize,
+		gameContainer: props.gameContainer,
 	})
 
 	const grid = new Grid()
@@ -57,16 +48,15 @@ export function gameBlastFactory(props: GameBlastFactoryProps) {
 	const animationsManager = new AnimationsManager()
 	const renderer = new PhaserRenderer({
 		container: props.gameContainer,
-		getContainerOffset: props.getContainerOffset,
+		getContainerOffset: layout.getGameContainerOffset.bind(layout),
 	})
 
 	const presenter = new GamePresenter({
-		layout,
+		layout: layout,
 		field,
 		grid,
 		renderer,
 		animationsManager,
-		setGameContainerSize: props.setGameContainerSize,
 	})
 
 	const tileClickManager = tileClickManagerFactory({

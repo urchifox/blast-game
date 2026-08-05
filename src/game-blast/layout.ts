@@ -1,3 +1,4 @@
+import { getElementInnerSize } from "../helpers/dom"
 import {
 	GAP_X,
 	MAX_TILE_WIDTH,
@@ -8,7 +9,7 @@ import {
 import { GridSnapshot } from "./grid"
 
 export type LayoutProps = {
-	getGameContainerSize: () => { width: number; height: number }
+	gameContainer: HTMLElement
 }
 
 export type LayoutSnapshot = {
@@ -21,7 +22,7 @@ export type LayoutSnapshot = {
 }
 
 export class Layout {
-	private readonly getGameContainerSize: LayoutProps["getGameContainerSize"]
+	private readonly gameContainer: HTMLElement
 
 	private gridWidth?: number
 	private gridHeight?: number
@@ -32,7 +33,7 @@ export class Layout {
 	private tileGapY?: number
 
 	constructor(props: LayoutProps) {
-		this.getGameContainerSize = props.getGameContainerSize
+		this.gameContainer = props.gameContainer
 	}
 
 	getSnapshot(): LayoutSnapshot {
@@ -46,9 +47,9 @@ export class Layout {
 		}
 	}
 
-	private setGridSizes(gridSizes: LayoutSnapshot) {
+	private setSizes(sizes: LayoutSnapshot) {
 		const { gridWidth, gridHeight, tileWidth, tileHeight, tileGapX, tileGapY } =
-			gridSizes
+			sizes
 		this.gridWidth = gridWidth
 		this.gridHeight = gridHeight
 		this.tileWidth = tileWidth
@@ -57,13 +58,13 @@ export class Layout {
 		this.tileGapY = tileGapY
 	}
 
-	updateGridSizes(gridSnapshot: GridSnapshot) {
-		const gridSizes = this.getGridSizes(gridSnapshot)
-		this.setGridSizes(gridSizes)
+	updateSizes(gridSnapshot: GridSnapshot) {
+		const gridSizes = this.getSizes(gridSnapshot)
+		this.setSizes(gridSizes)
 		return this.getSnapshot()
 	}
 
-	private getGridSizes({
+	private getSizes({
 		columns,
 		rows,
 	}: {
@@ -79,7 +80,7 @@ export class Layout {
 		let tileHeight = tileWidth / TILE_RATIO
 
 		// проверяем, какого размера будет поле с такими карточками
-		let gridHeight = this.getgridHeight({ tileHeight, rows })
+		let gridHeight = this.getHeight({ tileHeight, rows })
 
 		// если получившееся поля слишком длинное по вертикали
 		// пересчитываем размер карточки, отталкиваясь от высоты поля
@@ -88,10 +89,10 @@ export class Layout {
 			tileHeight = Math.min(MAX_TILE_HEIGHT, tileHeight)
 
 			tileWidth = tileHeight * TILE_RATIO
-			gridHeight = this.getgridHeight({ tileHeight, rows })
+			gridHeight = this.getHeight({ tileHeight, rows })
 		}
 
-		const gridWidth = this.getgridWidth({ tileWidth, columns })
+		const gridWidth = this.getWidth({ tileWidth, columns })
 		const tileGapX = GAP_X * tileWidth
 		const tileGapY = GAP_Y * tileHeight
 
@@ -105,7 +106,7 @@ export class Layout {
 		}
 	}
 
-	private getgridWidth({
+	private getWidth({
 		tileWidth,
 		columns,
 	}: {
@@ -115,7 +116,7 @@ export class Layout {
 		return tileWidth * (columns + GAP_X * (columns - 1))
 	}
 
-	private getgridHeight({
+	private getHeight({
 		tileHeight,
 		rows,
 	}: {
@@ -123,5 +124,33 @@ export class Layout {
 		rows: number
 	}) {
 		return tileHeight * (rows + GAP_Y * (rows - 1))
+	}
+
+	private getGameContainerSize() {
+		return getElementInnerSize({ element: this.gameContainer })
+	}
+
+	getGameContainerOffset() {
+		const { x, y } = this.gameContainer.getBoundingClientRect()
+		const style = window.getComputedStyle(this.gameContainer)
+		const offsetX = x + parseFloat(style.paddingLeft || "0")
+		const offsetY = y + parseFloat(style.paddingTop || "0")
+
+		return { offsetX, offsetY }
+	}
+
+	setGameContainerSize(sizes: { width: number; height: number } | null) {
+		const isResetSizes = sizes === null
+		this.gameContainer.classList.toggle(
+			"game-blast-container__canvas-container--fullsize",
+			isResetSizes
+		)
+		if (isResetSizes) {
+			return
+		}
+
+		const { width, height } = sizes
+		this.gameContainer.style.setProperty("--field-width", `${width}px`)
+		this.gameContainer.style.setProperty("--field-height", `${height}px`)
 	}
 }

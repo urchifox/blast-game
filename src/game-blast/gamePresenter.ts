@@ -14,12 +14,6 @@ type GamePresenterProps = {
 	grid: Grid
 	renderer: Renderer
 	animationsManager: AnimationsManager
-	setGameContainerSize: (
-		sizes: {
-			width: number
-			height: number
-		} | null
-	) => void
 }
 
 export class GamePresenter implements Presenter {
@@ -28,7 +22,6 @@ export class GamePresenter implements Presenter {
 	private readonly grid: GamePresenterProps["grid"]
 	private readonly renderer: GamePresenterProps["renderer"]
 	private readonly animationsManager: GamePresenterProps["animationsManager"]
-	private readonly setGameContainerSize: GamePresenterProps["setGameContainerSize"]
 
 	constructor(props: GamePresenterProps) {
 		this.layout = props.layout
@@ -36,7 +29,6 @@ export class GamePresenter implements Presenter {
 		this.grid = props.grid
 		this.renderer = props.renderer
 		this.animationsManager = props.animationsManager
-		this.setGameContainerSize = props.setGameContainerSize
 	}
 
 	async init(onTileClick: (id: string) => void) {
@@ -55,12 +47,12 @@ export class GamePresenter implements Presenter {
 	}
 
 	create({ columns, rows }: { columns: number; rows: number }) {
-		this.setGameContainerSize(null)
+		this.layout.setGameContainerSize(null)
 		this.grid.createGrid({ columns, rows })
 		this.field.generateTiles()
 		const gridSnapshot = this.grid.getSnapshot()
-		const layoutSnapshot = this.layout.updateGridSizes(gridSnapshot)
-		this.setGameContainerSize({
+		const layoutSnapshot = this.layout.updateSizes(gridSnapshot)
+		this.layout.setGameContainerSize({
 			width: layoutSnapshot.gridWidth,
 			height: layoutSnapshot.gridHeight,
 		})
@@ -73,10 +65,10 @@ export class GamePresenter implements Presenter {
 	}
 
 	updateGameSize() {
-		this.setGameContainerSize(null)
+		this.layout.setGameContainerSize(null)
 		const gridSnapshot = this.grid.getSnapshot()
-		const layoutSnapshot = this.layout.updateGridSizes(gridSnapshot)
-		this.setGameContainerSize({
+		const layoutSnapshot = this.layout.updateSizes(gridSnapshot)
+		this.layout.setGameContainerSize({
 			width: layoutSnapshot.gridWidth,
 			height: layoutSnapshot.gridHeight,
 		})

@@ -4,11 +4,7 @@ import "./assets/style/loss-modal.css"
 
 import { View } from "../view/view"
 import { GameBlast } from "../game-blast/gameBlast"
-import {
-	getElementInnerSize,
-	isHtmlElement,
-	queryElement,
-} from "../helpers/dom"
+import { isHtmlElement, queryElement } from "../helpers/dom"
 import { gameBlastFactory } from "../game-blast/gameBlastFactory"
 import { BoosterName } from "../game-blast/types"
 
@@ -59,11 +55,8 @@ export class GameView extends View {
 
 		this.gameBlast = gameBlastFactory({
 			gameContainer: this.gameContainer,
-			getContainerOffset: this.getContainerOffset.bind(this),
-			setGameContainerSize: this.setGameContainerSize.bind(this),
 			updateBoosterCounter: this.updateBoosterCounter.bind(this),
 			toggleBoosterButtonActive: this.toggleBoosterButtonActive.bind(this),
-			getGameContainerSize: this.getGameContainerSize.bind(this),
 			updateScoreCounter: this.updateScoreCounter.bind(this),
 			updateMovesCounter: this.updateMovesCounter.bind(this),
 			openWinModal: this.openWinModal.bind(this),
@@ -91,36 +84,6 @@ export class GameView extends View {
 	private handleWindowResize = this.onResize.bind(this)
 	private onResize() {
 		this.gameBlast?.onResize()
-	}
-
-	private setGameContainerSize(
-		sizes: { width: number; height: number } | null
-	) {
-		const isResetSizes = sizes === null
-		this.gameContainer?.classList.toggle(
-			"game-blast-container__canvas-container--fullsize",
-			isResetSizes
-		)
-		if (isResetSizes) {
-			return
-		}
-
-		const { width, height } = sizes
-		this.gameContainer?.style.setProperty("--field-width", `${width}px`)
-		this.gameContainer?.style.setProperty("--field-height", `${height}px`)
-	}
-
-	private getContainerOffset() {
-		if (this.gameContainer === undefined) {
-			return { offsetX: 0, offsetY: 0 }
-		}
-
-		const { x, y } = this.gameContainer.getBoundingClientRect()
-		const style = window.getComputedStyle(this.gameContainer)
-		const offsetX = x + parseFloat(style.paddingLeft || "0")
-		const offsetY = y + parseFloat(style.paddingTop || "0")
-
-		return { offsetX, offsetY }
 	}
 
 	private updateMovesCounter({
@@ -156,13 +119,6 @@ export class GameView extends View {
 		}
 		const counter = this.boostersElementsMap[booster].counter
 		counter.textContent = currentValue.toString()
-	}
-
-	private getGameContainerSize() {
-		if (this.gameContainer === undefined) {
-			return { width: 0, height: 0 }
-		}
-		return getElementInnerSize({ element: this.gameContainer })
 	}
 
 	private setBoostersButtonsListeners() {
