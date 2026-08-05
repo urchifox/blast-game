@@ -1,14 +1,10 @@
-import { BoosterCommonProps } from "./booster"
-import { BoosterHandler } from "./boosterHandler"
+import { BoosterHandler, BoosterHandlerProps } from "./boosterHandler"
 import { Tile } from "../tile"
-import { GameRules } from "../gameRules"
 import { TileRemovingInfo } from "../types"
 import { Presenter } from "../presenter"
 
-type BoosterHandlerTeleportProps = {
+type BoosterHandlerTeleportProps = BoosterHandlerProps & {
 	presenter: Pick<Presenter, "selectTile" | "swapTiles">
-	boosterProps: BoosterCommonProps
-	gameRules: GameRules
 }
 
 export class BoosterHandlerTeleport extends BoosterHandler {
@@ -17,12 +13,7 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 	private selectedTile: Tile | null = null
 
 	constructor(props: BoosterHandlerTeleportProps) {
-		super({
-			name: "teleport",
-			initialValue: props.gameRules.BOOSTER_TELEPORT_COUNT,
-			gameRules: props.gameRules,
-			...props.boosterProps,
-		})
+		super(props)
 		this.presenter = props.presenter
 	}
 
