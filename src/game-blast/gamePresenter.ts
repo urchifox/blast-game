@@ -6,8 +6,10 @@ import { wait } from "../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./config"
 import { AnimationsManager } from "../helpers/animationManager"
 import { Presenter } from "./presenter"
+import { Layout } from "./layout"
 
 type GamePresenterProps = {
+	layout: Layout
 	field: Field
 	grid: Grid
 	renderer: Renderer
@@ -21,6 +23,7 @@ type GamePresenterProps = {
 }
 
 export class GamePresenter implements Presenter {
+	private readonly layout: GamePresenterProps["layout"]
 	private readonly field: GamePresenterProps["field"]
 	private readonly grid: GamePresenterProps["grid"]
 	private readonly renderer: GamePresenterProps["renderer"]
@@ -28,6 +31,7 @@ export class GamePresenter implements Presenter {
 	private readonly setGameContainerSize: GamePresenterProps["setGameContainerSize"]
 
 	constructor(props: GamePresenterProps) {
+		this.layout = props.layout
 		this.field = props.field
 		this.grid = props.grid
 		this.renderer = props.renderer
@@ -55,26 +59,33 @@ export class GamePresenter implements Presenter {
 		this.grid.createGrid({ columns, rows })
 		this.field.generateTiles()
 		const gridSnapshot = this.grid.getSnapshot()
+		const layoutSnapshot = this.layout.updateGridSizes(gridSnapshot)
 		this.setGameContainerSize({
-			width: gridSnapshot.gridWidth,
-			height: gridSnapshot.gridHeight,
+			width: layoutSnapshot.gridWidth,
+			height: layoutSnapshot.gridHeight,
 		})
 		this.renderer.updateFieldOffsets()
 		this.renderer.renderTiles({
 			tilesSnapshots: this.field.getTilesSnapshots(),
-			gridSnapshot: gridSnapshot,
+			gridSnapshot,
+			layoutSnapshot,
 		})
 	}
 
 	updateGameSize() {
 		this.setGameContainerSize(null)
-		const gridSnapshot = this.grid.updateGridSizes()
+		const gridSnapshot = this.grid.getSnapshot()
+		const layoutSnapshot = this.layout.updateGridSizes(gridSnapshot)
 		this.setGameContainerSize({
-			width: gridSnapshot.gridWidth,
-			height: gridSnapshot.gridHeight,
+			width: layoutSnapshot.gridWidth,
+			height: layoutSnapshot.gridHeight,
 		})
 		const tilesSnapshots = this.field.getTilesSnapshots()
-		this.renderer.resize({ tilesSnapshots, gridSnapshot })
+		this.renderer.resize({
+			tilesSnapshots,
+			gridSnapshot,
+			layoutSnapshot,
+		})
 	}
 
 	async animateAndWaitForAll(promise: Promise<void>) {
@@ -87,7 +98,7 @@ export class GamePresenter implements Presenter {
 	selectTile(tile: Tile) {
 		this.renderer.selectTile({
 			tileSnapshot: tile.getSnapshot(),
-			gridSnapshot: this.grid.getSnapshot(),
+			layoutSnapshot: this.layout.getSnapshot(),
 		})
 	}
 
@@ -99,6 +110,7 @@ export class GamePresenter implements Presenter {
 		return this.renderer.renderTiles({
 			tilesSnapshots: [tile.getSnapshot()],
 			gridSnapshot: this.grid.getSnapshot(),
+			layoutSnapshot: this.layout.getSnapshot(),
 		})
 	}
 
@@ -135,26 +147,32 @@ export class GamePresenter implements Presenter {
 	async swapTiles(tile1: Tile, tile2: Tile) {
 		this.field.swapTiles(tile1, tile2)
 
+		const gridSnapshot = this.grid.getSnapshot()
+		const layoutSnapshot = this.layout.getSnapshot()
+
 		const promiseSelection = this.renderer
 			.selectTile({
 				tileSnapshot: tile2.getSnapshot(),
-				gridSnapshot: this.grid.getSnapshot(),
+				layoutSnapshot,
 			})
 			.then(() => {
 				return this.renderer.swapTiles({
 					tilesSnapshots: [tile1.getSnapshot(), tile2.getSnapshot()],
-					gridSnapshot: this.grid.getSnapshot(),
+					gridSnapshot,
+					layoutSnapshot,
 				})
 			})
 			.then(() => {
 				return Promise.all([
 					this.renderer.unselectTile({
 						tileSnapshot: tile1.getSnapshot(),
-						gridSnapshot: this.grid.getSnapshot(),
+						gridSnapshot,
+						layoutSnapshot,
 					}),
 					this.renderer.unselectTile({
 						tileSnapshot: tile2.getSnapshot(),
-						gridSnapshot: this.grid.getSnapshot(),
+						gridSnapshot,
+						layoutSnapshot,
 					}),
 				])
 			})
@@ -182,6 +200,7 @@ export class GamePresenter implements Presenter {
 		}
 
 		const gridSnapshot = this.grid.getSnapshot()
+		const layoutSnapshot = this.layout.getSnapshot()
 
 		const newTilesSnapshotsByColumns = new Map<number, Array<TileSnapshot>>()
 		for (const tile of newTiles) {
@@ -199,6 +218,7 @@ export class GamePresenter implements Presenter {
 				this.renderer.renderTiles({
 					tilesSnapshots: tilesSnapshots,
 					gridSnapshot,
+					layoutSnapshot,
 					isAppearOnDefaultPosition: true,
 				})
 			)
@@ -210,6 +230,7 @@ export class GamePresenter implements Presenter {
 					tile_1.getSnapshot()
 				),
 				gridSnapshot,
+				layoutSnapshot,
 			})
 			await Promise.all(renderTasks)
 		} finally {
@@ -225,6 +246,7 @@ export class GamePresenter implements Presenter {
 		const shuffleFieldPromise = this.renderer.shuffleTiles({
 			tilesSnapshots: Array.from(tiles).map((tile) => tile.getSnapshot()),
 			gridSnapshot: this.grid.getSnapshot(),
+			layoutSnapshot: this.layout.getSnapshot(),
 		})
 		return this.animationsManager.animate(shuffleFieldPromise)
 	}

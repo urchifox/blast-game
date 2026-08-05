@@ -1,3 +1,4 @@
+import { LayoutSnapshot } from "../layout"
 import { GridSnapshot } from "../grid"
 import { TileSnapshot } from "../tile"
 
@@ -9,6 +10,7 @@ export type Renderer = {
 	resize(props: {
 		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
+		layoutSnapshot: LayoutSnapshot
 	}): void
 	clearTiles(): Promise<void>
 	setOnTileClick(handler: OnTileClickHandler): void
@@ -16,28 +18,33 @@ export type Renderer = {
 	renderTiles(props: {
 		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
+		layoutSnapshot: LayoutSnapshot
 		isAppearOnDefaultPosition?: boolean
 	}): Promise<void>
 	removeTile(id: string): Promise<void>
 	fallTilesToCurrentPositions(props: {
 		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
+		layoutSnapshot: LayoutSnapshot
 	}): Promise<void>
 	shuffleTiles(props: {
 		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
+		layoutSnapshot: LayoutSnapshot
 	}): Promise<void>
 	swapTiles(props: {
 		tilesSnapshots: ReadonlyArray<TileSnapshot>
 		gridSnapshot: GridSnapshot
+		layoutSnapshot: LayoutSnapshot
 	}): Promise<void>
 	selectTile(props: {
 		tileSnapshot: TileSnapshot
-		gridSnapshot: GridSnapshot
+		layoutSnapshot: LayoutSnapshot
 	}): Promise<void>
 	unselectTile(props: {
 		tileSnapshot: TileSnapshot
 		gridSnapshot: GridSnapshot
+		layoutSnapshot: LayoutSnapshot
 	}): Promise<void>
 }
 

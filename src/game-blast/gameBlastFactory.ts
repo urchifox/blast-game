@@ -14,6 +14,7 @@ import { Grid } from "./grid"
 import { boosterManagerFactory } from "./boosters/boosterManagerFactory"
 import { BoosterName } from "./types"
 import { tileClickManagerFactory } from "./tile-handlers/tileClickManagerFactory"
+import { Layout } from "./layout"
 
 export type GameBlastFactoryProps = {
 	gameContainer: HTMLElement
@@ -40,9 +41,12 @@ export function gameBlastFactory(props: GameBlastFactoryProps) {
 	const gameRules = new GameRules()
 	const randomizationFunction = Math.random
 
-	const grid = new Grid({
-		getContainerSize: props.getGameContainerSize,
+	const layout = new Layout({
+		getGameContainerSize: props.getGameContainerSize,
 	})
+
+	const grid = new Grid()
+
 	const field = new Field({
 		getFieldSnapshot: grid.getSnapshot.bind(grid),
 		randomizationFunction,
@@ -57,6 +61,7 @@ export function gameBlastFactory(props: GameBlastFactoryProps) {
 	})
 
 	const presenter = new GamePresenter({
+		layout,
 		field,
 		grid,
 		renderer,
