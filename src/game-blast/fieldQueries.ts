@@ -1,6 +1,7 @@
 import { Field } from "./field"
 import { Tile, TilePosition } from "./tile"
 import { Grid } from "./grid"
+import { TilesCollector } from "./tilesCollector"
 
 type FieldQueriesProps = {
 	field: Field
@@ -41,20 +42,17 @@ export class FieldQueries {
 	}
 
 	getSameKindNeighbourTiles(tile: Tile) {
-		const position = tile.getPosition()
 		const kind = tile.getKind()
 
-		const tiles = new Set<Tile>([tile])
-		const stringifiedPositions = new Set<string>([JSON.stringify(position)])
-		const positions = new Set<TilePosition>([position])
+		const collector = new TilesCollector()
+		collector.collect(tile)
 
-		for (const tileToRemove of tiles) {
+		for (const tileToRemove of collector.getCollection().tiles) {
 			const neighborPositions = this.grid.getNeighbourPositions(
 				tileToRemove.getPosition()
 			)
 			for (const neighborPosition of neighborPositions) {
-				const stringifiedPosition = JSON.stringify(neighborPosition)
-				if (stringifiedPositions.has(stringifiedPosition)) {
+				if (collector.isCollected(neighborPosition)) {
 					continue
 				}
 
@@ -64,13 +62,11 @@ export class FieldQueries {
 					neighborTile.getKind() === kind &&
 					!neighborTile.getIsBlocked()
 				) {
-					tiles.add(neighborTile)
-					stringifiedPositions.add(stringifiedPosition)
-					positions.add(neighborPosition)
+					collector.collect(neighborTile)
 				}
 			}
 		}
 
-		return { tiles, positions }
+		return collector.getCollection()
 	}
 }

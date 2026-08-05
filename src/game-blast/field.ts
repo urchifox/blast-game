@@ -7,6 +7,7 @@ import {
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
 import { Tile, TileKind, TilePosition, TileSnapshot } from "./tile"
+import { TilesCollector } from "./tilesCollector"
 
 export type FieldProps = {
 	getFieldSnapshot: () => GridSnapshot
@@ -145,47 +146,30 @@ export class Field {
 
 	getTilesInColumn(column: number) {
 		const tilesInColumn = this.tilesByColumns[column]
-		const tiles = new Set<Tile>()
-		const stringifiedPositions = new Set<string>()
-		const positions = new Set<TilePosition>()
+
+		const collector = new TilesCollector()
 
 		for (const tile of tilesInColumn) {
 			if (tile === undefined) {
 				continue
 			}
-			const position = tile.getPosition()
-			const stringifiedPosition = JSON.stringify(position)
-			if (stringifiedPositions.has(stringifiedPosition)) {
-				continue
-			}
-			stringifiedPositions.add(stringifiedPosition)
-			positions.add(position)
-			tiles.add(tile)
+			collector.collect(tile)
 		}
 
-		return { tiles, positions }
+		return collector.getCollection()
 	}
 
 	getTilesInRow(row: number) {
-		const tiles = new Set<Tile>()
-		const stringifiedPositions = new Set<string>()
-		const positions = new Set<TilePosition>()
+		const collector = new TilesCollector()
 
 		for (const tile of this.getTiles()) {
 			if (tile === undefined || tile.getPosition().row !== row) {
 				continue
 			}
-			const position = tile.getPosition()
-			const stringifiedPosition = JSON.stringify(position)
-			if (stringifiedPositions.has(stringifiedPosition)) {
-				continue
-			}
-			stringifiedPositions.add(stringifiedPosition)
-			positions.add(position)
-			tiles.add(tile)
+			collector.collect(tile)
 		}
 
-		return { tiles, positions }
+		return collector.getCollection()
 	}
 
 	getTilesInRadius(position: TilePosition, radius: number) {
@@ -196,9 +180,7 @@ export class Field {
 		const minRow = Math.max(0, centerRow - radius)
 		const maxRow = Math.min(rows - 1, centerRow + radius)
 
-		const tiles = new Set<Tile>()
-		const stringifiedPositions = new Set<string>()
-		const positions = new Set<TilePosition>()
+		const collector = new TilesCollector()
 
 		for (let column = minColumn; column <= maxColumn; column++) {
 			for (let row = minRow; row <= maxRow; row++) {
@@ -206,18 +188,11 @@ export class Field {
 				if (tile === undefined) {
 					continue
 				}
-				const position = { column, row }
-				const stringifiedPosition = JSON.stringify(position)
-				if (stringifiedPositions.has(stringifiedPosition)) {
-					continue
-				}
-				stringifiedPositions.add(stringifiedPosition)
-				positions.add({ column, row })
-				tiles.add(tile)
+				collector.collect(tile)
 			}
 		}
 
-		return { tiles, positions }
+		return collector.getCollection()
 	}
 
 	shuffle() {

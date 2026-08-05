@@ -86,3 +86,7 @@ export class Tile {
 		this.position.column = position.column
 	}
 }
+
+export function stringifyTilePosition(position: TilePosition): string {
+	return `${position.row}:${position.column}`
+}
