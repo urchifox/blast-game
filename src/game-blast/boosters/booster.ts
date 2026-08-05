@@ -1,6 +1,5 @@
 import { Progress } from "../../helpers/progress"
-
-export type BoosterName = "bomb" | "teleport"
+import { BoosterName } from "../types"
 
 export type BoosterCommonProps = {
 	updateCounter: (booster: BoosterName, currentValue: number) => void

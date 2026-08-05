@@ -11,9 +11,9 @@ import { LevelGenerator } from "./levelGenerator"
 import { ProgressManager } from "./progressManager"
 import { PhaserRenderer } from "./rendering/phaserRenderer"
 import { TileClickManager } from "./tile-handlers/tileClickManager"
-import { BoosterName } from "./boosters/booster"
 import { Grid } from "./grid"
 import { boosterManagerFactory } from "./boosters/boosterManagerFactory"
+import { BoosterName } from "./types"
 
 export type GameBlastFactoryProps = {
 	gameContainer: HTMLElement

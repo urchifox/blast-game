@@ -1,11 +1,10 @@
-import { BoosterName } from "./boosters/booster"
 import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { BoosterManager } from "./boosters/boosterManager"
 import { CompletionManager } from "./completionManager"
 import { ProgressManager } from "./progressManager"
 import { LevelData, LevelGenerator } from "./levelGenerator"
 import { GameRules } from "./gameRules"
-import { GameCompletionStatus, TileRemovingInfo } from "./types"
+import { BoosterName, GameCompletionStatus, TileRemovingInfo } from "./types"
 import { FieldQueries } from "./fieldQueries"
 import { Presenter } from "./presenter"
 

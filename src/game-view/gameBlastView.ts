@@ -9,8 +9,8 @@ import {
 	isHtmlElement,
 	queryElement,
 } from "../helpers/dom"
-import { BoosterName } from "../game-blast/boosters/booster"
 import { gameBlastFactory } from "../game-blast/gameBlastFactory"
+import { BoosterName } from "../game-blast/types"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true

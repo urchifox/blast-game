@@ -1,10 +1,13 @@
 import { Tile } from "../tile"
-import { BoosterName } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
-import { BoosterHandlerResult } from "../types"
+import {
+	BoosterHandlerResult,
+	BoosterName,
+	BoostersHandlersMap,
+} from "../types"
 
 export type BoosterManagerProps = {
-	boostersHandlersMap: Record<BoosterName, BoosterHandler>
+	boostersHandlersMap: BoostersHandlersMap
 }
 
 export class BoosterManager {
