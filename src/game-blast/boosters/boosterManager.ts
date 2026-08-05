@@ -1,41 +1,18 @@
-import { BoosterHandlerBomb } from "./boosterHandlerBomb"
 import { Tile } from "../tile"
-import { BoosterHandlerTeleport } from "./boosterHandlerTeleport"
-import { BoosterCommonProps, BoosterName } from "./booster"
+import { BoosterName } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { BoosterHandlerResult } from "../types"
-import { GameRules } from "../gameRules"
-import { FieldQueries } from "../fieldQueries"
-import { Presenter } from "../presenter"
 
 export type BoosterManagerProps = {
-	fieldQueries: FieldQueries
-	presenter: Pick<
-		Presenter,
-		"selectTile" | "swapTiles" | "removeTilesFromCenter"
-	>
-	boosterProps: BoosterCommonProps
-	gameRules: GameRules
+	boostersHandlersMap: Record<BoosterName, BoosterHandler>
 }
 
 export class BoosterManager {
-	private boostersHandlersMap: Record<BoosterName, BoosterHandler>
+	private boostersHandlersMap: BoosterManagerProps["boostersHandlersMap"]
 	private boostersHandlers: Array<BoosterHandler>
 
 	constructor(props: BoosterManagerProps) {
-		this.boostersHandlersMap = {
-			bomb: new BoosterHandlerBomb({
-				fieldQueries: props.fieldQueries,
-				presenter: props.presenter,
-				boosterProps: props.boosterProps,
-				gameRules: props.gameRules,
-			}),
-			teleport: new BoosterHandlerTeleport({
-				presenter: props.presenter,
-				boosterProps: props.boosterProps,
-				gameRules: props.gameRules,
-			}),
-		}
+		this.boostersHandlersMap = props.boostersHandlersMap
 		this.boostersHandlers = Object.values(this.boostersHandlersMap)
 	}
 

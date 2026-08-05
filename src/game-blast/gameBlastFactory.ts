@@ -1,7 +1,6 @@
 import { AnimationsManager } from "../helpers/animationManager"
 import { Progress } from "../helpers/progress"
 import { createId } from "../helpers/random"
-import { BoosterManager } from "./boosters/boosterManager"
 import { CompletionManager } from "./completionManager"
 import { Field } from "./field"
 import { FieldQueries } from "./fieldQueries"
@@ -14,6 +13,7 @@ import { PhaserRenderer } from "./rendering/phaserRenderer"
 import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { BoosterName } from "./boosters/booster"
 import { Grid } from "./grid"
+import { boosterManagerFactory } from "./boosters/boosterManagerFactory"
 
 export type GameBlastFactoryProps = {
 	gameContainer: HTMLElement
@@ -75,11 +75,12 @@ export function gameBlastFactory(props: GameBlastFactoryProps) {
 		updateCounter: props.updateBoosterCounter,
 		onActiveChange: props.toggleBoosterButtonActive,
 	}
-	const boosterManager = new BoosterManager({
+
+	const boosterManager = boosterManagerFactory({
 		fieldQueries: fieldQueries,
 		presenter: presenter,
-		boosterProps: boosterProps,
 		gameRules: gameRules,
+		boosterProps: boosterProps,
 	})
 
 	const scoreProgress = new Progress({
