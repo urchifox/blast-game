@@ -18,6 +18,9 @@ type GameBlastProps = {
 	progressManager: ProgressManager
 	boosterProps: BoosterCommonProps
 	randomizationFunction: RandomizationFunction
+	tileClickManager: TileClickManager
+	boosterManager: BoosterManager
+	completionManager: CompletionManager
 	openWinModal: () => void
 	openLossModal: () => void
 }
@@ -28,12 +31,11 @@ export class GameBlast {
 	private readonly gameRules: GameBlastProps["gameRules"]
 	private readonly levelGenerator: GameBlastProps["levelGenerator"]
 	private readonly progressManager: GameBlastProps["progressManager"]
+	private readonly tileClickManager: GameBlastProps["tileClickManager"]
+	private readonly boosterManager: GameBlastProps["boosterManager"]
+	private readonly completionManager: GameBlastProps["completionManager"]
 	private readonly openWinModal: GameBlastProps["openWinModal"]
 	private readonly openLossModal: GameBlastProps["openLossModal"]
-
-	private tileClickManager: TileClickManager
-	private boosterManager: BoosterManager
-	private completionManager: CompletionManager
 
 	private levelData: LevelData = {
 		columns: 0,
@@ -48,34 +50,11 @@ export class GameBlast {
 		this.gameRules = props.gameRules
 		this.levelGenerator = props.levelGenerator
 		this.progressManager = props.progressManager
+		this.tileClickManager = props.tileClickManager
+		this.boosterManager = props.boosterManager
+		this.completionManager = props.completionManager
 		this.openWinModal = props.openWinModal
 		this.openLossModal = props.openLossModal
-
-		this.tileClickManager = new TileClickManager({
-			fieldQueries: this.fieldQueries,
-			presenter: this.presenter,
-			gameRules: props.gameRules,
-			randomizationFunction: props.randomizationFunction,
-		})
-
-		this.boosterManager = new BoosterManager({
-			fieldQueries: this.fieldQueries,
-			presenter: props.presenter,
-			boosterProps: props.boosterProps,
-			gameRules: props.gameRules,
-		})
-
-		this.completionManager = new CompletionManager({
-			fieldQueries: this.fieldQueries,
-			presenter: this.presenter,
-			gameRules: props.gameRules,
-			isScoreTargetReached: this.progressManager.isScoreTargetReached.bind(
-				this.progressManager
-			),
-			isMovesTargetReached: this.progressManager.isMovesTargetReached.bind(
-				this.progressManager
-			),
-		})
 	}
 
 	async init() {

@@ -21,6 +21,9 @@ import { GamePresenter } from "../game-blast/gamePresenter"
 import { AnimationsManager } from "../helpers/animationManager"
 import { FieldQueries } from "../game-blast/fieldQueries"
 import { createId } from "../helpers/random"
+import { BoosterManager } from "../game-blast/boosters/boosterManager"
+import { CompletionManager } from "../game-blast/completionManager"
+import { TileClickManager } from "../game-blast/tile-handlers/tileClickManager"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -122,6 +125,30 @@ export class GameView extends View {
 			setGameContainerSize: this.setGameContainerSize.bind(this),
 		})
 
+		const tileClickManager = new TileClickManager({
+			fieldQueries: fieldQueries,
+			presenter: presenter,
+			gameRules: gameRules,
+			randomizationFunction: randomizationFunction,
+		})
+
+		const boosterManager = new BoosterManager({
+			fieldQueries: fieldQueries,
+			presenter: presenter,
+			boosterProps: boosterProps,
+			gameRules: gameRules,
+		})
+
+		const completionManager = new CompletionManager({
+			fieldQueries: fieldQueries,
+			presenter: presenter,
+			gameRules: gameRules,
+			isScoreTargetReached:
+				progressManager.isScoreTargetReached.bind(progressManager),
+			isMovesTargetReached:
+				progressManager.isMovesTargetReached.bind(progressManager),
+		})
+
 		this.gameBlast = new GameBlast({
 			fieldQueries,
 			presenter,
@@ -130,6 +157,9 @@ export class GameView extends View {
 			progressManager,
 			boosterProps,
 			randomizationFunction,
+			tileClickManager,
+			boosterManager,
+			completionManager,
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
 		})
