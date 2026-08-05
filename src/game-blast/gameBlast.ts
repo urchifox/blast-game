@@ -1,5 +1,4 @@
-import { RandomizationFunction } from "../helpers/random"
-import { BoosterName, BoosterCommonProps } from "./boosters/booster"
+import { BoosterName } from "./boosters/booster"
 import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { BoosterManager } from "./boosters/boosterManager"
 import { CompletionManager } from "./completionManager"
@@ -10,14 +9,12 @@ import { GameCompletionStatus, TileRemovingInfo } from "./types"
 import { FieldQueries } from "./fieldQueries"
 import { Presenter } from "./presenter"
 
-type GameBlastProps = {
+export type GameBlastProps = {
 	fieldQueries: FieldQueries
 	presenter: Presenter
 	gameRules: GameRules
 	levelGenerator: LevelGenerator
 	progressManager: ProgressManager
-	boosterProps: BoosterCommonProps
-	randomizationFunction: RandomizationFunction
 	tileClickManager: TileClickManager
 	boosterManager: BoosterManager
 	completionManager: CompletionManager

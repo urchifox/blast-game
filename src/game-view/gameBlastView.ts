@@ -9,21 +9,8 @@ import {
 	isHtmlElement,
 	queryElement,
 } from "../helpers/dom"
-import { PhaserRenderer } from "../game-blast/rendering/phaserRenderer"
 import { BoosterName } from "../game-blast/boosters/booster"
-import { Field } from "../game-blast/field"
-import { Grid } from "../game-blast/grid"
-import { Progress } from "../helpers/progress"
-import { ProgressManager } from "../game-blast/progressManager"
-import { LevelGenerator } from "../game-blast/levelGenerator"
-import { GameRules } from "../game-blast/gameRules"
-import { GamePresenter } from "../game-blast/gamePresenter"
-import { AnimationsManager } from "../helpers/animationManager"
-import { FieldQueries } from "../game-blast/fieldQueries"
-import { createId } from "../helpers/random"
-import { BoosterManager } from "../game-blast/boosters/boosterManager"
-import { CompletionManager } from "../game-blast/completionManager"
-import { TileClickManager } from "../game-blast/tile-handlers/tileClickManager"
+import { gameBlastFactory } from "../game-blast/gameBlastFactory"
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -70,96 +57,15 @@ export class GameView extends View {
 			},
 		}
 
-		const gameRules = new GameRules()
-		const randomizationFunction = Math.random
-
-		const boosterProps = {
-			updateCounter: this.updateBoosterCounter.bind(this),
-			onActiveChange: this.toggleBoosterButtonActive.bind(this),
-		}
-		const grid = new Grid({
-			getContainerSize: this.getGameContainerSize.bind(this),
-		})
-		const field = new Field({
-			getFieldSnapshot: grid.getSnapshot.bind(grid),
-			randomizationFunction,
-			createId,
-		})
-
-		const scoreProgress = new Progress({
-			updateCounter: ({ currentValue, targetValue }) =>
-				this.updateScoreCounter({
-					score: currentValue,
-					goalScore: targetValue,
-				}),
-		})
-		const movesProgress = new Progress({
-			updateCounter: ({ currentValue, targetValue }) =>
-				this.updateMovesCounter({
-					movesNumber: currentValue,
-					movesLimit: targetValue,
-				}),
-		})
-		const progressManager = new ProgressManager({
-			scoreProgress,
-			movesProgress,
-		})
-		const levelGenerator = new LevelGenerator({
-			gameRules,
-			randomizationFunction,
-		})
-
-		const animationsManager = new AnimationsManager()
-		const renderer = new PhaserRenderer({
-			container: this.gameContainer,
+		this.gameBlast = gameBlastFactory({
+			gameContainer: this.gameContainer,
 			getContainerOffset: this.getContainerOffset.bind(this),
-		})
-
-		const fieldQueries = new FieldQueries({ field, grid })
-
-		const presenter = new GamePresenter({
-			field,
-			grid,
-			renderer,
-			animationsManager,
 			setGameContainerSize: this.setGameContainerSize.bind(this),
-		})
-
-		const tileClickManager = new TileClickManager({
-			fieldQueries: fieldQueries,
-			presenter: presenter,
-			gameRules: gameRules,
-			randomizationFunction: randomizationFunction,
-		})
-
-		const boosterManager = new BoosterManager({
-			fieldQueries: fieldQueries,
-			presenter: presenter,
-			boosterProps: boosterProps,
-			gameRules: gameRules,
-		})
-
-		const completionManager = new CompletionManager({
-			fieldQueries: fieldQueries,
-			presenter: presenter,
-			gameRules: gameRules,
-			isScoreTargetReached:
-				progressManager.isScoreTargetReached.bind(progressManager),
-			isMovesTargetReached:
-				progressManager.isMovesTargetReached.bind(progressManager),
-		})
-
-		this.gameBlast = new GameBlast({
-			fieldQueries,
-			presenter,
-			gameRules,
-			levelGenerator,
-			progressManager,
-			boosterProps,
-			randomizationFunction,
-			tileClickManager,
-			boosterManager,
-			completionManager,
+			updateBoosterCounter: this.updateBoosterCounter.bind(this),
+			toggleBoosterButtonActive: this.toggleBoosterButtonActive.bind(this),
+			getGameContainerSize: this.getGameContainerSize.bind(this),
+			updateScoreCounter: this.updateScoreCounter.bind(this),
+			updateMovesCounter: this.updateMovesCounter.bind(this),
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
 		})
