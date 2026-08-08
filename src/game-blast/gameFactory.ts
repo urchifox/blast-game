@@ -52,7 +52,7 @@ export function gameFactory(props: GameFactoryProps) {
 	const animationsManager = new AnimationsManager()
 	const renderer = new PhaserRenderer({
 		container: props.gameContainer,
-		getContainerOffset: layout.getGameContainerOffset.bind(layout),
+		layout: layout,
 	})
 
 	const presenter = new GamePresenter({

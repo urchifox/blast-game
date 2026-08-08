@@ -24,10 +24,12 @@ const tileTextureModules = import.meta.glob("../assets/img/*.png", {
 
 export type PhaserSceneProps = {
 	getContainerOffset: () => { offsetX: number; offsetY: number }
+	getTileImage: (tileSnapshot: TileSnapshot) => string
 }
 
 export class PhaserScene extends Phaser.Scene {
 	private readonly getContainerOffset: PhaserSceneProps["getContainerOffset"]
+	private readonly getTileImage: PhaserSceneProps["getTileImage"]
 
 	private readonly tilesMap = new Map<string, Phaser.GameObjects.Sprite>()
 	private readonly scaleTweens = new Map<
@@ -48,6 +50,7 @@ export class PhaserScene extends Phaser.Scene {
 	constructor(props: PhaserSceneProps) {
 		super(SCENE_KEY)
 		this.getContainerOffset = props.getContainerOffset
+		this.getTileImage = props.getTileImage
 	}
 
 	// #region Initialization
@@ -544,7 +547,7 @@ export class PhaserScene extends Phaser.Scene {
 		layoutSnapshot: LayoutSnapshot,
 		isAppearOnDefaultPosition?: boolean
 	) {
-		const { column, row, image } = tileSnapshot
+		const { column, row } = tileSnapshot
 		const { rows } = gridSnapshot
 		const { tileWidth, tileHeight, tileGapX, tileGapY } = layoutSnapshot
 		const x = column * (tileWidth + tileGapX) + tileWidth / 2 + this.offsetX
@@ -552,7 +555,7 @@ export class PhaserScene extends Phaser.Scene {
 			? this.offsetY + tileHeight / 2
 			: row * (tileHeight + tileGapY) + tileHeight / 2 + this.offsetY
 		const zIndex = rows - row
-		const imageKey = image
+		const imageKey = this.getTileImage(tileSnapshot)
 
 		return { x, y, zIndex, tileWidth, tileHeight, imageKey }
 	}

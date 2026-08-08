@@ -1,25 +1,21 @@
 import Phaser from "phaser"
 
 import { PhaserScene } from "./phaserScene"
-import { Renderer, RendererParams, RendererResult } from "./renderer"
+import { Renderer, RendererParams, RendererProps } from "./renderer"
 
-export type PhaserRendererProps = {
-	container: HTMLElement
-	getContainerOffset: () => { offsetX: number; offsetY: number }
-}
-
-export class PhaserRenderer implements Renderer {
-	private readonly container: PhaserRendererProps["container"]
-
+export class PhaserRenderer extends Renderer {
 	private readonly game: Phaser.Game
 	private scene: PhaserScene
 	readonly readyPromise: Promise<void>
 
-	constructor(props: PhaserRendererProps) {
-		this.container = props.container
+	constructor(props: RendererProps) {
+		super(props)
 
 		const rendererScene = new PhaserScene({
-			getContainerOffset: props.getContainerOffset,
+			getContainerOffset: props.layout.getGameContainerOffset.bind(
+				props.layout
+			),
+			getTileImage: this.getTileImage.bind(this),
 		})
 
 		this.game = new Phaser.Game({
@@ -41,73 +37,59 @@ export class PhaserRenderer implements Renderer {
 		})
 	}
 
-	async init(): RendererResult<"init"> {
+	async init() {
 		await this.readyPromise
 	}
 
-	setOnTileClick(
-		props: RendererParams<"setOnTileClick">
-	): RendererResult<"setOnTileClick"> {
+	setOnTileClick(props: RendererParams<"setOnTileClick">) {
 		this.scene.setOnTileClick(props)
 	}
 
-	destroy(): RendererResult<"destroy"> {
+	destroy() {
 		this.game.destroy(true)
 	}
 
-	resize(props: RendererParams<"resize">): RendererResult<"resize"> {
+	resize(props: RendererParams<"resize">) {
 		this.game.scale.resize(window.innerWidth, window.innerHeight)
 		this.updateFieldOffsets()
 		this.scene.resize(props)
 	}
 
-	async clearTiles(): RendererResult<"clearTiles"> {
+	async clearTiles() {
 		await this.scene.clearTiles()
 	}
 
-	updateFieldOffsets(): RendererResult<"updateFieldOffsets"> {
+	updateFieldOffsets() {
 		this.scene.setOffsets()
 	}
 
-	async removeTile(
-		props: RendererParams<"removeTile">
-	): RendererResult<"removeTile"> {
+	async removeTile(props: RendererParams<"removeTile">) {
 		await this.scene.removeTile(props)
 	}
 
 	async fallTilesToCurrentPositions(
 		props: RendererParams<"fallTilesToCurrentPositions">
-	): RendererResult<"fallTilesToCurrentPositions"> {
+	) {
 		await this.scene.fallTilesToCurrentPositions(props)
 	}
 
-	async renderTiles(
-		props: RendererParams<"renderTiles">
-	): RendererResult<"renderTiles"> {
+	async renderTiles(props: RendererParams<"renderTiles">) {
 		await this.scene.renderTiles(props)
 	}
 
-	async shuffleTiles(
-		props: RendererParams<"shuffleTiles">
-	): RendererResult<"shuffleTiles"> {
+	async shuffleTiles(props: RendererParams<"shuffleTiles">) {
 		await this.scene.shuffleTiles(props)
 	}
 
-	async swapTiles(
-		props: RendererParams<"swapTiles">
-	): RendererResult<"swapTiles"> {
+	async swapTiles(props: RendererParams<"swapTiles">) {
 		await this.scene.swapTiles(props)
 	}
 
-	async selectTile(
-		props: RendererParams<"selectTile">
-	): RendererResult<"selectTile"> {
+	async selectTile(props: RendererParams<"selectTile">) {
 		await this.scene.selectTile(props)
 	}
 
-	async unselectTile(
-		props: RendererParams<"unselectTile">
-	): RendererResult<"unselectTile"> {
+	async unselectTile(props: RendererParams<"unselectTile">) {
 		await this.scene.unselectTile(props)
 	}
 }

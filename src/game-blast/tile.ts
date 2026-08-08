@@ -2,7 +2,7 @@ import { TILES_KINDS_NORMAL, TILES_KINDS_SPECIAL } from "./config"
 
 export type TileSnapshot = {
 	id: string
-	image: string
+	kind: TileKind
 	row: number
 	column: number
 }
@@ -38,14 +38,12 @@ export class Tile {
 	private readonly position: TileProps["position"]
 
 	private readonly id: string
-	private readonly image: string
 	private _isBlocked = false
 
 	constructor(props: TileProps) {
 		this.kind = props.kind
 		this.position = props.position
 		this.id = props.id
-		this.image = `tile-${props.kind}`
 	}
 
 	get isBlocked(): boolean {
@@ -64,10 +62,6 @@ export class Tile {
 		return this.kind
 	}
 
-	getImage(): string {
-		return this.image
-	}
-
 	getPosition(): TilePosition {
 		return { ...this.position }
 	}
@@ -75,7 +69,7 @@ export class Tile {
 	getSnapshot(): TileSnapshot {
 		return {
 			id: this.id,
-			image: this.image,
+			kind: this.kind,
 			row: this.position.row,
 			column: this.position.column,
 		}
