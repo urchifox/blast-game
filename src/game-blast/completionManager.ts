@@ -46,7 +46,7 @@ export class CompletionManager {
 		return this.gameCompletionStatus
 	}
 
-	needToShuffle() {
+	isShuffleNeeded() {
 		if (this.isCompleted) {
 			return false
 		}

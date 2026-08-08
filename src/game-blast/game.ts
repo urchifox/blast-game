@@ -136,13 +136,13 @@ export class Game {
 	}
 
 	async maybeShuffle() {
-		const needToShuffle = this.completionManager.needToShuffle()
-		if (!needToShuffle) {
+		const isShuffleNeeded = this.completionManager.isShuffleNeeded()
+		if (!isShuffleNeeded) {
 			return
 		}
 		// Prevent infinite loop
 		let attempts = 0
-		while (attempts < 100 && this.completionManager.needToShuffle()) {
+		while (attempts < 100 && this.completionManager.isShuffleNeeded()) {
 			await this.presenter.shuffleField()
 			attempts++
 		}
