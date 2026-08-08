@@ -1,17 +1,24 @@
-import { isHtmlElement, queryElement } from "../helpers/dom"
+import { isHtmlElement } from "../helpers/dom"
 
-export type ViewConstructor<T extends View = View> = new () => T
+export type ViewConstructor<P = ViewProps> = new (props: P) => View
+
+export type ViewProps = {
+	name: string
+	appRoot: HTMLElement
+}
 
 export abstract class View {
-	readonly name: string
+	readonly name: ViewProps["name"]
+	private readonly appRoot: ViewProps["appRoot"]
+
 	readonly needLoadingScreenOnMount: boolean = false
 	isMounted = false
 
 	private readonly element: HTMLElement
-	private readonly appRoot: HTMLElement = queryElement("#app")
 
-	constructor(name: string) {
-		this.name = name
+	constructor(props: ViewProps) {
+		this.name = props.name
+		this.appRoot = props.appRoot
 
 		const templateId = this.name
 		const template = document.getElementById(templateId)

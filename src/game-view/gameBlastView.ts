@@ -2,11 +2,13 @@ import "./assets/style/game-blast-container.css"
 import "./assets/style/win-modal.css"
 import "./assets/style/loss-modal.css"
 
-import { View } from "../view/view"
+import { View, ViewProps } from "../view/view"
 import { GameBlast } from "../game-blast/gameBlast"
 import { isHtmlElement, queryElement } from "../helpers/dom"
 import { gameBlastFactory } from "../game-blast/gameBlastFactory"
 import { BoosterName } from "../game-blast/types"
+
+type GameViewProps = Omit<ViewProps, "name">
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
@@ -27,8 +29,8 @@ export class GameView extends View {
 		}
 	> | null = null
 
-	constructor() {
-		super("game-blast")
+	constructor(props: GameViewProps) {
+		super({ name: "game-blast", ...props })
 	}
 
 	override async mount() {
