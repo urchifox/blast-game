@@ -2,11 +2,9 @@ import { isTileKindSpecial } from "./tile"
 import { GameRules } from "./gameRules"
 import { GameCompletionStatus } from "./types"
 import { FieldQueries } from "./fieldQueries"
-import { Presenter } from "./presenter"
 
 export type CompletionManagerProps = {
 	fieldQueries: FieldQueries
-	presenter: Pick<Presenter, "shuffleField">
 	gameRules: GameRules
 	isScoreTargetReached: () => boolean
 	isMovesTargetReached: () => boolean
@@ -14,7 +12,6 @@ export type CompletionManagerProps = {
 
 export class CompletionManager {
 	private readonly fieldQueries: CompletionManagerProps["fieldQueries"]
-	private readonly presenter: CompletionManagerProps["presenter"]
 	private readonly gameRules: CompletionManagerProps["gameRules"]
 	private readonly isScoreTargetReached: CompletionManagerProps["isScoreTargetReached"]
 	private readonly isMovesTargetReached: CompletionManagerProps["isMovesTargetReached"]
@@ -26,7 +23,6 @@ export class CompletionManager {
 
 	constructor(props: CompletionManagerProps) {
 		this.fieldQueries = props.fieldQueries
-		this.presenter = props.presenter
 		this.gameRules = props.gameRules
 		this.isScoreTargetReached = props.isScoreTargetReached
 		this.isMovesTargetReached = props.isMovesTargetReached
@@ -50,41 +46,22 @@ export class CompletionManager {
 		return this.gameCompletionStatus
 	}
 
-	async checkForMove() {
-		const isNewMovePossible = await this.isNewMovePossible()
-		if (!isNewMovePossible) {
-			this.lose()
-		}
-	}
-
-	private async isNewMovePossible(): Promise<boolean> {
+	needToShuffle() {
 		if (this.isCompleted) {
 			return false
 		}
 
 		const isPossibleToMakeMove = this.isPossibleToMakeMove()
 		if (isPossibleToMakeMove) {
-			return true
-		}
-
-		if (this.shuffleAttempts >= this.gameRules.MAX_SHUFFLE_ATTEMPTS) {
 			return false
 		}
 
-		const isNewMovePossible = await this.shuffleForNewMove()
-		return isNewMovePossible
-	}
-
-	private async shuffleForNewMove() {
-		this.shuffleAttempts++
-		let attempts = 0
-		while (!this.isPossibleToMakeMove()) {
-			await this.presenter.shuffleField()
-			attempts++
-			// Prevent infinite loop
-			if (attempts >= 100) {
-				return false
-			}
+		const isPossibleToShuffle = this.isPossibleToShuffle(
+			this.shuffleAttempts
+		)
+		if (!isPossibleToShuffle) {
+			this.lose()
+			return false
 		}
 
 		return true
@@ -99,6 +76,18 @@ export class CompletionManager {
 			const { tiles } = this.fieldQueries.getSameKindNeighbourTiles(tile)
 			return tiles.size > 1
 		})
+	}
+
+    private isPossibleToShuffle(shuffleAttempts: number) {
+        return shuffleAttempts < this.gameRules.MAX_SHUFFLE_ATTEMPTS
+    }
+
+	updateShuffleAttempts() {
+		this.shuffleAttempts++
+		const isPossibleToMakeMove = this.isPossibleToMakeMove()
+		if (!isPossibleToMakeMove) {
+			this.lose()
+		}
 	}
 
 	private win() {

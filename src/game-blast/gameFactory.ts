@@ -102,7 +102,6 @@ export function gameFactory(props: GameFactoryProps) {
 	})
 	const completionManager = new CompletionManager({
 		fieldQueries: fieldQueries,
-		presenter: presenter,
 		gameRules: gameRules,
 		isScoreTargetReached:
 			progressManager.isScoreTargetReached.bind(progressManager),

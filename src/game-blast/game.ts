@@ -129,10 +129,24 @@ export class Game {
 
 		const animationPromise = removingPromise
 			.then(() => this.presenter.fillEmptyPositions(removedPositions))
-			.then(() => this.completionManager.checkForMove())
+			.then(() => this.maybeShuffle())
 		this.presenter.animateAndWaitForAll(animationPromise).then(() => {
 			this.processGameCompletion()
 		})
+	}
+
+	async maybeShuffle() {
+		const needToShuffle = this.completionManager.needToShuffle()
+		if (!needToShuffle) {
+			return
+		}
+		// Prevent infinite loop
+		let attempts = 0
+		while (attempts < 100 && this.completionManager.needToShuffle()) {
+			await this.presenter.shuffleField()
+			attempts++
+		}
+		this.completionManager.updateShuffleAttempts()
 	}
 
 	private processGameCompletion() {
