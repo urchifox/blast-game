@@ -3,11 +3,10 @@ import { BoosterHandler } from "./boosterHandler"
 import {
 	BoosterHandlerResult,
 	BoosterName,
-	BoostersHandlersMap,
 } from "../types"
 
 export type BoosterManagerProps = {
-	boostersHandlersMap: BoostersHandlersMap
+	boostersHandlersMap: Record<BoosterName, BoosterHandler>
 }
 
 export class BoosterManager {

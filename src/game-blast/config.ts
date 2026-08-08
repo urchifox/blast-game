@@ -20,6 +20,8 @@ export const TILES_KINDS_SPECIAL = [
 	"rockets-row",
 ] as const
 
+export const BOOSTER_NAMES = ["bomb", "teleport"] as const
+
 /** tile heights per second */
 export const TILE_FALL_SPEED = 10
 export const MIN_TILE_FALL_DURATION_MS = 10

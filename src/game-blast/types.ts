@@ -1,5 +1,4 @@
-import { BoosterHandlerBomb } from "./boosters/boosterHandlerBomb"
-import { BoosterHandlerTeleport } from "./boosters/boosterHandlerTeleport"
+import { BOOSTER_NAMES } from "./config"
 import { Tile, TilePosition } from "./tile"
 
 export type TileClickHandler = (tile: Tile) => TileRemovingInfo
@@ -21,9 +20,4 @@ export enum GameCompletionStatus {
 	IN_PROGRESS = "in_progress",
 }
 
-export type BoostersHandlersMap = {
-	bomb: BoosterHandlerBomb
-	teleport: BoosterHandlerTeleport
-}
-
-export type BoosterName = keyof BoostersHandlersMap
+export type BoosterName = (typeof BOOSTER_NAMES)[number]
