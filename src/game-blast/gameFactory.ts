@@ -19,6 +19,7 @@ import { LayoutCalculator } from "./layoutCalculator"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
+	toggleGameContainerResetSizes: (isResetSizes: boolean) => void
 
 	updateBoosterCounter: (booster: BoosterName, currentValue: number) => void
 	toggleBoosterButtonActive: (booster: BoosterName, active: boolean) => void
@@ -38,6 +39,7 @@ export function gameFactory(props: GameFactoryProps) {
 	const layout = new Layout({
 		gameContainer: props.gameContainer,
 		layoutCalculator: layoutCalculator,
+		toggleGameContainerResetSizes: props.toggleGameContainerResetSizes,
 	})
 
 	const grid = new Grid()

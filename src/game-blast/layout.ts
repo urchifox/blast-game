@@ -5,6 +5,7 @@ import { LayoutCalculator } from "./layoutCalculator"
 export type LayoutProps = {
 	gameContainer: HTMLElement
 	layoutCalculator: LayoutCalculator
+	toggleGameContainerResetSizes: (isResetSizes: boolean) => void
 }
 
 export type LayoutSnapshot = {
@@ -19,6 +20,7 @@ export type LayoutSnapshot = {
 export class Layout {
 	private readonly gameContainer: LayoutProps["gameContainer"]
 	private readonly layoutCalculator: LayoutProps["layoutCalculator"]
+	private readonly toggleGameContainerResetSizes: LayoutProps["toggleGameContainerResetSizes"]
 
 	private gridWidth?: number
 	private gridHeight?: number
@@ -31,6 +33,7 @@ export class Layout {
 	constructor(props: LayoutProps) {
 		this.gameContainer = props.gameContainer
 		this.layoutCalculator = props.layoutCalculator
+		this.toggleGameContainerResetSizes = props.toggleGameContainerResetSizes
 	}
 
 	getSnapshot(): LayoutSnapshot {
@@ -81,14 +84,7 @@ export class Layout {
 
 	setGameContainerSize(sizes: { width: number; height: number } | null) {
 		const isResetSizes = sizes === null
-		this.gameContainer.classList.toggle(
-			"game-blast-container__canvas-container--fullsize",
-			isResetSizes
-		)
-		this.gameContainer.querySelector(".canvas-container__canvas")?.classList.toggle(
-			"canvas-container__canvas--fullsize",
-			isResetSizes
-		)
+		this.toggleGameContainerResetSizes(isResetSizes)
 		if (isResetSizes) {
 			return
 		}
