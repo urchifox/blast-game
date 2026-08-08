@@ -8,13 +8,13 @@ export class TilesCollector {
 	private isPositionCollected(position: TilePosition) {
 		const stringifiedPosition = stringifyTilePosition(position)
 		return (
-			this.stringifiedPositions.has(stringifiedPosition) ||
+			this.stringifiedPositions.has(stringifiedPosition) ??
 			this.positions.has(position)
 		)
 	}
 
 	private isTileCollected(tile: Tile) {
-		return this.tiles.has(tile) || this.isPositionCollected(tile.getPosition())
+		return this.tiles.has(tile) ?? this.isPositionCollected(tile.getPosition())
 	}
 
 	isCollected(tileOrPosition: Tile | TilePosition) {

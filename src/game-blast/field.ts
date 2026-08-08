@@ -222,7 +222,7 @@ export class Field {
 				Math.abs(tile.getPosition().column - centerColumn),
 				Math.abs(tile.getPosition().row - centerRow)
 			)
-			const tiles = groupedTiles.get(distance) || new Set<Tile>()
+			const tiles = groupedTiles.get(distance) ?? new Set<Tile>()
 			tiles.add(tile)
 			groupedTiles.set(distance, tiles)
 		}

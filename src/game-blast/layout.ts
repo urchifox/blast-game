@@ -133,8 +133,8 @@ export class Layout {
 	getGameContainerOffset() {
 		const { x, y } = this.gameContainer.getBoundingClientRect()
 		const style = window.getComputedStyle(this.gameContainer)
-		const offsetX = x + parseFloat(style.paddingLeft || "0")
-		const offsetY = y + parseFloat(style.paddingTop || "0")
+		const offsetX = x + parseFloat(style.paddingLeft ?? "0")
+		const offsetY = y + parseFloat(style.paddingTop ?? "0")
 
 		return { offsetX, offsetY }
 	}

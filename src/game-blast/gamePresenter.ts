@@ -197,7 +197,7 @@ export class GamePresenter implements Presenter {
 		const newTilesSnapshotsByColumns = new Map<number, Array<TileSnapshot>>()
 		for (const tile of newTiles) {
 			const column = tile.getPosition().column
-			const tilesSnapshots = newTilesSnapshotsByColumns.get(column) || []
+			const tilesSnapshots = newTilesSnapshotsByColumns.get(column) ?? []
 			tilesSnapshots.push(tile.getSnapshot())
 			newTilesSnapshotsByColumns.set(column, tilesSnapshots)
 		}
