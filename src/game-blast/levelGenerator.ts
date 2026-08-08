@@ -23,10 +23,9 @@ export class LevelGenerator {
 	}
 
 	generateLevelData() {
-		const levelData = {} as LevelData
-		levelData.columns = this.gameRules.DEFAULT_COLUMNS
-		levelData.rows = this.gameRules.DEFAULT_ROWS
-		levelData.goalScore = getRandomNumber(
+		const columns = this.gameRules.DEFAULT_COLUMNS
+		const rows = this.gameRules.DEFAULT_ROWS
+		const goalScore = getRandomNumber(
 			{
 				min: this.gameRules.MIN_GOAL_SCORE,
 				max: this.gameRules.MAX_GOAL_SCORE,
@@ -34,7 +33,13 @@ export class LevelGenerator {
 			},
 			this.randomizationFunction
 		)
-		levelData.movesLimit = this.estimateMoves(levelData.goalScore)
+		const movesLimit = this.estimateMoves(goalScore)
+		const levelData: LevelData = {
+			columns,
+			rows,
+			goalScore,
+			movesLimit,
+		}
 		return levelData
 	}
 
