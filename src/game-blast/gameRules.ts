@@ -1,4 +1,5 @@
 import { TileKindSpecial } from "./tile"
+import { BoosterName } from "./types"
 
 export class GameRules {
 	readonly MIN_GOAL_SCORE = 1000
@@ -19,8 +20,10 @@ export class GameRules {
 	readonly DEFAULT_COLUMNS = 9
 	readonly DEFAULT_ROWS = 9
 
-	readonly BOOSTER_BOMBS_COUNT = 3
-	readonly BOOSTER_TELEPORT_COUNT = 5
+	readonly BOOSTER_INITIAL_VALUE: Record<BoosterName, number> = {
+		bomb: 3,
+		teleport: 5,
+	}
 
 	readonly BOOSTER_BOMB_RADIUS = 2
 	readonly TILE_BOMB_RADIUS = 2
