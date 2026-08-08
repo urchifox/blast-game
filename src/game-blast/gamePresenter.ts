@@ -110,7 +110,7 @@ export class GamePresenter implements Presenter {
 		const ids = new Set<string>()
 		for (const tile of tiles) {
 			const removedTileId = tile.getId()
-			tile.setIsBlocked(true)
+			tile.isBlocked = true
 			this.field.removeTile(tile.getPosition())
 			ids.add(removedTileId)
 		}
@@ -184,11 +184,11 @@ export class GamePresenter implements Presenter {
 
 		for (const movedTile of movedTiles) {
 			temporaryBlockedTiles.add(movedTile)
-			movedTile.setIsBlocked(true)
+			movedTile.isBlocked = true
 		}
 		for (const newTile of newTiles) {
 			temporaryBlockedTiles.add(newTile)
-			newTile.setIsBlocked(true)
+			newTile.isBlocked = true
 		}
 
 		const gridSnapshot = this.grid.getSnapshot()
@@ -227,7 +227,7 @@ export class GamePresenter implements Presenter {
 			await Promise.all(renderTasks)
 		} finally {
 			for (const blockedTile of temporaryBlockedTiles) {
-				blockedTile.setIsBlocked(false)
+				blockedTile.isBlocked = false
 			}
 		}
 	}

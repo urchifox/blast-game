@@ -60,7 +60,7 @@ export class FieldQueries {
 				if (
 					neighborTile !== undefined &&
 					neighborTile.getKind() === kind &&
-					!neighborTile.getIsBlocked()
+					!neighborTile.isBlocked
 				) {
 					collector.collect(neighborTile)
 				}

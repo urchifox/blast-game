@@ -102,7 +102,7 @@ export class GameBlast {
 		}
 
 		const tile = this.fieldQueries.getTileById(id)
-		if (tile === undefined || tile.getIsBlocked()) {
+		if (tile === undefined || tile.isBlocked) {
 			return
 		}
 

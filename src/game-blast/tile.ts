@@ -39,7 +39,7 @@ export class Tile {
 
 	private readonly id: string
 	private readonly image: string
-	private isBlocked = false
+	private _isBlocked = false
 
 	constructor(props: TileProps) {
 		this.kind = props.kind
@@ -48,12 +48,12 @@ export class Tile {
 		this.image = `tile-${props.kind}`
 	}
 
-	getIsBlocked(): boolean {
-		return this.isBlocked
+	get isBlocked(): boolean {
+		return this._isBlocked
 	}
 
-	setIsBlocked(isBlocked: boolean) {
-		this.isBlocked = isBlocked
+	set isBlocked(isBlocked: boolean) {
+		this._isBlocked = isBlocked
 	}
 
 	getId(): string {
