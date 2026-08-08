@@ -1,3 +1,4 @@
+import { Progress } from "../../helpers/progress"
 import { FirstConstructorArg, UnionToIntersection } from "../../helpers/types"
 import { Booster } from "./booster"
 import { BoosterHandlerBomb } from "./boosterHandlerBomb"
@@ -12,7 +13,7 @@ export type BoosterManagerFactoryProps = Omit<
 > & {
 	boosterProps: Omit<
 		FirstConstructorArg<typeof Booster>,
-		"name" | "initialValue"
+		"name" | "initialValue" | "progress"
 	>
 }
 
@@ -24,6 +25,11 @@ export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
 			booster: new Booster({
 				name: "bomb",
 				initialValue: gameRules.BOOSTER_BOMBS_COUNT,
+				progress: new Progress({
+					updateCounter: ({ currentValue }) =>
+						props.boosterProps.updateCounter("bomb", currentValue),
+					isDirectionDown: true,
+				}),
 				...boosterProps,
 			}),
 			fieldQueries: fieldQueries,
@@ -34,6 +40,11 @@ export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
 			booster: new Booster({
 				name: "teleport",
 				initialValue: gameRules.BOOSTER_TELEPORT_COUNT,
+				progress: new Progress({
+					updateCounter: ({ currentValue }) =>
+						props.boosterProps.updateCounter("teleport", currentValue),
+					isDirectionDown: true,
+				}),
 				...boosterProps,
 			}),
 			presenter: presenter,

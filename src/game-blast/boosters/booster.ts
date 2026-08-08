@@ -4,6 +4,7 @@ import { BoosterName } from "../types"
 export type BoosterCommonProps = {
 	updateCounter: (booster: BoosterName, currentValue: number) => void
 	onActiveChange?: (boosterName: BoosterName, isActive: boolean) => void
+	progress: Progress
 }
 
 export type BoosterCustomProps = {
@@ -17,18 +18,14 @@ export class Booster {
 	private readonly name: BoosterProps["name"]
 	private readonly initialValue: BoosterProps["initialValue"]
 	private readonly onActiveChange?: BoosterProps["onActiveChange"]
+	private readonly progress: BoosterProps["progress"]
 
-	private readonly progress: Progress
 	private isActive = false
 
 	constructor(props: BoosterProps) {
 		this.name = props.name
 		this.initialValue = props.initialValue
-		this.progress = new Progress({
-			updateCounter: ({ currentValue }) =>
-				props.updateCounter(this.name, currentValue),
-			isDirectionDown: true,
-		})
+		this.progress = props.progress
 		this.onActiveChange = props.onActiveChange
 		this.progress.setTargetValue(0)
 	}
