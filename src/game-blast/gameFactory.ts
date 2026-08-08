@@ -4,7 +4,7 @@ import { createId } from "../helpers/random"
 import { CompletionManager } from "./completionManager"
 import { Field } from "./field"
 import { FieldQueries } from "./fieldQueries"
-import { GameBlast, GameBlastProps } from "./gameBlast"
+import { Game, GameProps } from "./game"
 import { GamePresenter } from "./gamePresenter"
 import { GameRules } from "./gameRules"
 import { LevelGenerator } from "./levelGenerator"
@@ -16,7 +16,7 @@ import { BoosterName } from "./types"
 import { tileClickManagerFactory } from "./tile-handlers/tileClickManagerFactory"
 import { Layout } from "./layout"
 
-export type GameBlastFactoryProps = {
+export type GameFactoryProps = {
 	gameContainer: HTMLElement
 
 	updateBoosterCounter: (booster: BoosterName, currentValue: number) => void
@@ -27,9 +27,9 @@ export type GameBlastFactoryProps = {
 		movesNumber: number
 		movesLimit: number
 	}) => void
-} & Pick<GameBlastProps, "openWinModal" | "openLossModal">
+} & Pick<GameProps, "openWinModal" | "openLossModal">
 
-export function gameBlastFactory(props: GameBlastFactoryProps) {
+export function gameFactory(props: GameFactoryProps) {
 	const gameRules = new GameRules()
 	const randomizationFunction = Math.random
 	const layout = new Layout({
@@ -111,7 +111,7 @@ export function gameBlastFactory(props: GameBlastFactoryProps) {
 		randomizationFunction,
 	})
 
-	return new GameBlast({
+	return new Game({
 		fieldQueries,
 		presenter,
 		gameRules,

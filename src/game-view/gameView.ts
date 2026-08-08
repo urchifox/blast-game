@@ -3,16 +3,16 @@ import "./assets/style/win-modal.css"
 import "./assets/style/loss-modal.css"
 
 import { View, ViewProps } from "../view/view"
-import { GameBlast } from "../game-blast/gameBlast"
+import { Game } from "../game-blast/game"
 import { isHtmlElement, queryElement } from "../helpers/dom"
-import { gameBlastFactory } from "../game-blast/gameBlastFactory"
+import { gameFactory } from "../game-blast/gameFactory"
 import { BoosterName } from "../game-blast/types"
 
 type GameViewProps = Omit<ViewProps, "name">
 
 export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
-	private gameBlast?: GameBlast
+	private game?: Game
 	private gameContainer?: HTMLElement
 	private movesCounter?: HTMLElement
 	private scoreCounter?: HTMLElement
@@ -55,7 +55,7 @@ export class GameView extends View {
 			},
 		}
 
-		this.gameBlast = gameBlastFactory({
+		this.game = gameFactory({
 			gameContainer: this.gameContainer,
 			updateBoosterCounter: this.updateBoosterCounter.bind(this),
 			toggleBoosterButtonActive: this.toggleBoosterButtonActive.bind(this),
@@ -67,7 +67,7 @@ export class GameView extends View {
 
 		this.setListeners()
 
-		await this.gameBlast.init()
+		await this.game.init()
 	}
 
 	private setListeners() {
@@ -79,13 +79,13 @@ export class GameView extends View {
 
 	override async unmount() {
 		window.removeEventListener("resize", this.handleWindowResize)
-		await this.gameBlast?.destroy()
+		await this.game?.destroy()
 		super.unmount()
 	}
 
 	private handleWindowResize = this.onResize.bind(this)
 	private onResize() {
-		this.gameBlast?.onResize()
+		this.game?.onResize()
 	}
 
 	private updateMovesCounter({
@@ -124,7 +124,7 @@ export class GameView extends View {
 	}
 
 	private setBoostersButtonsListeners() {
-		if (this.boostersElementsMap === null || this.gameBlast === undefined) {
+		if (this.boostersElementsMap === null || this.game === undefined) {
 			return
 		}
 
@@ -132,8 +132,8 @@ export class GameView extends View {
 			this.boostersElementsMap
 		)) {
 			const button = booster.button
-			const onClick = this.gameBlast.onBoosterButtonClick.bind(
-				this.gameBlast,
+			const onClick = this.game.onBoosterButtonClick.bind(
+				this.game,
 				boosterName as BoosterName
 			)
 
@@ -203,12 +203,12 @@ export class GameView extends View {
 	}
 
 	private onWinModalButtonClick() {
-		this.gameBlast?.startNewLevel()
+		this.game?.startNewLevel()
 		this.closeWinModal()
 	}
 
 	private onWinModalBackdropClick() {
-		this.gameBlast?.startNewLevel()
+		this.game?.startNewLevel()
 		this.closeWinModal()
 	}
 
@@ -276,12 +276,12 @@ export class GameView extends View {
 	}
 
 	private onLossModalButtonClick() {
-		this.gameBlast?.restartLevel()
+		this.game?.restartLevel()
 		this.closeLossModal()
 	}
 
 	private onLossModalBackdropClick() {
-		this.gameBlast?.restartLevel()
+		this.game?.restartLevel()
 		this.closeLossModal()
 	}
 

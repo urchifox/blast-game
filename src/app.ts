@@ -7,7 +7,7 @@ import "./assets/style/points-counter.css"
 import "./assets/style/progress-block.css"
 import "./assets/style/view.css"
 
-import { GameView } from "./game-view/gameBlastView"
+import { GameView } from "./game-view/gameView"
 import { ViewManager } from "./view/viewManager"
 import { LoadingScreen } from "./view/loadingScreen"
 

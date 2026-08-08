@@ -8,7 +8,7 @@ import { BoosterName, GameCompletionStatus, TileRemovingInfo } from "./types"
 import { FieldQueries } from "./fieldQueries"
 import { Presenter } from "./presenter"
 
-export type GameBlastProps = {
+export type GameProps = {
 	fieldQueries: FieldQueries
 	presenter: Presenter
 	gameRules: GameRules
@@ -21,17 +21,17 @@ export type GameBlastProps = {
 	openLossModal: () => void
 }
 
-export class GameBlast {
-	private readonly fieldQueries: GameBlastProps["fieldQueries"]
-	private readonly presenter: GameBlastProps["presenter"]
-	private readonly gameRules: GameBlastProps["gameRules"]
-	private readonly levelGenerator: GameBlastProps["levelGenerator"]
-	private readonly progressManager: GameBlastProps["progressManager"]
-	private readonly tileClickManager: GameBlastProps["tileClickManager"]
-	private readonly boosterManager: GameBlastProps["boosterManager"]
-	private readonly completionManager: GameBlastProps["completionManager"]
-	private readonly openWinModal: GameBlastProps["openWinModal"]
-	private readonly openLossModal: GameBlastProps["openLossModal"]
+export class Game {
+	private readonly fieldQueries: GameProps["fieldQueries"]
+	private readonly presenter: GameProps["presenter"]
+	private readonly gameRules: GameProps["gameRules"]
+	private readonly levelGenerator: GameProps["levelGenerator"]
+	private readonly progressManager: GameProps["progressManager"]
+	private readonly tileClickManager: GameProps["tileClickManager"]
+	private readonly boosterManager: GameProps["boosterManager"]
+	private readonly completionManager: GameProps["completionManager"]
+	private readonly openWinModal: GameProps["openWinModal"]
+	private readonly openLossModal: GameProps["openLossModal"]
 
 	private levelData: LevelData = {
 		columns: 0,
@@ -40,7 +40,7 @@ export class GameBlast {
 		movesLimit: 0,
 	}
 
-	constructor(props: GameBlastProps) {
+	constructor(props: GameProps) {
 		this.fieldQueries = props.fieldQueries
 		this.presenter = props.presenter
 		this.gameRules = props.gameRules
