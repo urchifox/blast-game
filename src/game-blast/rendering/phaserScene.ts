@@ -55,7 +55,7 @@ export class PhaserScene extends Phaser.Scene {
 	preload() {
 		Object.entries(tileTextureModules).forEach(([modulePath, textureUrl]) => {
 			const fileName = modulePath.split("/").pop()
-			if (!fileName) {
+			if (fileName === undefined) {
 				return
 			}
 
@@ -390,7 +390,7 @@ export class PhaserScene extends Phaser.Scene {
 		layoutSnapshot: LayoutSnapshot
 	) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
-		if (!tileSprite) {
+		if (tileSprite === undefined) {
 			return
 		}
 
@@ -465,7 +465,7 @@ export class PhaserScene extends Phaser.Scene {
 		layoutSnapshot,
 	}: RendererParams<"selectTile">) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
-		if (!tileSprite) {
+		if (tileSprite === undefined) {
 			return
 		}
 		tileSprite.setDepth(Infinity)
@@ -496,7 +496,7 @@ export class PhaserScene extends Phaser.Scene {
 		layoutSnapshot,
 	}: RendererParams<"unselectTile">) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
-		if (!tileSprite) {
+		if (tileSprite === undefined) {
 			return
 		}
 
