@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## Conditions
 
-- Always use explicit comparisons.
+- Always use explicit comparisons in "if" blocks and ternary operator.
 - Prefer `value !== null` over `!value`.
 - Prefer `value === undefined` over falsy checks when checking for undefined.
 - Avoid implicit truthiness checks unless the value is explicitly boolean.
