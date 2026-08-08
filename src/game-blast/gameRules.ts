@@ -1,3 +1,5 @@
+import { TileKindSpecial } from "./tile"
+
 export class GameRules {
 	readonly MIN_GOAL_SCORE = 1000
 	readonly MAX_GOAL_SCORE = 5000
@@ -6,10 +8,11 @@ export class GameRules {
 	readonly MAX_AVG_COMBO = 10
 	readonly MIN_COMBO_SIZE = 2
 
-	readonly ROCKET_COLUMN_COMBO_SIZE = 4
-	readonly ROCKET_ROW_COMBO_SIZE = 4
-	readonly BOMB_COMBO_SIZE = 6
-	readonly DYNAMITE_COMBO_SIZE = 8
+	readonly REWARD_BY_COMBO_SIZE: Record<number, Array<TileKindSpecial>> = {
+		4: ["rockets-column", "rockets-row"],
+		6: ["bomb"],
+		8: ["dynamite"],
+	}
 
 	readonly MAX_SHUFFLE_ATTEMPTS = 3
 
