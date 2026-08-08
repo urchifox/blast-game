@@ -1,4 +1,4 @@
-import { shuffle } from "../helpers/array"
+import { getShuffledArray } from "../helpers/array"
 import {
 	IdGenerator,
 	pickRandomItem,
@@ -198,7 +198,7 @@ export class Field {
 	shuffle() {
 		const tiles = this.getTiles()
 		const positions = this.getPositions(tiles)
-		const shuffledPositions = shuffle(positions, {
+		const shuffledPositions = getShuffledArray(positions, {
 			randomizationFunction: this.randomizationFunction,
 		})
 		for (const [index, tile] of tiles.entries()) {
