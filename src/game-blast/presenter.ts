@@ -4,7 +4,7 @@ export type Presenter = {
 	init: (onTileClick: (id: string) => void) => Promise<void>
 	destroy: () => void
 	clear: () => Promise<void>
-	create: (props: { columns: number; rows: number }) => void
+	create: (props: { columns: number; rows: number }) => Promise<void>
 	updateGameSize: () => void
 
 	shuffleField: () => Promise<void>

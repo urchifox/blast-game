@@ -57,7 +57,7 @@ export class GamePresenter implements Presenter {
 			height: layoutSnapshot.gridHeight,
 		})
 		this.renderer.updateFieldOffsets()
-		this.renderer.renderTiles({
+		return this.renderer.renderTiles({
 			tilesSnapshots: this.field.getTilesSnapshots(),
 			gridSnapshot,
 			layoutSnapshot,

@@ -79,18 +79,18 @@ export class Game {
 	async startNewLevel() {
 		await this.clearLevel()
 		this.levelData = this.levelGenerator.generateLevelData()
-		this.createLevel()
+		await this.createLevel()
 	}
 
 	async restartLevel() {
 		await this.clearLevel()
-		this.createLevel()
+		await this.createLevel()
 	}
 
-	private createLevel() {
+	private async createLevel() {
 		const { columns, rows, goalScore, movesLimit } = this.levelData
 		this.boosterManager.setInitialValue()
-		this.presenter.create({ columns, rows })
+		await this.presenter.create({ columns, rows })
 		this.progressManager.setInitialValues({ goalScore, movesLimit })
 	}
 
