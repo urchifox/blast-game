@@ -145,6 +145,14 @@ export class GameView extends View {
 		}
 		const button = this.boostersElementsMap[boosterName].button
 		button.classList.toggle("booster--active", active)
+		button.parentElement?.classList.toggle(
+			"boosters-container__item--raised",
+			active
+		)
+		this.gameContainer?.classList.toggle(
+			"game-blast-container__canvas-container--raised",
+			active
+		)
 	}
 
 	// #region Win Modal
