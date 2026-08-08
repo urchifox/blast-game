@@ -14,7 +14,7 @@ export class TileHandlerBomb extends TileHandlerSpecial {
 	private readonly fieldQueries: TileHandlerBombProps["fieldQueries"]
 	private readonly presenter: TileHandlerBombProps["presenter"]
 
-	readonly comboSize = 6
+	readonly comboSize = this.gameRules.BOMB_COMBO_SIZE
 	readonly kind = "bomb"
 
 	constructor(props: TileHandlerBombProps) {

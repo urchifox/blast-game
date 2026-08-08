@@ -14,7 +14,7 @@ export class TileHandlerRocketColumn extends TileHandlerSpecial {
 	private readonly fieldQueries: TileHandlerRocketColumnProps["fieldQueries"]
 	private readonly presenter: TileHandlerRocketColumnProps["presenter"]
 
-	readonly comboSize = 4
+	readonly comboSize = this.gameRules.ROCKET_COLUMN_COMBO_SIZE
 	readonly kind = "rockets-column"
 
 	constructor(props: TileHandlerRocketColumnProps) {

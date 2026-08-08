@@ -6,6 +6,11 @@ export class GameRules {
 	readonly MAX_AVG_COMBO = 10
 	readonly MIN_COMBO_SIZE = 2
 
+	readonly ROCKET_COLUMN_COMBO_SIZE = 4
+	readonly ROCKET_ROW_COMBO_SIZE = 4
+	readonly BOMB_COMBO_SIZE = 6
+	readonly DYNAMITE_COMBO_SIZE = 8
+
 	readonly MAX_SHUFFLE_ATTEMPTS = 3
 
 	readonly DEFAULT_COLUMNS = 9

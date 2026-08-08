@@ -14,7 +14,7 @@ export class TileHandlerDynamite extends TileHandlerSpecial {
 	private readonly fieldQueries: TileHandlerDynamiteProps["fieldQueries"]
 	private readonly presenter: TileHandlerDynamiteProps["presenter"]
 
-	readonly comboSize = 8
+	readonly comboSize = this.gameRules.DYNAMITE_COMBO_SIZE
 	readonly kind = "dynamite"
 
 	constructor(props: TileHandlerDynamiteProps) {
