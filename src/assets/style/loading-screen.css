@@ -20,7 +20,7 @@
 		opacity 0.3s ease;
 }
 
-.loading-screen.hidden {
+.loading-screen--hidden {
 	visibility: hidden;
 	opacity: 0;
 
@@ -56,9 +56,9 @@
 	animation-duration: 3s;
 }
 
-.loading-screen.hidden .loading-screen__spinner,
-.loading-screen.hidden .loading-screen__spinner::before,
-.loading-screen.hidden .loading-screen__spinner::after {
+.loading-screen--hidden .loading-screen__spinner,
+.loading-screen--hidden .loading-screen__spinner::before,
+.loading-screen--hidden .loading-screen__spinner::after {
 	animation-play-state: paused;
 }
 

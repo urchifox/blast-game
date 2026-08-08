@@ -14,7 +14,7 @@ class LoadingScreen {
 	}
 
 	private toggleVisibility(visible: boolean) {
-		this.loadingScreen.classList.toggle("hidden", !visible)
+		this.loadingScreen.classList.toggle("loading-screen--hidden", !visible)
 	}
 }
 
