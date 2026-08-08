@@ -51,17 +51,6 @@
 	box-sizing: border-box;
 }
 
-.game-blast-container__canvas-container canvas {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-}
-.game-blast-container__canvas-container--fullsize canvas {
-	display: none;
-}
-
 .game-blast-container__boosters-container {
 	z-index: 1;
 	width: 100%;

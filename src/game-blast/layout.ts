@@ -85,6 +85,10 @@ export class Layout {
 			"game-blast-container__canvas-container--fullsize",
 			isResetSizes
 		)
+		this.gameContainer.querySelector(".canvas-container__canvas")?.classList.toggle(
+			"canvas-container__canvas--fullsize",
+			isResetSizes
+		)
 		if (isResetSizes) {
 			return
 		}

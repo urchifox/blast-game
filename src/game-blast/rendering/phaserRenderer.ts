@@ -29,6 +29,8 @@ export class PhaserRenderer extends Renderer {
 			},
 			scene: [rendererScene],
 		})
+		this.game.canvas.classList.add("canvas-container__canvas")
+
 		this.scene = rendererScene
 		this.readyPromise = new Promise<void>((resolve) => {
 			this.scene.onReady(() => {
