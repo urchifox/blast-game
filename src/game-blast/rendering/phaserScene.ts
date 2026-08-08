@@ -128,7 +128,7 @@ export class PhaserScene extends Phaser.Scene {
 		isAppearOnDefaultPosition,
 	}: RendererParams<"renderTiles">) {
 		let pauseDuration = 0
-		if (isAppearOnDefaultPosition) {
+		if (isAppearOnDefaultPosition === true) {
 			const tileHeight = layoutSnapshot.tileHeight
 			const fallingDuration = this.getFallingDuration({
 				distance: tileHeight,
@@ -182,7 +182,7 @@ export class PhaserScene extends Phaser.Scene {
 		tileSprite.on("pointerdown", () => this.onTileClick?.(id))
 
 		await this.animateAppear({ tileSprite, layoutSnapshot, pauseDuration })
-		if (isAppearOnDefaultPosition) {
+		if (isAppearOnDefaultPosition === true) {
 			await this.animateFallingToCurrentPosition(
 				tileSnapshot,
 				gridSnapshot,
@@ -551,7 +551,7 @@ export class PhaserScene extends Phaser.Scene {
 		const { rows } = gridSnapshot
 		const { tileWidth, tileHeight, tileGapX, tileGapY } = layoutSnapshot
 		const x = column * (tileWidth + tileGapX) + tileWidth / 2 + this.offsetX
-		const y = isAppearOnDefaultPosition
+		const y = isAppearOnDefaultPosition === true
 			? this.offsetY + tileHeight / 2
 			: row * (tileHeight + tileGapY) + tileHeight / 2 + this.offsetY
 		const zIndex = rows - row
