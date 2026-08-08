@@ -1,4 +1,4 @@
-import { Tile, TileKind, TilePosition } from "./tile"
+import { Tile, TileKind, TilePosition } from "./domain/tile"
 
 export type Presenter = {
 	init: (onTileClick: (id: string) => void) => Promise<void>

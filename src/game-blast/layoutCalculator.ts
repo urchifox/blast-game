@@ -4,7 +4,7 @@ import {
 	TILE_RATIO,
 	GAP_Y,
 	MAX_TILE_HEIGHT,
-} from "./config"
+} from "./renderingRules"
 
 export class LayoutCalculator {
 	getSizes({

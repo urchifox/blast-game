@@ -6,7 +6,7 @@ import { View, ViewProps } from "../view/view"
 import { Game } from "../game-blast/game"
 import { isHtmlElement, queryElement } from "../helpers/dom"
 import { gameFactory } from "../game-blast/gameFactory"
-import { BoosterName } from "../game-blast/types"
+import { BoosterName } from "../game-blast/domain/types"
 
 type GameViewProps = Omit<ViewProps, "name">
 

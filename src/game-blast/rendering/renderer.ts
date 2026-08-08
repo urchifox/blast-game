@@ -1,6 +1,6 @@
 import { Layout, LayoutSnapshot } from "../layout"
-import { GridSnapshot } from "../grid"
-import { TileSnapshot } from "../tile"
+import { GridSnapshot } from "../domain/grid"
+import { TileSnapshot } from "../domain/tile"
 
 export type OnTileClickHandler = (id: string) => void
 

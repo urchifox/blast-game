@@ -1,7 +1,7 @@
 import { pickRandomItem, RandomizationFunction } from "../../helpers/random"
-import { FieldQueries } from "../fieldQueries"
-import { GameRules } from "../gameRules"
-import { isTileKindNormal, Tile, TileKind } from "../tile"
+import { FieldQueries } from "./fieldQueries"
+import { GameRules } from "./gameRules"
+import { isTileKindNormal, Tile, TileKind } from "./tile"
 
 export type TileClickHandlerProps = {
 	gameRules: GameRules

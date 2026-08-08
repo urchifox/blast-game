@@ -1,6 +1,6 @@
 import { Progress } from "../../helpers/progress"
 import { FirstConstructorArg, UnionToIntersection } from "../../helpers/types"
-import { BoosterName } from "../types"
+import { BoosterName } from "../domain/types"
 import { Booster } from "./booster"
 import { BoosterHandlerBomb } from "./boosterHandlerBomb"
 import { BoosterHandlerTeleport } from "./boosterHandlerTeleport"

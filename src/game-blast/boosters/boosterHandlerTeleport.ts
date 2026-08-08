@@ -1,5 +1,5 @@
 import { BoosterHandler, BoosterHandlerProps } from "./boosterHandler"
-import { Tile } from "../tile"
+import { Tile } from "../domain/tile"
 import { TileRemovingInfo } from "../types"
 import { Presenter } from "../presenter"
 

@@ -1,6 +1,6 @@
 import { Booster } from "./booster"
-import { Tile } from "../tile"
-import { GameRules } from "../gameRules"
+import { Tile } from "../domain/tile"
+import { GameRules } from "../domain/gameRules"
 import { BoosterHandlerResult, TileRemovingInfo } from "../types"
 
 export type BoosterHandlerProps = {

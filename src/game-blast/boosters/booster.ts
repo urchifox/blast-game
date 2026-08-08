@@ -1,5 +1,5 @@
 import { Progress } from "../../helpers/progress"
-import { BoosterName } from "../types"
+import { BoosterName } from "../domain/types"
 
 export type BoosterCommonProps = {
 	updateCounter: (booster: BoosterName, currentValue: number) => void

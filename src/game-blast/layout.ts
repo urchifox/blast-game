@@ -1,5 +1,5 @@
 import { getElementInnerSize } from "../helpers/dom"
-import { GridSnapshot } from "./grid"
+import { GridSnapshot } from "./domain/grid"
 import { LayoutCalculator } from "./layoutCalculator"
 
 export type LayoutProps = {

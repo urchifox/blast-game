@@ -1,9 +1,9 @@
-import { getShuffledArray } from "../helpers/array"
+import { getShuffledArray } from "../../helpers/array"
 import {
 	IdGenerator,
 	pickRandomItem,
 	RandomizationFunction,
-} from "../helpers/random"
+} from "../../helpers/random"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
 import { Tile, TileKind, TilePosition, TileSnapshot } from "./tile"

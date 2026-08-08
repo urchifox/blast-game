@@ -1,7 +1,7 @@
 import Phaser from "phaser"
 
 import { OnTileClickHandler, RendererParams } from "./renderer"
-import { TileSnapshot } from "../tile"
+import { TileSnapshot } from "../domain/tile"
 import { wait } from "../../helpers/time"
 import {
 	TILE_APPEAR_DURATION_MS,
@@ -11,10 +11,10 @@ import {
 	MIN_TILE_FALL_DURATION_MS,
 	TILE_FALL_SPEED,
 	TILE_SHUFFLE_DURATION_MS,
-} from "../config"
+} from "../animationRules"
 import { easeInOutBack } from "../../helpers/animation"
 import { LayoutSnapshot } from "../layout"
-import { GridSnapshot } from "../grid"
+import { GridSnapshot } from "../domain/grid"
 
 export const SCENE_KEY = "blast"
 const tileTextureModules = import.meta.glob("../assets/img/*.png", {

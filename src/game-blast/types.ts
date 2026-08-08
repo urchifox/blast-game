@@ -1,5 +1,4 @@
-import { BOOSTER_NAMES } from "./config"
-import { Tile, TilePosition } from "./tile"
+import { Tile, TilePosition } from "./domain/tile"
 
 export type TileClickHandler = (tile: Tile) => TileRemovingInfo
 
@@ -13,11 +12,3 @@ export type TileRemovingInfo = {
 	removedPositions: Set<TilePosition>
 	removingPromise: Promise<void>
 } | null
-
-export enum GameCompletionStatus {
-	WIN = "win",
-	LOSS = "loss",
-	IN_PROGRESS = "in_progress",
-}
-
-export type BoosterName = (typeof BOOSTER_NAMES)[number]

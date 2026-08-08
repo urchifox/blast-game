@@ -1,11 +1,12 @@
 import { TileClickManager } from "./tile-handlers/tileClickManager"
 import { BoosterManager } from "./boosters/boosterManager"
-import { CompletionManager } from "./completionManager"
+import { CompletionManager } from "./domain/completionManager"
 import { ProgressManager } from "./progressManager"
-import { LevelData, LevelGenerator } from "./levelGenerator"
-import { GameRules } from "./gameRules"
-import { BoosterName, GameCompletionStatus, TileRemovingInfo } from "./types"
-import { FieldQueries } from "./fieldQueries"
+import { LevelData, LevelGenerator } from "./domain/levelGenerator"
+import { GameRules } from "./domain/gameRules"
+import { BoosterName, GameCompletionStatus } from "./domain/types"
+import { TileRemovingInfo } from "./types"
+import { FieldQueries } from "./domain/fieldQueries"
 import { Presenter } from "./presenter"
 
 export type GameProps = {

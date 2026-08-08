@@ -1,5 +1,5 @@
-import { Tile, TileKind, TilePosition } from "../tile"
-import { TileClickHandler } from "./tileClickHandler"
+import { Tile, TileKind, TilePosition } from "../domain/tile"
+import { TileClickHandler } from "../domain/tileClickHandler"
 import { Presenter } from "../presenter"
 import { TileRemovingInfo } from "../types"
 

@@ -1,7 +1,7 @@
 import { BoosterHandler, BoosterHandlerProps } from "./boosterHandler"
-import { Tile } from "../tile"
+import { Tile } from "../domain/tile"
 import { TileRemovingInfo } from "../types"
-import { FieldQueries } from "../fieldQueries"
+import { FieldQueries } from "../domain/fieldQueries"
 import { Presenter } from "../presenter"
 
 export type BoosterHandlerBombProps = BoosterHandlerProps & {

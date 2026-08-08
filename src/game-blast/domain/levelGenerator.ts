@@ -1,4 +1,4 @@
-import { getRandomNumber, RandomizationFunction } from "../helpers/random"
+import { getRandomNumber, RandomizationFunction } from "../../helpers/random"
 import { GameRules } from "./gameRules"
 
 export type LevelGeneratorProps = {
