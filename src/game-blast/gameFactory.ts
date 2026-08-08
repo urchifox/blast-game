@@ -15,6 +15,7 @@ import { boosterManagerFactory } from "./boosters/boosterManagerFactory"
 import { BoosterName } from "./types"
 import { tileClickManagerFactory } from "./tile-handlers/tileClickManagerFactory"
 import { Layout } from "./layout"
+import { LayoutCalculator } from "./layoutCalculator"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
@@ -32,8 +33,11 @@ export type GameFactoryProps = {
 export function gameFactory(props: GameFactoryProps) {
 	const gameRules = new GameRules()
 	const randomizationFunction = Math.random
+
+	const layoutCalculator = new LayoutCalculator()
 	const layout = new Layout({
 		gameContainer: props.gameContainer,
+		layoutCalculator: layoutCalculator,
 	})
 
 	const grid = new Grid()
