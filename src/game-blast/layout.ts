@@ -74,16 +74,12 @@ export class Layout {
 		const { width: containerWidth, height: containerHeight } =
 			this.getGameContainerSize()
 
-		// сначала пробуем рассчитать размер плитки отталкиваясь от ширины поля
 		let tileWidth = containerWidth / (columns + GAP_X * (columns - 1))
 		tileWidth = Math.min(MAX_TILE_WIDTH, tileWidth)
 		let tileHeight = tileWidth / TILE_RATIO
 
-		// проверяем, какого размера будет поле с такими карточками
 		let gridHeight = this.getHeight({ tileHeight, rows })
 
-		// если получившееся поля слишком длинное по вертикали
-		// пересчитываем размер карточки, отталкиваясь от высоты поля
 		if (gridHeight > containerHeight) {
 			tileHeight = containerHeight / (rows + GAP_Y * (rows - 1))
 			tileHeight = Math.min(MAX_TILE_HEIGHT, tileHeight)
