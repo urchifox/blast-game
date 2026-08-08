@@ -7,10 +7,16 @@ alwaysApply: false
 ## Clean Architecture
 
 - Follow Clean Architecture principles.
-- Dependencies must always point toward the domain layer.
+- Dependencies must point toward the domain layer or the framework-independent shared kernel.
 - Business logic must not depend on rendering, UI, browser APIs, DOM, Phaser or any infrastructure library.
 - Infrastructure communicates with the domain only through abstractions.
 - External integrations must be implemented as adapters.
+
+## Shared Kernel
+
+- `src/helpers/` contains project-wide reusable utilities.
+- Domain code may import only framework-independent, side-effect-free helpers, such as collection, randomization, and generic type utilities.
+- Shared-kernel helpers must not depend on feature, application, presentation, rendering, or infrastructure modules.
 
 ## Domain
 
