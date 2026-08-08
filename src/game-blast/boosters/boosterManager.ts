@@ -1,8 +1,6 @@
 import { Tile } from "../domain/tile"
 import { BoosterHandler } from "./boosterHandler"
-import {
-	BoosterHandlerResult,
-} from "../types"
+import { BoosterHandlerResult } from "../types"
 import { BoosterName } from "../domain/types"
 
 export type BoosterManagerProps = {

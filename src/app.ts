@@ -11,7 +11,8 @@ import { GameView } from "./game-view/gameView"
 import { ViewManager } from "./view/viewManager"
 import { LoadingScreen } from "./view/loadingScreen"
 
-const loadingScreenRoot = document.getElementById("loading-screen") ?? document.body
+const loadingScreenRoot =
+	document.getElementById("loading-screen") ?? document.body
 const loadingScreen = new LoadingScreen({ root: loadingScreenRoot })
 
 const appRoot = document.getElementById("app") ?? document.body

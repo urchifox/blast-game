@@ -551,9 +551,10 @@ export class PhaserScene extends Phaser.Scene {
 		const { rows } = gridSnapshot
 		const { tileWidth, tileHeight, tileGapX, tileGapY } = layoutSnapshot
 		const x = column * (tileWidth + tileGapX) + tileWidth / 2 + this.offsetX
-		const y = isAppearOnDefaultPosition === true
-			? this.offsetY + tileHeight / 2
-			: row * (tileHeight + tileGapY) + tileHeight / 2 + this.offsetY
+		const y =
+			isAppearOnDefaultPosition === true
+				? this.offsetY + tileHeight / 2
+				: row * (tileHeight + tileGapY) + tileHeight / 2 + this.offsetY
 		const zIndex = rows - row
 		const imageKey = this.getTileImage(tileSnapshot)
 

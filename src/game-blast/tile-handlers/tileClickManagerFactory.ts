@@ -1,4 +1,7 @@
-import { TileClickHandler, TileClickHandlerProps } from "../domain/tileClickHandler"
+import {
+	TileClickHandler,
+	TileClickHandlerProps,
+} from "../domain/tileClickHandler"
 import { TileClickManager, TileClickManagerProps } from "./tileClickManager"
 
 type TileClickManagerFactoryProps = TileClickHandlerProps &

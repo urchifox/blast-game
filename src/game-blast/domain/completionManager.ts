@@ -56,9 +56,7 @@ export class CompletionManager {
 			return false
 		}
 
-		const isPossibleToShuffle = this.isPossibleToShuffle(
-			this.shuffleAttempts
-		)
+		const isPossibleToShuffle = this.isPossibleToShuffle(this.shuffleAttempts)
 		if (!isPossibleToShuffle) {
 			this.lose()
 			return false
@@ -78,9 +76,9 @@ export class CompletionManager {
 		})
 	}
 
-    private isPossibleToShuffle(shuffleAttempts: number) {
-        return shuffleAttempts < this.gameRules.MAX_SHUFFLE_ATTEMPTS
-    }
+	private isPossibleToShuffle(shuffleAttempts: number) {
+		return shuffleAttempts < this.gameRules.MAX_SHUFFLE_ATTEMPTS
+	}
 
 	updateShuffleAttempts() {
 		this.shuffleAttempts++

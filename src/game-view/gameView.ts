@@ -57,7 +57,8 @@ export class GameView extends View {
 
 		this.game = gameFactory({
 			gameContainer: this.gameContainer,
-			toggleGameContainerResetSizes: this.toggleGameContainerResetSizes.bind(this),
+			toggleGameContainerResetSizes:
+				this.toggleGameContainerResetSizes.bind(this),
 			updateBoosterCounter: this.updateBoosterCounter.bind(this),
 			toggleBoosterButtonActive: this.toggleBoosterButtonActive.bind(this),
 			updateScoreCounter: this.updateScoreCounter.bind(this),
@@ -94,10 +95,9 @@ export class GameView extends View {
 			"game-blast-container__canvas-container--fullsize",
 			isResetSizes
 		)
-		this.gameContainer?.querySelector(".canvas-container__canvas")?.classList.toggle(
-			"canvas-container__canvas--fullsize",
-			isResetSizes
-		)
+		this.gameContainer
+			?.querySelector(".canvas-container__canvas")
+			?.classList.toggle("canvas-container__canvas--fullsize", isResetSizes)
 	}
 
 	private updateMovesCounter({

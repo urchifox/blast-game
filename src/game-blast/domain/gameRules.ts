@@ -1,4 +1,4 @@
-import { TileKindSpecial,  } from "./tile"
+import { TileKindSpecial } from "./tile"
 import { BoosterName } from "./types"
 
 export class GameRules {
