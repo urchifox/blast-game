@@ -1,33 +1,43 @@
 import { BoosterHandler, BoosterHandlerProps } from "./boosterHandler"
 import { Tile } from "../domain/tile"
 import { TileRemovingInfo } from "../types"
-import { Presenter } from "../presenter"
+import { ActionManager, ActionName } from "../actionManager"
 
 type BoosterHandlerTeleportProps = BoosterHandlerProps & {
-	presenter: Pick<Presenter, "selectTile" | "swapTiles">
+	actionManager: ActionManager
 }
 
 export class BoosterHandlerTeleport extends BoosterHandler {
-	private readonly presenter: BoosterHandlerTeleportProps["presenter"]
+	private readonly actionManager: BoosterHandlerTeleportProps["actionManager"]
 
 	private selectedTile: Tile | null = null
 
 	constructor(props: BoosterHandlerTeleportProps) {
 		super(props)
-		this.presenter = props.presenter
+		this.actionManager = props.actionManager
 	}
 
 	use(tile: Tile): TileRemovingInfo {
 		if (this.selectedTile === null) {
 			this.selectedTile = tile
-			this.presenter.selectTile(tile)
+			this.actionManager.act([
+				{
+					name: ActionName.SELECT,
+					payload: tile,
+				},
+			])
 			return null
 		}
 
 		const selectedTile = this.selectedTile
 		this.selectedTile = null
 		this.spend()
-		const promise = this.presenter.swapTiles(selectedTile, tile)
+		const promise = this.actionManager.act([
+			{
+				name: ActionName.SWAP,
+				payload: [selectedTile, tile],
+			},
+		])
 		return {
 			removedTiles: new Set(),
 			removedPositions: new Set(),

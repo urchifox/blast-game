@@ -8,7 +8,8 @@ type TileClickManagerFactoryProps = TileClickHandlerProps &
 	Omit<TileClickManagerProps, "tileClickHandler">
 
 export function tileClickManagerFactory(props: TileClickManagerFactoryProps) {
-	const { fieldQueries, presenter, gameRules, randomizationFunction } = props
+	const { fieldQueries, actionManager, gameRules, randomizationFunction } =
+		props
 
 	const tileClickHandler = new TileClickHandler({
 		fieldQueries: fieldQueries,
@@ -17,7 +18,7 @@ export function tileClickManagerFactory(props: TileClickManagerFactoryProps) {
 	})
 
 	return new TileClickManager({
-		presenter: presenter,
+		actionManager: actionManager,
 		tileClickHandler: tileClickHandler,
 	})
 }

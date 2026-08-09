@@ -19,7 +19,7 @@ export type BoosterManagerFactoryProps = Omit<
 }
 
 export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
-	const { gameRules, boosterProps, fieldQueries, presenter } = props
+	const { gameRules, boosterProps, fieldQueries, actionManager } = props
 
 	const getBoosterProps = (name: BoosterName) => {
 		const initialValue = gameRules.BOOSTER_INITIAL_VALUE[name]
@@ -42,14 +42,14 @@ export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
 				...getBoosterProps("bomb"),
 			}),
 			fieldQueries: fieldQueries,
-			presenter: presenter,
+			actionManager: actionManager,
 			gameRules: gameRules,
 		}),
 		teleport: new BoosterHandlerTeleport({
 			booster: new Booster({
 				...getBoosterProps("teleport"),
 			}),
-			presenter: presenter,
+			actionManager: actionManager,
 			gameRules: gameRules,
 		}),
 	}

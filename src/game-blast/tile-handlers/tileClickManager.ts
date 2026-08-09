@@ -1,19 +1,19 @@
-import { Tile, TileKind, TilePosition } from "../domain/tile"
+import { Tile } from "../domain/tile"
 import { TileClickHandler } from "../domain/tileClickHandler"
-import { Presenter } from "../presenter"
 import { TileRemovingInfo } from "../types"
+import { Action, ActionManager, ActionName } from "../actionManager"
 
 export type TileClickManagerProps = {
-	presenter: Pick<Presenter, "renderTile" | "addTile" | "removeTilesFromCenter">
+	actionManager: ActionManager
 	tileClickHandler: TileClickHandler
 }
 
 export class TileClickManager {
-	private readonly presenter: TileClickManagerProps["presenter"]
+	private readonly actionManager: TileClickManagerProps["actionManager"]
 	private readonly tileClickHandler: TileClickManagerProps["tileClickHandler"]
 
 	constructor(props: TileClickManagerProps) {
-		this.presenter = props.presenter
+		this.actionManager = props.actionManager
 		this.tileClickHandler = props.tileClickHandler
 	}
 
@@ -26,27 +26,32 @@ export class TileClickManager {
 		const { connectedTiles, connectedPositions, rewardType } = result
 		const tilePosition = tile.getPosition()
 
-		const removingPromise = this.presenter
-			.removeTilesFromCenter(connectedTiles, tilePosition)
-			.then(() => {
-				if (rewardType !== null) {
-					return this.createComboPrize(rewardType, tilePosition)
-				}
+		const actions: Array<Action> = [
+			{
+				name: ActionName.REMOVE,
+				payload: {
+					centerPosition: tilePosition,
+					tiles: connectedTiles,
+				},
+			},
+		]
+
+		if (rewardType !== null) {
+			actions.push({
+				name: ActionName.ADD,
+				payload: {
+					kind: rewardType,
+					position: tilePosition,
+				},
 			})
+		}
+
+		const removingPromise = this.actionManager.act(actions)
 
 		return {
 			removedTiles: connectedTiles,
 			removedPositions: connectedPositions,
 			removingPromise: removingPromise,
 		}
-	}
-
-	private createComboPrize(rewardType: TileKind, position: TilePosition) {
-		const newTile = this.presenter.addTile({
-			kind: rewardType,
-			position: position,
-		})
-
-		return this.presenter.renderTile(newTile)
 	}
 }

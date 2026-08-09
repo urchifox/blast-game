@@ -16,6 +16,7 @@ import { BoosterName } from "./domain/types"
 import { tileClickManagerFactory } from "./tile-handlers/tileClickManagerFactory"
 import { Layout } from "./layout"
 import { LayoutCalculator } from "./layoutCalculator"
+import { ActionManager } from "./actionManager"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
@@ -65,9 +66,13 @@ export function gameFactory(props: GameFactoryProps) {
 		animationsManager,
 	})
 
+	const actionManager = new ActionManager({
+		presenter: presenter,
+	})
+
 	const tileClickManager = tileClickManagerFactory({
 		fieldQueries: fieldQueries,
-		presenter: presenter,
+		actionManager: actionManager,
 		gameRules: gameRules,
 		randomizationFunction: randomizationFunction,
 	})
@@ -79,7 +84,7 @@ export function gameFactory(props: GameFactoryProps) {
 
 	const boosterManager = boosterManagerFactory({
 		fieldQueries: fieldQueries,
-		presenter: presenter,
+		actionManager: actionManager,
 		gameRules: gameRules,
 		boosterProps: boosterProps,
 	})

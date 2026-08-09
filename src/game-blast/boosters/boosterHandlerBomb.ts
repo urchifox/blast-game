@@ -2,21 +2,21 @@ import { BoosterHandler, BoosterHandlerProps } from "./boosterHandler"
 import { Tile } from "../domain/tile"
 import { TileRemovingInfo } from "../types"
 import { FieldQueries } from "../domain/fieldQueries"
-import { Presenter } from "../presenter"
+import { ActionManager, ActionName } from "../actionManager"
 
 export type BoosterHandlerBombProps = BoosterHandlerProps & {
 	fieldQueries: FieldQueries
-	presenter: Pick<Presenter, "removeTilesFromCenter">
+	actionManager: ActionManager
 }
 
 export class BoosterHandlerBomb extends BoosterHandler {
 	private readonly fieldQueries: BoosterHandlerBombProps["fieldQueries"]
-	private readonly presenter: BoosterHandlerBombProps["presenter"]
+	private readonly actionManager: BoosterHandlerBombProps["actionManager"]
 
 	constructor(props: BoosterHandlerBombProps) {
 		super(props)
 		this.fieldQueries = props.fieldQueries
-		this.presenter = props.presenter
+		this.actionManager = props.actionManager
 	}
 
 	use(tile: Tile): TileRemovingInfo {
@@ -29,10 +29,16 @@ export class BoosterHandlerBomb extends BoosterHandler {
 		}
 
 		this.spend()
-		const removingPromise = this.presenter.removeTilesFromCenter(
-			tiles,
-			tile.getPosition()
-		)
+		const removingPromise = this.actionManager.act([
+			{
+				name: ActionName.REMOVE,
+				payload: {
+					centerPosition: tile.getPosition(),
+					tiles: tiles,
+				},
+			},
+		])
+
 		return {
 			removedTiles: tiles,
 			removedPositions: positions,
