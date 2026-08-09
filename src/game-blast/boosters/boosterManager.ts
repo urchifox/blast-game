@@ -1,6 +1,5 @@
 import { Tile } from "../domain/tile"
-import { BoosterHandler } from "./boosterHandler"
-import { BoosterHandlerResult } from "../types"
+import { BoosterHandler, BoosterHandlerResult } from "./boosterHandler"
 import { BoosterName } from "../domain/types"
 
 export type BoosterManagerProps = {
@@ -35,7 +34,7 @@ export class BoosterManager {
 				return result
 			}
 		}
-		return { isUsed: false, tileRemovingInfo: null }
+		return { isUsed: false, actResult: null }
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {

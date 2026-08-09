@@ -1,6 +1,5 @@
-import { BoosterHandler, BoosterHandlerProps } from "./boosterHandler"
+import { BoosterHandler, BoosterHandlerProps, BoosterHandlerResult } from "./boosterHandler"
 import { Tile } from "../domain/tile"
-import { TileRemovingInfo } from "../types"
 import { ActionManager, ActionName } from "../actionManager"
 
 type BoosterHandlerTeleportProps = BoosterHandlerProps & {
@@ -17,7 +16,7 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 		this.actionManager = props.actionManager
 	}
 
-	use(tile: Tile): TileRemovingInfo {
+	use(tile: Tile): BoosterHandlerResult["actResult"] {
 		if (this.selectedTile === null) {
 			this.selectedTile = tile
 			this.actionManager.act([
@@ -32,17 +31,12 @@ export class BoosterHandlerTeleport extends BoosterHandler {
 		const selectedTile = this.selectedTile
 		this.selectedTile = null
 		this.spend()
-		const promise = this.actionManager.act([
+		return this.actionManager.act([
 			{
 				name: ActionName.SWAP,
 				payload: [selectedTile, tile],
 			},
 		])
-		return {
-			removedTiles: new Set(),
-			removedPositions: new Set(),
-			removingPromise: promise,
-		}
 	}
 
 	override clear() {

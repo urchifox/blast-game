@@ -5,9 +5,9 @@ import { ProgressManager } from "./progressManager"
 import { LevelData, LevelGenerator } from "./domain/levelGenerator"
 import { GameRules } from "./domain/gameRules"
 import { BoosterName, GameCompletionStatus } from "./domain/types"
-import { TileRemovingInfo } from "./types"
 import { FieldQueries } from "./domain/fieldQueries"
 import { Presenter } from "./presenter"
+import { ActResult } from "./actionManager"
 
 export type GameProps = {
 	fieldQueries: FieldQueries
@@ -108,30 +108,32 @@ export class Game {
 		}
 
 		const boosterHandlerResult = this.boosterManager.maybeUseBooster(tile)
-		const tileRemovingInfo = boosterHandlerResult.isUsed
-			? boosterHandlerResult.tileRemovingInfo
+		const actResult = boosterHandlerResult.isUsed
+			? boosterHandlerResult.actResult
 			: this.tileClickManager.onClick(tile)
-		this.processRemovingTiles(tileRemovingInfo)
+		if (actResult === null) {
+			return
+		}
+		this.processActResult(actResult)
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {
 		this.boosterManager.onBoosterButtonClick(boosterName)
 	}
 
-	private processRemovingTiles(tileRemovingInfo: TileRemovingInfo) {
-		if (tileRemovingInfo === null) {
-			return
+	private processActResult(actResult: Promise<ActResult>) {
+		const animationPromise = async () => {
+			const result = await actResult
+			const { removedTiles } = result
+			const removedPositions = new Set(
+				[...removedTiles].map((tile) => tile.getPosition())
+			)
+			const points = this.gameRules.getPoints(removedTiles.size)
+			this.progressManager.addProgress(points)
+			await this.presenter.fillEmptyPositions(removedPositions)
+			await this.maybeShuffle()
 		}
-
-		const { removedTiles, removedPositions, removingPromise } = tileRemovingInfo
-
-		const points = this.gameRules.getPoints(removedTiles.size)
-		this.progressManager.addProgress(points)
-
-		const animationPromise = removingPromise
-			.then(() => this.presenter.fillEmptyPositions(removedPositions))
-			.then(() => this.maybeShuffle())
-		this.presenter.animateAndWaitForAll(animationPromise).then(() => {
+		this.presenter.animateAndWaitForAll(animationPromise()).then(() => {
 			this.processGameCompletion()
 		})
 	}

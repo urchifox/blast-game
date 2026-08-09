@@ -1,6 +1,5 @@
-import { BoosterHandler, BoosterHandlerProps } from "./boosterHandler"
+import { BoosterHandler, BoosterHandlerProps, BoosterHandlerResult } from "./boosterHandler"
 import { Tile } from "../domain/tile"
-import { TileRemovingInfo } from "../types"
 import { FieldQueries } from "../domain/fieldQueries"
 import { ActionManager, ActionName } from "../actionManager"
 
@@ -19,8 +18,8 @@ export class BoosterHandlerBomb extends BoosterHandler {
 		this.actionManager = props.actionManager
 	}
 
-	use(tile: Tile): TileRemovingInfo {
-		const { tiles, positions } = this.fieldQueries.getTilesInRadius(
+	use(tile: Tile): BoosterHandlerResult["actResult"] {
+		const { tiles } = this.fieldQueries.getTilesInRadius(
 			tile.getPosition(),
 			this.gameRules.BOOSTER_BOMB_RADIUS
 		)
@@ -29,7 +28,7 @@ export class BoosterHandlerBomb extends BoosterHandler {
 		}
 
 		this.spend()
-		const removingPromise = this.actionManager.act([
+		return this.actionManager.act([
 			{
 				name: ActionName.REMOVE,
 				payload: {
@@ -38,11 +37,5 @@ export class BoosterHandlerBomb extends BoosterHandler {
 				},
 			},
 		])
-
-		return {
-			removedTiles: tiles,
-			removedPositions: positions,
-			removingPromise: removingPromise,
-		}
 	}
 }
