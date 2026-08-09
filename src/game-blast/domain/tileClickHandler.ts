@@ -1,4 +1,5 @@
 import { pickRandomItem, RandomizationFunction } from "../../helpers/random"
+import { Command, CommandName } from "./command"
 import { FieldQueries } from "./fieldQueries"
 import { GameRules } from "./gameRules"
 import { isTileKindNormal, Tile, TileKind } from "./tile"
@@ -34,7 +35,7 @@ export class TileClickHandler {
 			return null
 		}
 
-		const { tiles, positions } = connection
+		const { tiles } = connection
 		const minTilesCount = isTileKindNormal(tile.getKind())
 			? this.gameRules.MIN_COMBO_SIZE
 			: 1
@@ -43,13 +44,27 @@ export class TileClickHandler {
 			return null
 		}
 
-		const rewardType = this.getComboRewardType(tile.getKind(), tiles.size)
+		const commands: Array<Command> = [
+			{
+				name: CommandName.REMOVE,
+				payload: {
+					tiles: tiles,
+				},
+			},
+		]
 
-		return {
-			connectedTiles: tiles,
-			connectedPositions: positions,
-			rewardType: rewardType,
+		const rewardType = this.getComboRewardType(tile.getKind(), tiles.size)
+		if (rewardType !== null) {
+			commands.push({
+				name: CommandName.ADD,
+				payload: {
+					kind: rewardType,
+					position: tile.getPosition(),
+				},
+			})
 		}
+
+		return commands
 	}
 
 	private getConnections(tile: Tile) {
