@@ -1,4 +1,8 @@
-import { BoosterHandler, BoosterHandlerProps, BoosterHandlerResult } from "./boosterHandler"
+import {
+	BoosterHandler,
+	BoosterHandlerProps,
+	BoosterHandlerResult,
+} from "./boosterHandler"
 import { Tile } from "../domain/tile"
 import { ActionManager, ActionName } from "../actionManager"
 

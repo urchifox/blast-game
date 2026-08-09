@@ -76,9 +76,7 @@ export class ActionManager {
 				actResult.addedTiles.add(result.addedTile)
 			}
 			if ("removedTiles" in result) {
-				result.removedTiles.forEach((tile) =>
-					actResult.removedTiles.add(tile)
-				)
+				result.removedTiles.forEach((tile) => actResult.removedTiles.add(tile))
 			}
 			if ("selectedTile" in result) {
 				actResult.selectedTiles.add(result.selectedTile)

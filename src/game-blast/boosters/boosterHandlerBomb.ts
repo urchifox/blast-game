@@ -1,4 +1,8 @@
-import { BoosterHandler, BoosterHandlerProps, BoosterHandlerResult } from "./boosterHandler"
+import {
+	BoosterHandler,
+	BoosterHandlerProps,
+	BoosterHandlerResult,
+} from "./boosterHandler"
 import { Tile } from "../domain/tile"
 import { FieldQueries } from "../domain/fieldQueries"
 import { ActionManager, ActionName } from "../actionManager"
