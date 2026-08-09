@@ -77,16 +77,12 @@ export function gameFactory(props: GameFactoryProps) {
 		randomizationFunction: randomizationFunction,
 	})
 
-	const boosterProps = {
-		updateCounter: props.updateBoosterCounter,
-		onActiveChange: props.toggleBoosterButtonActive,
-	}
-
 	const boosterManager = boosterManagerFactory({
 		fieldQueries: fieldQueries,
 		actionManager: actionManager,
 		gameRules: gameRules,
-		boosterProps: boosterProps,
+		updateCounter: props.updateBoosterCounter,
+		onActiveChange: props.toggleBoosterButtonActive,
 	})
 
 	const scoreProgress = new Progress({

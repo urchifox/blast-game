@@ -25,6 +25,11 @@ export class GameRules {
 		teleport: 5,
 	}
 
+	readonly BOOSTER_TILES_COUNT_FOR_USE: Record<BoosterName, number> = {
+		bomb: 1,
+		teleport: 2,
+	}
+
 	readonly BOOSTER_BOMB_RADIUS = 2
 	readonly TILE_BOMB_RADIUS = 2
 

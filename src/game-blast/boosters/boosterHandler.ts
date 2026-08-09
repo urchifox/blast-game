@@ -1,7 +1,9 @@
 import { Booster } from "./booster"
 import { Tile } from "../domain/tile"
-import { GameRules } from "../domain/gameRules"
-import { ActResult } from "../actionManager"
+import { Action, ActionManager, ActionName, ActResult } from "../actionManager"
+import { BoosterUseHandler } from "../domain/boosterUseHandler"
+import { BoosterName } from "../domain/types"
+import { CommandName } from "../domain/command"
 
 export type BoosterHandlerResult = {
 	isUsed: boolean
@@ -9,20 +11,74 @@ export type BoosterHandlerResult = {
 }
 
 export type BoosterHandlerProps = {
+	name: BoosterName
+	tilesCountForUse: number
 	booster: Booster
-	gameRules: GameRules
+	boosterUseHandler: BoosterUseHandler
+	actionManager: ActionManager
 }
 
-export abstract class BoosterHandler {
-	protected readonly gameRules: BoosterHandlerProps["gameRules"]
+export class BoosterHandler {
+	protected readonly tilesCountForUse: BoosterHandlerProps["tilesCountForUse"]
+	private readonly name: BoosterHandlerProps["name"]
 	private readonly booster: BoosterHandlerProps["booster"]
+	private readonly boosterUseHandler: BoosterHandlerProps["boosterUseHandler"]
+	private readonly actionManager: BoosterHandlerProps["actionManager"]
 
 	constructor(props: BoosterHandlerProps) {
-		this.gameRules = props.gameRules
+		this.name = props.name
+		this.tilesCountForUse = props.tilesCountForUse
 		this.booster = props.booster
+		this.boosterUseHandler = props.boosterUseHandler
+		this.actionManager = props.actionManager
 	}
 
-	abstract use(tile: Tile): BoosterHandlerResult["actResult"]
+	use(tiles: Array<Tile>) {
+		const commands = this.boosterUseHandler.use({
+			boosterName: this.name,
+			tiles: tiles,
+		})
+		if (commands === null) {
+			return null
+		}
+
+		const actions: Array<Action> = []
+
+		commands.forEach(({ name, payload }) => {
+			switch (name) {
+				case CommandName.ADD: {
+					actions.push({
+						name: ActionName.ADD,
+						payload: payload,
+					})
+					break
+				}
+				case CommandName.REMOVE: {
+					actions.push({
+						name: ActionName.REMOVE,
+						payload: {
+							centerPosition: tiles[0].getPosition(),
+							tiles: payload.tiles,
+						},
+					})
+					break
+				}
+				case CommandName.SWAP: {
+					actions.push({
+						name: ActionName.SWAP,
+						payload: payload,
+					})
+					break
+				}
+				default: {
+					break
+				}
+			}
+		})
+
+		this.booster.spend()
+		return this.actionManager.act(actions)
+	}
 
 	clear() {
 		this.booster.clear()
@@ -33,18 +89,22 @@ export abstract class BoosterHandler {
 		this.booster.renderCounter()
 	}
 
-	maybeUse(tile: Tile): BoosterHandlerResult {
-		if (this.booster.isActivated()) {
-			return { isUsed: true, actResult: this.use(tile) }
+	maybeUse(tiles: Array<Tile>) {
+		if (this.booster.isActivated() && tiles.length === this.tilesCountForUse) {
+			return this.use(tiles)
 		}
-		return { isUsed: false, actResult: null }
+		tiles.forEach((tile) => {
+			this.actionManager.act([
+				{
+					name: ActionName.SELECT,
+					payload: tile,
+				},
+			])
+		})
+		return null
 	}
 
 	tryActivate() {
-		this.booster.tryActivate()
-	}
-
-	spend() {
-		this.booster.spend()
+		return this.booster.tryActivate()
 	}
 }

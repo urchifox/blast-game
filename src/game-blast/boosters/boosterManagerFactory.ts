@@ -1,58 +1,57 @@
 import { Progress } from "../../helpers/progress"
-import { FirstConstructorArg, UnionToIntersection } from "../../helpers/types"
+import { ActionManager } from "../actionManager"
+import { BoosterUseHandler } from "../domain/boosterUseHandler"
+import { BOOSTER_NAMES } from "../domain/config"
+import { FieldQueries } from "../domain/fieldQueries"
+import { GameRules } from "../domain/gameRules"
 import { BoosterName } from "../domain/types"
 import { Booster } from "./booster"
-import { BoosterHandlerBomb } from "./boosterHandlerBomb"
-import { BoosterHandlerTeleport } from "./boosterHandlerTeleport"
+import { BoosterHandler } from "./boosterHandler"
 import { BoosterManager } from "./boosterManager"
 
-type Boosters = typeof BoosterHandlerBomb | typeof BoosterHandlerTeleport
-
-export type BoosterManagerFactoryProps = Omit<
-	UnionToIntersection<FirstConstructorArg<Boosters>>,
-	"booster"
-> & {
-	boosterProps: Omit<
-		FirstConstructorArg<typeof Booster>,
-		"name" | "initialValue" | "progress"
-	>
+export type BoosterManagerFactoryProps = {
+	updateCounter: (boosterName: BoosterName, currentValue: number) => void
+	onActiveChange: (boosterName: BoosterName, isActive: boolean) => void
+	gameRules: GameRules
+	fieldQueries: FieldQueries
+	actionManager: ActionManager
 }
 
 export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
-	const { gameRules, boosterProps, fieldQueries, actionManager } = props
+	const { gameRules, fieldQueries, actionManager, ...boosterProps } = props
 
-	const getBoosterProps = (name: BoosterName) => {
-		const initialValue = gameRules.BOOSTER_INITIAL_VALUE[name]
-		const progress = new Progress({
-			updateCounter: ({ currentValue }) =>
-				props.boosterProps.updateCounter(name, currentValue),
-			isDirectionDown: true,
-		})
-		return {
-			...boosterProps,
-			name: name,
-			initialValue: initialValue,
-			progress: progress,
-		}
-	}
+	const boosterUseHandler = new BoosterUseHandler({
+		gameRules: gameRules,
+		fieldQueries: fieldQueries,
+	})
 
-	const boostersHandlersMap = {
-		bomb: new BoosterHandlerBomb({
-			booster: new Booster({
-				...getBoosterProps("bomb"),
-			}),
-			fieldQueries: fieldQueries,
-			actionManager: actionManager,
-			gameRules: gameRules,
-		}),
-		teleport: new BoosterHandlerTeleport({
-			booster: new Booster({
-				...getBoosterProps("teleport"),
-			}),
-			actionManager: actionManager,
-			gameRules: gameRules,
-		}),
-	}
+	const boostersHandlersMap = BOOSTER_NAMES.reduce(
+		(acc, name) => {
+			const initialValue = gameRules.BOOSTER_INITIAL_VALUE[name]
+			const progress = new Progress({
+				updateCounter: ({ currentValue }) =>
+					boosterProps.updateCounter(name, currentValue),
+				isDirectionDown: true,
+			})
+			const tilesCountForUse = gameRules.BOOSTER_TILES_COUNT_FOR_USE[name]
+			const booster = new Booster({
+				...boosterProps,
+				name: name,
+				initialValue: initialValue,
+				progress: progress,
+			})
+
+			acc[name] = new BoosterHandler({
+				name: name,
+				tilesCountForUse: tilesCountForUse,
+				boosterUseHandler: boosterUseHandler,
+				booster: booster,
+				actionManager: actionManager,
+			})
+			return acc
+		},
+		{} as Record<BoosterName, BoosterHandler>
+	)
 
 	return new BoosterManager({
 		boostersHandlersMap: boostersHandlersMap,

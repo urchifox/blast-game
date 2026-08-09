@@ -61,10 +61,10 @@ export class Booster {
 	}
 
 	tryActivate() {
-		if (this.progress.isTargetReached()) {
-			return
+		if (!this.progress.isTargetReached()) {
+			this.setIsActive(true)
 		}
-		this.setIsActive(true)
+		return this.isActivated()
 	}
 
 	isActivated() {
