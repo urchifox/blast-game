@@ -129,7 +129,7 @@ export class Game {
 				[...removedTiles].map((tile) => tile.getPosition())
 			)
 			const points = this.gameRules.getPoints(removedTiles.size)
-			this.progressManager.addProgress(points)
+			this.progressManager.addProgress({points, moves: 1})
 			await this.presenter.fillEmptyPositions(removedPositions)
 			await this.maybeShuffle()
 		}

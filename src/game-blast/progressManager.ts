@@ -32,9 +32,9 @@ export class ProgressManager {
 		this.movesProgress.renderCounters()
 	}
 
-	addProgress(points: number) {
+	addProgress({points, moves}: {points: number, moves: number}) {
 		this.scoreProgress.addCurrentValue(points)
-		this.movesProgress.addCurrentValue()
+		this.movesProgress.addCurrentValue(moves)
 	}
 
 	isScoreTargetReached() {
