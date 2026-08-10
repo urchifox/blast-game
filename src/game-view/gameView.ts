@@ -201,7 +201,7 @@ export class GameView extends View {
 			this.onWinModalButtonClick()
 			return
 		}
-		if (target.closest(".win-modal__wrapper") === null) {
+		if (target.closest(".win-modal__wrapper") !== null) {
 			return
 		}
 		this.onWinModalBackdropClick()
@@ -274,7 +274,7 @@ export class GameView extends View {
 			this.onLossModalButtonClick()
 			return
 		}
-		if (target.closest(".loss-modal__wrapper") === null) {
+		if (target.closest(".loss-modal__wrapper") !== null) {
 			return
 		}
 		this.onLossModalBackdropClick()
