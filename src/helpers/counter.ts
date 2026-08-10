@@ -1,4 +1,4 @@
-export type ProgressProps = {
+export type CounterProps = {
 	startValue: number
 	currentValue?: number
 	endValue: number
@@ -9,11 +9,14 @@ export class Counter {
 	private currentValue = 0
 	private endValue = 0
 
-	constructor(props: ProgressProps) {
-		this.currentValue = props.currentValue ?? props.startValue
+	constructor(props?: CounterProps) {
+		if (props === undefined) {
+			return
+		}
 		this.setInitialValues({
 			startValue: props.startValue,
 			targetValue: props.endValue,
+			currentValue: props.currentValue,
 		})
 	}
 
@@ -24,11 +27,10 @@ export class Counter {
 	}
 
 	reset() {
-		this.setCurrentValue(this.startValue)
-	}
-
-	setCurrentValue(value: number) {
-		this.currentValue = value
+		this.setInitialValues({
+			startValue: this.startValue,
+			targetValue: this.endValue,
+		})
 	}
 
 	getCurrentValue() {
@@ -38,11 +40,14 @@ export class Counter {
 	setInitialValues({
 		startValue,
 		targetValue,
+		currentValue,
 	}: {
 		startValue: number
 		targetValue: number
+		currentValue?: number
 	}) {
 		this.startValue = startValue
+		this.currentValue = currentValue ?? startValue
 		this.endValue = targetValue
 	}
 
