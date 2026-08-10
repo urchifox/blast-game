@@ -56,7 +56,7 @@ export class Game {
 
 	async init() {
 		await this.presenter.init(this.onTileClick.bind(this))
-		await this.startNewLevel()
+		await this.initNewLevel()
 	}
 
 	async destroy() {
@@ -77,10 +77,14 @@ export class Game {
 
 	// #region Level creation
 
-	async startNewLevel() {
-		await this.clearLevel()
+	private async initNewLevel() {
 		this.levelData = this.levelGenerator.generateLevelData()
 		await this.createLevel()
+	}
+
+	async startNewLevel() {
+		await this.clearLevel()
+		await this.initNewLevel()
 	}
 
 	async restartLevel() {
@@ -90,7 +94,7 @@ export class Game {
 
 	private async createLevel() {
 		const { columns, rows, goalScore, movesLimit } = this.levelData
-		this.boosterManager.setInitialValue()
+		this.boosterManager.reset()
 		await this.presenter.create({ columns, rows })
 		this.progressManager.setInitialValues({ goalScore, movesLimit })
 	}
@@ -129,7 +133,7 @@ export class Game {
 				[...removedTiles].map((tile) => tile.getPosition())
 			)
 			const points = this.gameRules.getPoints(removedTiles.size)
-			this.progressManager.addProgress({points, moves: 1})
+			this.progressManager.addProgress({ points, moves: 1 })
 			await this.presenter.fillEmptyPositions(removedPositions)
 			await this.maybeShuffle()
 		}

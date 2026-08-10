@@ -26,9 +26,9 @@ export class BoosterManager {
 		this.activeBoosterName = null
 	}
 
-	setInitialValue() {
+	reset() {
 		for (const handler of this.boostersHandlers) {
-			handler.setInitialValue()
+			handler.reset()
 		}
 	}
 

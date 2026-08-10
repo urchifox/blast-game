@@ -1,73 +1,69 @@
-import { Progress } from "../../helpers/progress"
 import { BoosterName } from "../domain/types"
+import { BoosterCounter } from "../domain/boosterCounter"
 
 export type BoosterCommonProps = {
-	updateCounter: (booster: BoosterName, currentValue: number) => void
-	onActiveChange?: (boosterName: BoosterName, isActive: boolean) => void
-	progress: Progress
+	updateCounter: (currentValue: number) => void
+	onActivationChange?: (boosterName: BoosterName, isActivated: boolean) => void
 }
 
 export type BoosterCustomProps = {
 	name: BoosterName
-	initialValue: number
+	boosterCounter: BoosterCounter
 }
 
 export type BoosterProps = BoosterCommonProps & BoosterCustomProps
 
 export class Booster {
 	private readonly name: BoosterProps["name"]
-	private readonly initialValue: BoosterProps["initialValue"]
-	private readonly onActiveChange?: BoosterProps["onActiveChange"]
-	private readonly progress: BoosterProps["progress"]
+	private readonly boosterCounter: BoosterProps["boosterCounter"]
+	private readonly onActivationChange?: BoosterProps["onActivationChange"]
+	private readonly updateCounter: BoosterProps["updateCounter"]
 
-	private isActive = false
+	private _isActivated = false
 
 	constructor(props: BoosterProps) {
 		this.name = props.name
-		this.initialValue = props.initialValue
-		this.progress = props.progress
-		this.onActiveChange = props.onActiveChange
-		this.progress.setTargetValue(0)
+		this.boosterCounter = props.boosterCounter
+		this.onActivationChange = props.onActivationChange
+		this.updateCounter = props.updateCounter
 	}
 
-	private setIsActive(isActive: boolean) {
-		if (this.isActive === isActive) {
-			return
-		}
-		this.isActive = isActive
-		this.onActiveChange?.(this.name, isActive)
-	}
-
-	setInitialValue() {
-		this.setCurrentValue(this.initialValue)
-	}
-
-	setCurrentValue(value: number) {
-		this.progress.setCurrentValue(value)
+	reset() {
+		this.boosterCounter.reset()
+		this.renderCounter()
 	}
 
 	spend() {
-		this.progress.addCurrentValue(-1)
-		this.setIsActive(false)
+		this.boosterCounter.spend()
+		this.renderCounter()
+		this.setIsActivated(false)
 	}
 
-	renderCounter() {
-		this.progress.renderCounters()
+	private renderCounter() {
+		this.updateCounter(this.boosterCounter.getCurrentValue())
 	}
 
 	clear() {
-		this.progress.clear()
-		this.setIsActive(false)
+		this.boosterCounter.reset()
+		this.setIsActivated(false)
 	}
 
 	tryActivate() {
-		if (!this.progress.isTargetReached()) {
-			this.setIsActive(true)
+		if (this.boosterCounter.canBeUsed) {
+			this.setIsActivated(true)
 		}
 		return this.isActivated()
 	}
 
 	isActivated() {
-		return this.isActive
+		return this._isActivated
+	}
+
+	private setIsActivated(flag: boolean) {
+		if (this._isActivated === flag) {
+			return
+		}
+		this._isActivated = flag
+		this.onActivationChange?.(this.name, flag)
 	}
 }

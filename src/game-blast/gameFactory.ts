@@ -82,7 +82,7 @@ export function gameFactory(props: GameFactoryProps) {
 		actionManager: actionManager,
 		gameRules: gameRules,
 		updateCounter: props.updateBoosterCounter,
-		onActiveChange: props.toggleBoosterButtonActive,
+		onActivationChange: props.toggleBoosterButtonActive,
 	})
 
 	const scoreProgress = new Progress({

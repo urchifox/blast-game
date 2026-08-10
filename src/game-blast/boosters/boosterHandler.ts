@@ -43,12 +43,11 @@ export class BoosterHandler {
 	}
 
 	clear() {
-		this.booster.clear()
+		this.reset()
 	}
 
-	setInitialValue() {
-		this.booster.setInitialValue()
-		this.booster.renderCounter()
+	reset() {
+		this.booster.reset()
 	}
 
 	maybeUse(tiles: Array<Tile>) {
