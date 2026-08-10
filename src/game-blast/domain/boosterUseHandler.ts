@@ -25,11 +25,12 @@ export class BoosterUseHandler {
 		boosterName: BoosterName
 		tiles: Array<Tile>
 	}): Array<Command> | null {
-		const tilesRequired = this.gameRules.BOOSTER_TILES_COUNT_FOR_USE[boosterName]
+		const tilesRequired =
+			this.gameRules.BOOSTER_TILES_COUNT_FOR_USE[boosterName]
 		if (tiles.length !== tilesRequired) {
-		  return null
+			return null
 		}
-		
+
 		const commands: Array<Command> = []
 
 		switch (boosterName) {

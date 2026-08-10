@@ -56,16 +56,12 @@ export class ActionManager {
 		this.presenter = props.presenter
 	}
 
-	doCommands(
-		commands: Array<Command>,
-	) {
+	doCommands(commands: Array<Command>) {
 		const actions = this.convertCommandToAction(commands)
 		return this.doActions(actions)
 	}
 
-	private convertCommandToAction(
-		commands: Array<Command>,
-	) {
+	private convertCommandToAction(commands: Array<Command>) {
 		const actions: Array<Action> = []
 
 		commands.forEach(({ name, payload }) => {

@@ -47,7 +47,7 @@ export class BoosterManager {
 			this.selectedTiles = []
 		}
 
-		return {isUsed: true, actResult: result}
+		return { isUsed: true, actResult: result }
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {
