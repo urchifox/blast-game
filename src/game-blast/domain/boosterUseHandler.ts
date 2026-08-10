@@ -37,6 +37,7 @@ export class BoosterUseHandler {
 					name: CommandName.REMOVE,
 					payload: {
 						tiles: tilesInRadius,
+						removingFromPosition: tiles[0].getPosition(),
 					},
 				})
 				break

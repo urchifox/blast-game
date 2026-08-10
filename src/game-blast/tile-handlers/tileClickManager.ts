@@ -1,7 +1,6 @@
 import { Tile } from "../domain/tile"
 import { TileClickHandler } from "../domain/tileClickHandler"
-import { Action, ActionManager, ActionName } from "../actionManager"
-import { CommandName } from "../domain/command"
+import { ActionManager } from "../actionManager"
 
 export type TileClickManagerProps = {
 	actionManager: ActionManager
@@ -23,40 +22,6 @@ export class TileClickManager {
 			return null
 		}
 
-		const actions: Array<Action> = []
-
-		commands.forEach(({ name, payload }) => {
-			switch (name) {
-				case CommandName.ADD: {
-					actions.push({
-						name: ActionName.ADD,
-						payload: payload,
-					})
-					break
-				}
-				case CommandName.REMOVE: {
-					actions.push({
-						name: ActionName.REMOVE,
-						payload: {
-							centerPosition: tile.getPosition(),
-							tiles: payload.tiles,
-						},
-					})
-					break
-				}
-				case CommandName.SWAP: {
-					actions.push({
-						name: ActionName.SWAP,
-						payload: payload,
-					})
-					break
-				}
-				default: {
-					break
-				}
-			}
-		})
-
-		return this.actionManager.act(actions)
+		return this.actionManager.doCommands(commands)
 	}
 }

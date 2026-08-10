@@ -40,7 +40,8 @@ export class TileClickHandler {
 			? this.gameRules.MIN_COMBO_SIZE
 			: 1
 
-		if (tiles.size < minTilesCount) {
+		const tilesNumber = tiles.size
+		if (tilesNumber < minTilesCount) {
 			return null
 		}
 
@@ -49,11 +50,12 @@ export class TileClickHandler {
 				name: CommandName.REMOVE,
 				payload: {
 					tiles: tiles,
+					removingFromPosition: tile.getPosition(),
 				},
 			},
 		]
 
-		const rewardType = this.getComboRewardType(tile.getKind(), tiles.size)
+		const rewardType = this.getComboRewardType(tile.getKind(), tilesNumber)
 		if (rewardType !== null) {
 			commands.push({
 				name: CommandName.ADD,

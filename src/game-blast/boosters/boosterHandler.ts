@@ -1,9 +1,8 @@
 import { Booster } from "./booster"
 import { Tile } from "../domain/tile"
-import { Action, ActionManager, ActionName, ActResult } from "../actionManager"
+import { ActionManager, ActionName, ActResult } from "../actionManager"
 import { BoosterUseHandler } from "../domain/boosterUseHandler"
 import { BoosterName } from "../domain/types"
-import { CommandName } from "../domain/command"
 
 export type BoosterHandlerResult = {
 	isUsed: boolean
@@ -42,42 +41,8 @@ export class BoosterHandler {
 			return null
 		}
 
-		const actions: Array<Action> = []
-
-		commands.forEach(({ name, payload }) => {
-			switch (name) {
-				case CommandName.ADD: {
-					actions.push({
-						name: ActionName.ADD,
-						payload: payload,
-					})
-					break
-				}
-				case CommandName.REMOVE: {
-					actions.push({
-						name: ActionName.REMOVE,
-						payload: {
-							centerPosition: tiles[0].getPosition(),
-							tiles: payload.tiles,
-						},
-					})
-					break
-				}
-				case CommandName.SWAP: {
-					actions.push({
-						name: ActionName.SWAP,
-						payload: payload,
-					})
-					break
-				}
-				default: {
-					break
-				}
-			}
-		})
-
 		this.booster.spend()
-		return this.actionManager.act(actions)
+		return this.actionManager.doCommands(commands)
 	}
 
 	clear() {
@@ -94,7 +59,7 @@ export class BoosterHandler {
 			return this.use(tiles)
 		}
 		tiles.forEach((tile) => {
-			this.actionManager.act([
+			this.actionManager.doActions([
 				{
 					name: ActionName.SELECT,
 					payload: tile,

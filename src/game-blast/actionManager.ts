@@ -1,3 +1,4 @@
+import { Command, CommandName } from "./domain/command"
 import { Tile, TileKind, TilePosition } from "./domain/tile"
 import { Presenter } from "./presenter"
 
@@ -55,7 +56,54 @@ export class ActionManager {
 		this.presenter = props.presenter
 	}
 
-	async act(actions: Array<Action>) {
+	doCommands(
+		commands: Array<Command>,
+	) {
+		const actions = this.convertCommandToAction(commands)
+		return this.doActions(actions)
+	}
+
+	private convertCommandToAction(
+		commands: Array<Command>,
+	) {
+		const actions: Array<Action> = []
+
+		commands.forEach(({ name, payload }) => {
+			switch (name) {
+				case CommandName.ADD: {
+					actions.push({
+						name: ActionName.ADD,
+						payload: payload,
+					})
+					break
+				}
+				case CommandName.REMOVE: {
+					actions.push({
+						name: ActionName.REMOVE,
+						payload: {
+							centerPosition: payload.removingFromPosition,
+							tiles: payload.tiles,
+						},
+					})
+					break
+				}
+				case CommandName.SWAP: {
+					actions.push({
+						name: ActionName.SWAP,
+						payload: payload,
+					})
+					break
+				}
+				default: {
+					break
+				}
+			}
+		})
+
+		return actions
+	}
+
+	async doActions(actions: Array<Action>) {
 		const results: Array<ActionResult> = []
 
 		for (const action of actions) {

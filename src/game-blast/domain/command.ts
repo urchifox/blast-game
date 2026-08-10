@@ -20,6 +20,7 @@ export type CommandPayload = {
 	}
 	[CommandName.REMOVE]: {
 		tiles: Set<Tile>
+		removingFromPosition: TilePosition
 	}
 	[CommandName.SWAP]: [Tile, Tile]
 }
