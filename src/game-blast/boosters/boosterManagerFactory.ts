@@ -33,7 +33,6 @@ export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
 					boosterProps.updateCounter(name, currentValue),
 				isDirectionDown: true,
 			})
-			const tilesCountForUse = gameRules.BOOSTER_TILES_COUNT_FOR_USE[name]
 			const booster = new Booster({
 				...boosterProps,
 				name: name,
@@ -43,7 +42,6 @@ export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
 
 			acc[name] = new BoosterHandler({
 				name: name,
-				tilesCountForUse: tilesCountForUse,
 				boosterUseHandler: boosterUseHandler,
 				booster: booster,
 				actionManager: actionManager,

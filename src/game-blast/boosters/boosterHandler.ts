@@ -11,14 +11,12 @@ export type BoosterHandlerResult = {
 
 export type BoosterHandlerProps = {
 	name: BoosterName
-	tilesCountForUse: number
 	booster: Booster
 	boosterUseHandler: BoosterUseHandler
 	actionManager: ActionManager
 }
 
 export class BoosterHandler {
-	protected readonly tilesCountForUse: BoosterHandlerProps["tilesCountForUse"]
 	private readonly name: BoosterHandlerProps["name"]
 	private readonly booster: BoosterHandlerProps["booster"]
 	private readonly boosterUseHandler: BoosterHandlerProps["boosterUseHandler"]
@@ -26,7 +24,6 @@ export class BoosterHandler {
 
 	constructor(props: BoosterHandlerProps) {
 		this.name = props.name
-		this.tilesCountForUse = props.tilesCountForUse
 		this.booster = props.booster
 		this.boosterUseHandler = props.boosterUseHandler
 		this.actionManager = props.actionManager
@@ -55,8 +52,11 @@ export class BoosterHandler {
 	}
 
 	maybeUse(tiles: Array<Tile>) {
-		if (this.booster.isActivated() && tiles.length === this.tilesCountForUse) {
-			return this.use(tiles)
+		if (this.booster.isActivated()) {
+			const result = this.use(tiles)
+			if (result !== null) {
+				return result
+			}
 		}
 		tiles.forEach((tile) => {
 			this.actionManager.doActions([
