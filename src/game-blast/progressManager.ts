@@ -1,22 +1,27 @@
-import { Progress } from "../helpers/progress"
+import { ProgressCounter } from "./domain/progressCounter"
 
 export type ProgressManagerProps = {
-	scoreProgress: Progress
-	movesProgress: Progress
+	progressCounter: ProgressCounter
+	updateScoreCounter: (props: {
+		currentValue: number
+		targetValue: number
+	}) => void
+	updateMovesCounter: (props: { currentValue: number }) => void
 }
 
 export class ProgressManager {
-	private readonly scoreProgress: ProgressManagerProps["scoreProgress"]
-	private readonly movesProgress: ProgressManagerProps["movesProgress"]
+	private readonly progressCounter: ProgressCounter
+	private readonly updateScoreCounter: ProgressManagerProps["updateScoreCounter"]
+	private readonly updateMovesCounter: ProgressManagerProps["updateMovesCounter"]
 
 	constructor(props: ProgressManagerProps) {
-		this.scoreProgress = props.scoreProgress
-		this.movesProgress = props.movesProgress
+		this.progressCounter = props.progressCounter
+		this.updateScoreCounter = props.updateScoreCounter
+		this.updateMovesCounter = props.updateMovesCounter
 	}
 
 	clear() {
-		this.scoreProgress.clear()
-		this.movesProgress.clear()
+		this.progressCounter.clear()
 	}
 
 	setInitialValues({
@@ -26,22 +31,26 @@ export class ProgressManager {
 		goalScore: number
 		movesLimit: number
 	}) {
-		this.scoreProgress.setTargetValue(goalScore)
-		this.movesProgress.setTargetValue(movesLimit)
-		this.scoreProgress.renderCounters()
-		this.movesProgress.renderCounters()
+		this.progressCounter.setInitialValues({
+			goalScore,
+			movesLimit,
+		})
+		this.renderCounters()
 	}
 
-	addProgress({ points, moves }: { points: number; moves: number }) {
-		this.scoreProgress.addCurrentValue(points)
-		this.movesProgress.addCurrentValue(moves)
+	processMove(removedTilesCount: number) {
+		this.progressCounter.processMove(removedTilesCount)
+		this.renderCounters()
 	}
 
-	isScoreTargetReached() {
-		return this.scoreProgress.isTargetReached()
-	}
-
-	isMovesTargetReached() {
-		return this.movesProgress.isTargetReached()
+	private renderCounters() {
+		const { score, moves } = this.progressCounter.getValues()
+		this.updateScoreCounter({
+			currentValue: score.currentValue,
+			targetValue: score.endValue,
+		})
+		this.updateMovesCounter({
+			currentValue: moves.currentValue,
+		})
 	}
 }

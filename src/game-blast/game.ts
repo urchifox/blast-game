@@ -3,7 +3,6 @@ import { BoosterManager } from "./boosters/boosterManager"
 import { CompletionManager } from "./domain/completionManager"
 import { ProgressManager } from "./progressManager"
 import { LevelData, LevelGenerator } from "./domain/levelGenerator"
-import { GameRules } from "./domain/gameRules"
 import { BoosterName, GameCompletionStatus } from "./domain/types"
 import { FieldQueries } from "./domain/fieldQueries"
 import { Presenter } from "./presenter"
@@ -12,7 +11,6 @@ import { ActResult } from "./actionManager"
 export type GameProps = {
 	fieldQueries: FieldQueries
 	presenter: Presenter
-	gameRules: GameRules
 	levelGenerator: LevelGenerator
 	progressManager: ProgressManager
 	tileClickManager: TileClickManager
@@ -25,7 +23,6 @@ export type GameProps = {
 export class Game {
 	private readonly fieldQueries: GameProps["fieldQueries"]
 	private readonly presenter: GameProps["presenter"]
-	private readonly gameRules: GameProps["gameRules"]
 	private readonly levelGenerator: GameProps["levelGenerator"]
 	private readonly progressManager: GameProps["progressManager"]
 	private readonly tileClickManager: GameProps["tileClickManager"]
@@ -44,7 +41,6 @@ export class Game {
 	constructor(props: GameProps) {
 		this.fieldQueries = props.fieldQueries
 		this.presenter = props.presenter
-		this.gameRules = props.gameRules
 		this.levelGenerator = props.levelGenerator
 		this.progressManager = props.progressManager
 		this.tileClickManager = props.tileClickManager
@@ -132,8 +128,7 @@ export class Game {
 			const removedPositions = new Set(
 				[...removedTiles].map((tile) => tile.getPosition())
 			)
-			const points = this.gameRules.getPoints(removedTiles.size)
-			this.progressManager.addProgress({ points, moves: 1 })
+			this.progressManager.processMove(removedTiles.size)
 			await this.presenter.fillEmptyPositions(removedPositions)
 			await this.maybeShuffle()
 		}

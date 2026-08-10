@@ -100,17 +100,10 @@ export class GameView extends View {
 			?.classList.toggle("canvas-container__canvas--fullsize", isResetSizes)
 	}
 
-	private updateMovesCounter({
-		movesNumber,
-		movesLimit,
-	}: {
-		movesNumber: number
-		movesLimit: number
-	}) {
+	private updateMovesCounter({ movesLeft }: { movesLeft: number }) {
 		if (this.movesCounter === undefined) {
 			return
 		}
-		const movesLeft = movesLimit - movesNumber
 		this.movesCounter.textContent = movesLeft.toString()
 	}
 

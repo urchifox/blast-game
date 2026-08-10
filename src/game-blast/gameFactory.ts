@@ -1,5 +1,4 @@
 import { AnimationsManager } from "../helpers/animationManager"
-import { Progress } from "../helpers/progress"
 import { createId } from "../helpers/random"
 import { CompletionManager } from "./domain/completionManager"
 import { Field } from "./domain/field"
@@ -17,6 +16,8 @@ import { tileClickManagerFactory } from "./tile-handlers/tileClickManagerFactory
 import { Layout } from "./layout"
 import { LayoutCalculator } from "./layoutCalculator"
 import { ActionManager } from "./actionManager"
+import { ProgressCounter } from "./domain/progressCounter"
+import { Counter } from "../helpers/counter"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
@@ -26,10 +27,7 @@ export type GameFactoryProps = {
 	toggleBoosterButtonActive: (booster: BoosterName, active: boolean) => void
 
 	updateScoreCounter: (props: { score: number; goalScore: number }) => void
-	updateMovesCounter: (props: {
-		movesNumber: number
-		movesLimit: number
-	}) => void
+	updateMovesCounter: (props: { movesLeft: number }) => void
 } & Pick<GameProps, "openWinModal" | "openLossModal">
 
 export function gameFactory(props: GameFactoryProps) {
@@ -85,31 +83,28 @@ export function gameFactory(props: GameFactoryProps) {
 		onActivationChange: props.toggleBoosterButtonActive,
 	})
 
-	const scoreProgress = new Progress({
-		updateCounter: ({ currentValue, targetValue }) =>
+	const progressCounter = new ProgressCounter({
+		scoreCounter: new Counter(),
+		movesCounter: new Counter(),
+		gameRules: gameRules,
+	})
+
+	const progressManager = new ProgressManager({
+		progressCounter: progressCounter,
+		updateScoreCounter: ({ currentValue, targetValue }) =>
 			props.updateScoreCounter({
 				score: currentValue,
 				goalScore: targetValue,
 			}),
-	})
-	const movesProgress = new Progress({
-		updateCounter: ({ currentValue, targetValue }) =>
+		updateMovesCounter: ({ currentValue }) =>
 			props.updateMovesCounter({
-				movesNumber: currentValue,
-				movesLimit: targetValue,
+				movesLeft: currentValue,
 			}),
-	})
-	const progressManager = new ProgressManager({
-		scoreProgress,
-		movesProgress,
 	})
 	const completionManager = new CompletionManager({
 		fieldQueries: fieldQueries,
 		gameRules: gameRules,
-		isScoreTargetReached:
-			progressManager.isScoreTargetReached.bind(progressManager),
-		isMovesTargetReached:
-			progressManager.isMovesTargetReached.bind(progressManager),
+		progressCounter: progressCounter,
 	})
 
 	const levelGenerator = new LevelGenerator({
@@ -120,7 +115,6 @@ export function gameFactory(props: GameFactoryProps) {
 	return new Game({
 		fieldQueries,
 		presenter,
-		gameRules,
 		levelGenerator,
 		progressManager,
 		tileClickManager,

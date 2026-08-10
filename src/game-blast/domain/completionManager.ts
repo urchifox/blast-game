@@ -2,19 +2,18 @@ import { isTileKindSpecial } from "./tile"
 import { GameRules } from "./gameRules"
 import { GameCompletionStatus } from "./types"
 import { FieldQueries } from "./fieldQueries"
+import { ProgressCounter } from "./progressCounter"
 
 export type CompletionManagerProps = {
 	fieldQueries: FieldQueries
 	gameRules: GameRules
-	isScoreTargetReached: () => boolean
-	isMovesTargetReached: () => boolean
+	progressCounter: ProgressCounter
 }
 
 export class CompletionManager {
 	private readonly fieldQueries: CompletionManagerProps["fieldQueries"]
 	private readonly gameRules: CompletionManagerProps["gameRules"]
-	private readonly isScoreTargetReached: CompletionManagerProps["isScoreTargetReached"]
-	private readonly isMovesTargetReached: CompletionManagerProps["isMovesTargetReached"]
+	private readonly progressCounter: CompletionManagerProps["progressCounter"]
 
 	private isCompleted = false
 	private shuffleAttempts = 0
@@ -24,8 +23,7 @@ export class CompletionManager {
 	constructor(props: CompletionManagerProps) {
 		this.fieldQueries = props.fieldQueries
 		this.gameRules = props.gameRules
-		this.isScoreTargetReached = props.isScoreTargetReached
-		this.isMovesTargetReached = props.isMovesTargetReached
+		this.progressCounter = props.progressCounter
 	}
 
 	isGameCompleted() {
@@ -37,12 +35,10 @@ export class CompletionManager {
 			return this.gameCompletionStatus
 		}
 
-		if (this.isScoreTargetReached()) {
+		const gameCompletionStatus = this.progressCounter.getCompletionStatus()
+		if (gameCompletionStatus === GameCompletionStatus.WIN) {
 			this.win()
-		} else if (this.isMovesTargetReached()) {
-			this.lose()
-		}
-
+		} 
 		return this.gameCompletionStatus
 	}
 
