@@ -82,8 +82,6 @@ export class GameView extends View {
 		this.game = gameFactory({
 			boosterUI: boosterUI,
 			gameContainer: this.gameContainer,
-			toggleGameContainerResetSizes:
-				this.toggleGameContainerResetSizes.bind(this),
 			progressUI: progressUI,
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
@@ -110,16 +108,6 @@ export class GameView extends View {
 	private handleWindowResize = this.onResize.bind(this)
 	private onResize() {
 		this.game?.onResize()
-	}
-
-	private toggleGameContainerResetSizes(isResetSizes: boolean) {
-		this.gameContainer?.classList.toggle(
-			"game-blast-container__canvas-container--fullsize",
-			isResetSizes
-		)
-		this.gameContainer
-			?.querySelector(".canvas-container__canvas")
-			?.classList.toggle("canvas-container__canvas--fullsize", isResetSizes)
 	}
 
 	private setBoostersButtonsListeners() {

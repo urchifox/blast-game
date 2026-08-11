@@ -23,8 +23,6 @@ import { ProgressUIContract } from "./types"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
-	toggleGameContainerResetSizes: (isResetSizes: boolean) => void
-
 	boosterUI: Record<BoosterName, BoosterUIContract>
 
 	progressUI: ProgressUIContract
@@ -38,7 +36,6 @@ export function gameFactory(props: GameFactoryProps) {
 	const layout = new Layout({
 		gameContainer: props.gameContainer,
 		layoutCalculator: layoutCalculator,
-		toggleGameContainerResetSizes: props.toggleGameContainerResetSizes,
 	})
 
 	const grid = new Grid()
