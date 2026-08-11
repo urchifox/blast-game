@@ -1,3 +1,5 @@
+import "./assets/style/view.css"
+
 import { isHtmlElement } from "../helpers/dom"
 
 export type ViewConstructor<P = ViewProps> = new (props: P) => View

@@ -1,6 +1,6 @@
-import { Tile } from "../domain/tile"
-import { TileClickHandler } from "../domain/tileClickHandler"
-import { ActionManager } from "../actionManager"
+import { Tile } from "./domain/tile"
+import { TileClickHandler } from "./domain/tileClickHandler"
+import { ActionManager } from "./actionManager"
 
 export type TileClickManagerProps = {
 	actionManager: ActionManager

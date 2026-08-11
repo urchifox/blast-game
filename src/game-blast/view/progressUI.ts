@@ -1,4 +1,4 @@
-import { ProgressUIContract } from "../game-blast/types"
+import { ProgressUIContract } from "../types"
 
 export type ProgressUIProps = {
 	scoreCounter: HTMLElement

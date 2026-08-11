@@ -12,7 +12,7 @@
 
 	background-color: transparent;
 
-	border-image-source: url("../img/booster-bg.png");
+	border-image-source: url("./../img/booster-bg.png");
 	border-image-slice: 80 fill;
 	border-image-width: 30px;
 	border-image-repeat: stretch;

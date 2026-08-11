@@ -1,5 +1,5 @@
-import { isHtmlElement, queryElement } from "../helpers/dom"
-import { ModalUIContract } from "../game-blast/types"
+import { isHtmlElement, queryElement } from "../../helpers/dom"
+import { ModalUIContract } from "../types"
 
 export type ModalProps = {
 	modal: HTMLDialogElement

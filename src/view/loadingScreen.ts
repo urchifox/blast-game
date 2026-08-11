@@ -1,4 +1,4 @@
-import "./../assets/style/loading-screen.css"
+import "./assets/style/loading-screen.css"
 
 type LoadingScreenProps = {
 	root: HTMLElement

@@ -1,5 +1,5 @@
-import { TileClickManager } from "./tile-handlers/tileClickManager"
-import { BoosterManager } from "./boosters/boosterManager"
+import { TileClickManager } from "./tileClickManager"
+import { BoosterManager } from "./boosterManager"
 import { CompletionManager } from "./domain/completionManager"
 import { ProgressManager } from "./progressManager"
 import { LevelData, LevelGenerator } from "./domain/levelGenerator"

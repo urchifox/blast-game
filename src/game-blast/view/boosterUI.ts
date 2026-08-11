@@ -1,4 +1,4 @@
-import { BoosterUIContract } from "../game-blast/types"
+import { BoosterUIContract } from "../types"
 
 export type BoosterUIProps = {
 	button: HTMLElement

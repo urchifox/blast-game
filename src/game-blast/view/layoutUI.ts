@@ -1,7 +1,7 @@
-import { getElementInnerSize } from "../helpers/dom"
-import { GridSnapshot } from "../game-blast/domain/grid"
-import { LayoutSnapshot, LayoutUIContract } from "../game-blast/types"
-import { LayoutCalculator } from "../game-blast/layoutCalculator"
+import { getElementInnerSize } from "../../helpers/dom"
+import { GridSnapshot } from "../domain/grid"
+import { LayoutSnapshot, LayoutUIContract } from "../types"
+import { LayoutCalculator } from "../layoutCalculator"
 
 export type LayoutProps = {
 	gameContainer: HTMLElement
