@@ -11,7 +11,7 @@ import {
 	OnTileClickCallback,
 } from "./types"
 
-type GamePresenterProps = {
+type PresenterProps = {
 	layoutUI: LayoutUIContract
 	field: Field
 	grid: Grid
@@ -19,14 +19,14 @@ type GamePresenterProps = {
 	animationsManager: AnimationsManager
 }
 
-export class GamePresenter implements PresenterContract {
-	private readonly layoutUI: GamePresenterProps["layoutUI"]
-	private readonly field: GamePresenterProps["field"]
-	private readonly grid: GamePresenterProps["grid"]
-	private readonly renderer: GamePresenterProps["renderer"]
-	private readonly animationsManager: GamePresenterProps["animationsManager"]
+export class Presenter implements PresenterContract {
+	private readonly layoutUI: PresenterProps["layoutUI"]
+	private readonly field: PresenterProps["field"]
+	private readonly grid: PresenterProps["grid"]
+	private readonly renderer: PresenterProps["renderer"]
+	private readonly animationsManager: PresenterProps["animationsManager"]
 
-	constructor(props: GamePresenterProps) {
+	constructor(props: PresenterProps) {
 		this.layoutUI = props.layoutUI
 		this.field = props.field
 		this.grid = props.grid

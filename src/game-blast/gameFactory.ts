@@ -4,7 +4,7 @@ import { CompletionManager } from "./domain/completionManager"
 import { Field } from "./domain/field"
 import { FieldQueries } from "./domain/fieldQueries"
 import { Game } from "./game"
-import { GamePresenter } from "./gamePresenter"
+import { Presenter } from "./presenter"
 import { GameRules } from "./domain/gameRules"
 import { LevelGenerator } from "./domain/levelGenerator"
 import { ProgressManager } from "./progressManager"
@@ -50,7 +50,7 @@ export function gameFactory(props: GameFactoryProps) {
 		layoutUI: props.layoutUI,
 	})
 
-	const presenter = new GamePresenter({
+	const presenter = new Presenter({
 		layoutUI: props.layoutUI,
 		field,
 		grid,
