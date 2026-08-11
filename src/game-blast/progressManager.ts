@@ -1,23 +1,18 @@
 import { ProgressCounter } from "./domain/progressCounter"
+import { ProgressUIContract } from "./types"
 
 export type ProgressManagerProps = {
 	progressCounter: ProgressCounter
-	updateScoreCounter: (props: {
-		currentValue: number
-		targetValue: number
-	}) => void
-	updateMovesCounter: (props: { currentValue: number }) => void
+	progressUI: ProgressUIContract
 }
 
 export class ProgressManager {
 	private readonly progressCounter: ProgressCounter
-	private readonly updateScoreCounter: ProgressManagerProps["updateScoreCounter"]
-	private readonly updateMovesCounter: ProgressManagerProps["updateMovesCounter"]
+	private readonly progressUI: ProgressManagerProps["progressUI"]
 
 	constructor(props: ProgressManagerProps) {
 		this.progressCounter = props.progressCounter
-		this.updateScoreCounter = props.updateScoreCounter
-		this.updateMovesCounter = props.updateMovesCounter
+		this.progressUI = props.progressUI
 	}
 
 	clear() {
@@ -45,12 +40,12 @@ export class ProgressManager {
 
 	private renderCounters() {
 		const { score, moves } = this.progressCounter.getValues()
-		this.updateScoreCounter({
-			currentValue: score.currentValue,
-			targetValue: score.endValue,
+		this.progressUI.updateScoreCounter({
+			score: score.currentValue,
+			goalScore: score.endValue,
 		})
-		this.updateMovesCounter({
-			currentValue: moves.currentValue,
+		this.progressUI.updateMovesCounter({
+			movesLeft: moves.currentValue,
 		})
 	}
 }

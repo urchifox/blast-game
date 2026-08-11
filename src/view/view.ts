@@ -9,7 +9,7 @@ export type ViewProps = {
 
 export abstract class View {
 	readonly name: ViewProps["name"]
-	private readonly appRoot: ViewProps["appRoot"]
+	protected readonly appRoot: ViewProps["appRoot"]
 
 	readonly needLoadingScreenOnMount: boolean = false
 	isMounted = false

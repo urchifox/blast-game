@@ -19,6 +19,7 @@ import { ProgressCounter } from "./domain/progressCounter"
 import { Counter } from "../helpers/counter"
 import { BoosterUIContract } from "./boosters/types"
 import { BoosterName } from "./domain/types"
+import { ProgressUIContract } from "./types"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
@@ -26,8 +27,7 @@ export type GameFactoryProps = {
 
 	boosterUI: Record<BoosterName, BoosterUIContract>
 
-	updateScoreCounter: (props: { score: number; goalScore: number }) => void
-	updateMovesCounter: (props: { movesLeft: number }) => void
+	progressUI: ProgressUIContract
 } & Pick<GameProps, "openWinModal" | "openLossModal">
 
 export function gameFactory(props: GameFactoryProps) {
@@ -90,15 +90,7 @@ export function gameFactory(props: GameFactoryProps) {
 
 	const progressManager = new ProgressManager({
 		progressCounter: progressCounter,
-		updateScoreCounter: ({ currentValue, targetValue }) =>
-			props.updateScoreCounter({
-				score: currentValue,
-				goalScore: targetValue,
-			}),
-		updateMovesCounter: ({ currentValue }) =>
-			props.updateMovesCounter({
-				movesLeft: currentValue,
-			}),
+		progressUI: props.progressUI,
 	})
 	const completionManager = new CompletionManager({
 		fieldQueries: fieldQueries,

@@ -8,6 +8,7 @@ import { isHtmlElement, queryElement } from "../helpers/dom"
 import { gameFactory } from "../game-blast/gameFactory"
 import { BoosterName } from "../game-blast/domain/types"
 import { BoosterUI } from "./boosterUI"
+import { ProgressUI } from "./progressUI"
 
 type GameViewProps = Omit<ViewProps, "name">
 
@@ -15,8 +16,6 @@ export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
 	private game?: Game
 	private gameContainer?: HTMLElement
-	private movesCounter?: HTMLElement
-	private scoreCounter?: HTMLElement
 	private winModal?: HTMLDialogElement
 	private winModalWrapper?: HTMLElement
 	private lossModal?: HTMLDialogElement
@@ -38,8 +37,6 @@ export class GameView extends View {
 		super.mount()
 
 		this.gameContainer = queryElement("#canvas-container")
-		this.movesCounter = queryElement("#movements-counter-text")
-		this.scoreCounter = queryElement("#points-counter-result")
 		this.winModal = queryElement<HTMLDialogElement>("#win-modal")
 		this.winModalWrapper = queryElement(".win-modal__wrapper", this.winModal)
 		this.lossModal = queryElement<HTMLDialogElement>("#loss-modal")
@@ -75,13 +72,19 @@ export class GameView extends View {
 			{} as Record<BoosterName, BoosterUI>
 		)
 
+		const scoreCounter = queryElement("#points-counter-result", this.appRoot)
+		const movesCounter = queryElement("#movements-counter-text", this.appRoot)
+		const progressUI = new ProgressUI({
+			scoreCounter: scoreCounter,
+			movesCounter: movesCounter,
+		})
+
 		this.game = gameFactory({
 			boosterUI: boosterUI,
 			gameContainer: this.gameContainer,
 			toggleGameContainerResetSizes:
 				this.toggleGameContainerResetSizes.bind(this),
-			updateScoreCounter: this.updateScoreCounter.bind(this),
-			updateMovesCounter: this.updateMovesCounter.bind(this),
+			progressUI: progressUI,
 			openWinModal: this.openWinModal.bind(this),
 			openLossModal: this.openLossModal.bind(this),
 		})
@@ -117,26 +120,6 @@ export class GameView extends View {
 		this.gameContainer
 			?.querySelector(".canvas-container__canvas")
 			?.classList.toggle("canvas-container__canvas--fullsize", isResetSizes)
-	}
-
-	private updateMovesCounter({ movesLeft }: { movesLeft: number }) {
-		if (this.movesCounter === undefined) {
-			return
-		}
-		this.movesCounter.textContent = movesLeft.toString()
-	}
-
-	private updateScoreCounter({
-		score,
-		goalScore,
-	}: {
-		score: number
-		goalScore: number
-	}) {
-		if (this.scoreCounter === undefined) {
-			return
-		}
-		this.scoreCounter.textContent = `${score}/${goalScore}`
 	}
 
 	private setBoostersButtonsListeners() {
