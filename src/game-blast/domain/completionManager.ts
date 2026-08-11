@@ -39,6 +39,9 @@ export class CompletionManager {
 		if (gameCompletionStatus === GameCompletionStatus.WIN) {
 			this.win()
 		}
+		if (gameCompletionStatus === GameCompletionStatus.LOSS) {
+			this.lose()
+		}
 		return this.gameCompletionStatus
 	}
 
