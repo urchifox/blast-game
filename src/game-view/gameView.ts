@@ -9,7 +9,7 @@ import { BoosterUI } from "./boosterUI"
 import { ProgressUI } from "./progressUI"
 import { ModalUI } from "./modalUI"
 import { BOOSTER_NAMES } from "../game-blast/domain/config"
-import { BoosterUIMap } from "../game-blast/boosters/types"
+import { BoosterUIMap } from "../game-blast/types"
 import { LayoutUI } from "./layoutUI"
 import { LayoutCalculator } from "../game-blast/layoutCalculator"
 

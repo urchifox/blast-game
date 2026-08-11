@@ -1,22 +1,25 @@
 import { Field } from "./domain/field"
 import { Grid } from "./domain/grid"
-import { Renderer } from "./rendering/renderer"
 import { Tile, TileKind, TilePosition, TileSnapshot } from "./domain/tile"
 import { wait } from "../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./animationRules"
 import { AnimationsManager } from "../helpers/animationManager"
-import { Presenter } from "./presenter"
-import { LayoutUIContract } from "./types"
+import {
+	LayoutUIContract,
+	PresenterContract,
+	RendererContract,
+	OnTileClickCallback,
+} from "./types"
 
 type GamePresenterProps = {
 	layoutUI: LayoutUIContract
 	field: Field
 	grid: Grid
-	renderer: Renderer
+	renderer: RendererContract
 	animationsManager: AnimationsManager
 }
 
-export class GamePresenter implements Presenter {
+export class GamePresenter implements PresenterContract {
 	private readonly layoutUI: GamePresenterProps["layoutUI"]
 	private readonly field: GamePresenterProps["field"]
 	private readonly grid: GamePresenterProps["grid"]
@@ -31,7 +34,7 @@ export class GamePresenter implements Presenter {
 		this.animationsManager = props.animationsManager
 	}
 
-	async init(onTileClick: (id: string) => void) {
+	async init(onTileClick: OnTileClickCallback) {
 		this.renderer.setOnTileClick(onTileClick)
 		await this.renderer.init()
 	}

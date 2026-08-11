@@ -1,19 +1,32 @@
 import Phaser from "phaser"
 
+import { TileSnapshot } from "../domain/tile"
 import { PhaserScene } from "./phaserScene"
-import { Renderer, RendererParams, RendererProps } from "./renderer"
+import { LayoutUIContract, RendererContract } from "../types"
 
-export class PhaserRenderer extends Renderer {
+export type RendererParams<Method extends keyof RendererContract> = Parameters<
+	RendererContract[Method]
+>[0]
+
+export type PhaserRendererProps = {
+	container: HTMLElement
+	layoutUI: LayoutUIContract
+}
+
+export class PhaserRenderer implements RendererContract {
+	private readonly container: PhaserRendererProps["container"]
+	private readonly layoutUI: PhaserRendererProps["layoutUI"]
 	private readonly game: Phaser.Game
 	private scene: PhaserScene
 	readonly readyPromise: Promise<void>
 
-	constructor(props: RendererProps) {
-		super(props)
+	constructor(props: PhaserRendererProps) {
+		this.container = props.container
+		this.layoutUI = props.layoutUI
 
 		const rendererScene = new PhaserScene({
-			getContainerOffset: props.layoutUI.getGameContainerOffset.bind(
-				props.layoutUI
+			getContainerOffset: this.layoutUI.getGameContainerOffset.bind(
+				this.layoutUI
 			),
 			getTileImage: this.getTileImage.bind(this),
 		})
@@ -37,6 +50,10 @@ export class PhaserRenderer extends Renderer {
 				resolve()
 			})
 		})
+	}
+
+	getTileImage(tileSnapshot: TileSnapshot): string {
+		return `tile-${tileSnapshot.kind}`
 	}
 
 	async init() {

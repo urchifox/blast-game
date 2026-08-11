@@ -5,13 +5,12 @@ import { ProgressManager } from "./progressManager"
 import { LevelData, LevelGenerator } from "./domain/levelGenerator"
 import { BoosterName, GameCompletionStatus } from "./domain/types"
 import { FieldQueries } from "./domain/fieldQueries"
-import { Presenter } from "./presenter"
+import { PresenterContract, ModalUIContract } from "./types"
 import { ActResult } from "./actionManager"
-import { ModalUIContract } from "./types"
 
 export type GameProps = {
 	fieldQueries: FieldQueries
-	presenter: Presenter
+	presenter: PresenterContract
 	levelGenerator: LevelGenerator
 	progressManager: ProgressManager
 	tileClickManager: TileClickManager

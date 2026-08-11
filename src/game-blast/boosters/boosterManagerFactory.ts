@@ -1,4 +1,3 @@
-
 import { ActionManager } from "../actionManager"
 import { BoosterCounter } from "../domain/boosterCounter"
 import { BoosterUseHandler } from "../domain/boosterUseHandler"
@@ -9,7 +8,7 @@ import { BoosterName } from "../domain/types"
 import { Booster } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { BoosterManager } from "./boosterManager"
-import { BoosterUIMap } from "./types"
+import { BoosterUIMap } from "../types"
 
 export type BoosterManagerFactoryProps = {
 	boosterUIMap: BoosterUIMap

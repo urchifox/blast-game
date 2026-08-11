@@ -1,6 +1,6 @@
 import { Command, CommandName } from "./domain/command"
 import { Tile, TileKind, TilePosition } from "./domain/tile"
-import { Presenter } from "./presenter"
+import { PresenterContract } from "./types"
 
 export type Action<T extends ActionName = ActionName> = {
 	[K in T]: {
@@ -46,7 +46,7 @@ export type ActResult = {
 }
 
 export type ActionManagerProps = {
-	presenter: Presenter
+	presenter: PresenterContract
 }
 
 export class ActionManager {

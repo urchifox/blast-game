@@ -15,8 +15,12 @@ import { tileClickManagerFactory } from "./tile-handlers/tileClickManagerFactory
 import { ActionManager } from "./actionManager"
 import { ProgressCounter } from "./domain/progressCounter"
 import { Counter } from "../helpers/counter"
-import { BoosterUIMap } from "./boosters/types"
-import { LayoutUIContract, ModalUIContract, ProgressUIContract } from "./types"
+import {
+	LayoutUIContract,
+	ModalUIContract,
+	BoosterUIMap,
+	ProgressUIContract,
+} from "./types"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement

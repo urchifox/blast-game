@@ -1,6 +1,6 @@
 import Phaser from "phaser"
 
-import { OnTileClickHandler, RendererParams } from "./renderer"
+import { OnTileClickCallback, LayoutSnapshot } from "../types"
 import { TileSnapshot } from "../domain/tile"
 import { wait } from "../../helpers/time"
 import {
@@ -13,8 +13,8 @@ import {
 	TILE_SHUFFLE_DURATION_MS,
 } from "../animationRules"
 import { easeInOutBack } from "../../helpers/animation"
-import { LayoutSnapshot } from "../types"
 import { GridSnapshot } from "../domain/grid"
+import { RendererParams } from "./phaserRenderer"
 
 export const SCENE_KEY = "blast"
 const tileTextureModules = import.meta.glob("../assets/img/*.png", {
@@ -42,7 +42,7 @@ export class PhaserScene extends Phaser.Scene {
 	>()
 	private isReady = false
 	private onReadyCallbacks: Array<() => void> = []
-	private onTileClick: OnTileClickHandler | null = null
+	private onTileClick: OnTileClickCallback | null = null
 
 	private offsetX = 0
 	private offsetY = 0

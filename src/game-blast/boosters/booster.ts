@@ -1,5 +1,5 @@
 import { BoosterCounter } from "../domain/boosterCounter"
-import { BoosterUIContract } from "./types"
+import { BoosterUIContract } from "../types"
 
 export type BoosterCommonProps = {
 	boosterUI: BoosterUIContract
