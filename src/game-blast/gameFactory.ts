@@ -24,7 +24,6 @@ import { ProgressUIContract } from "./types"
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
 	boosterUI: Record<BoosterName, BoosterUIContract>
-
 	progressUI: ProgressUIContract
 } & Pick<GameProps, "openWinModal" | "openLossModal">
 

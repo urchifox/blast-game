@@ -38,7 +38,7 @@ export class CompletionManager {
 		const gameCompletionStatus = this.progressCounter.getCompletionStatus()
 		if (gameCompletionStatus === GameCompletionStatus.WIN) {
 			this.win()
-		} 
+		}
 		return this.gameCompletionStatus
 	}
 
