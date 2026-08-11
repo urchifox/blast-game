@@ -10,6 +10,8 @@ import { ProgressUI } from "./progressUI"
 import { ModalUI } from "./modalUI"
 import { BOOSTER_NAMES } from "../game-blast/domain/config"
 import { BoosterUIMap } from "../game-blast/boosters/types"
+import { LayoutUI } from "./layoutUI"
+import { LayoutCalculator } from "../game-blast/layoutCalculator"
 
 type GameViewProps = Omit<ViewProps, "name">
 
@@ -26,28 +28,31 @@ export class GameView extends View {
 		super.mount()
 		this.gameContainer = queryElement("#canvas-container")
 
-		const boosterUIMap = BOOSTER_NAMES.reduce(
-			(acc, boosterName) => {
-				const button = queryElement(`#booster-${boosterName}`, this.appRoot)
-				const counter = queryElement(
-					`#booster-counter-${boosterName}`,
-					this.appRoot
-				)
-				const toggleGameContainerRaised =
-					this.toggleGameContainerRaised.bind(this)
-				const onClick = () => this.game?.onBoosterButtonClick(boosterName)
+		const layoutCalculator = new LayoutCalculator()
+		const layoutUI = new LayoutUI({
+			gameContainer: this.gameContainer,
+			layoutCalculator: layoutCalculator,
+		})
 
-				acc[boosterName] = new BoosterUI({
-					button: button,
-					counter: counter,
-					toggleGameContainerRaised: toggleGameContainerRaised,
-					onClick: onClick,
-				})
+		const boosterUIMap = BOOSTER_NAMES.reduce((acc, boosterName) => {
+			const button = queryElement(`#booster-${boosterName}`, this.appRoot)
+			const counter = queryElement(
+				`#booster-counter-${boosterName}`,
+				this.appRoot
+			)
+			const toggleGameContainerRaised =
+				this.toggleGameContainerRaised.bind(this)
+			const onClick = () => this.game?.onBoosterButtonClick(boosterName)
 
-				return acc
-			},
-			{} as BoosterUIMap
-		)
+			acc[boosterName] = new BoosterUI({
+				button: button,
+				counter: counter,
+				toggleGameContainerRaised: toggleGameContainerRaised,
+				onClick: onClick,
+			})
+
+			return acc
+		}, {} as BoosterUIMap)
 
 		const scoreCounter = queryElement("#points-counter-result", this.appRoot)
 		const movesCounter = queryElement("#movements-counter-text", this.appRoot)
@@ -71,6 +76,7 @@ export class GameView extends View {
 		})
 
 		this.game = gameFactory({
+			layoutUI: layoutUI,
 			boosterUIMap: boosterUIMap,
 			gameContainer: this.gameContainer,
 			progressUI: progressUI,

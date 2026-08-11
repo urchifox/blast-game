@@ -13,7 +13,7 @@ import {
 	TILE_SHUFFLE_DURATION_MS,
 } from "../animationRules"
 import { easeInOutBack } from "../../helpers/animation"
-import { LayoutSnapshot } from "../layout"
+import { LayoutSnapshot } from "../types"
 import { GridSnapshot } from "../domain/grid"
 
 export const SCENE_KEY = "blast"

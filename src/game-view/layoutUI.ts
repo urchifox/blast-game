@@ -1,22 +1,14 @@
 import { getElementInnerSize } from "../helpers/dom"
-import { GridSnapshot } from "./domain/grid"
-import { LayoutCalculator } from "./layoutCalculator"
+import { GridSnapshot } from "../game-blast/domain/grid"
+import { LayoutSnapshot, LayoutUIContract } from "../game-blast/types"
+import { LayoutCalculator } from "../game-blast/layoutCalculator"
 
 export type LayoutProps = {
 	gameContainer: HTMLElement
 	layoutCalculator: LayoutCalculator
 }
 
-export type LayoutSnapshot = {
-	readonly gridWidth: number
-	readonly gridHeight: number
-	readonly tileWidth: number
-	readonly tileHeight: number
-	readonly tileGapX: number
-	readonly tileGapY: number
-}
-
-export class Layout {
+export class LayoutUI implements LayoutUIContract {
 	private readonly gameContainer: LayoutProps["gameContainer"]
 	private readonly layoutCalculator: LayoutProps["layoutCalculator"]
 

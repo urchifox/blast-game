@@ -6,10 +6,10 @@ import { wait } from "../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./animationRules"
 import { AnimationsManager } from "../helpers/animationManager"
 import { Presenter } from "./presenter"
-import { Layout } from "./layout"
+import { LayoutUIContract } from "./types"
 
 type GamePresenterProps = {
-	layout: Layout
+	layoutUI: LayoutUIContract
 	field: Field
 	grid: Grid
 	renderer: Renderer
@@ -17,14 +17,14 @@ type GamePresenterProps = {
 }
 
 export class GamePresenter implements Presenter {
-	private readonly layout: GamePresenterProps["layout"]
+	private readonly layoutUI: GamePresenterProps["layoutUI"]
 	private readonly field: GamePresenterProps["field"]
 	private readonly grid: GamePresenterProps["grid"]
 	private readonly renderer: GamePresenterProps["renderer"]
 	private readonly animationsManager: GamePresenterProps["animationsManager"]
 
 	constructor(props: GamePresenterProps) {
-		this.layout = props.layout
+		this.layoutUI = props.layoutUI
 		this.field = props.field
 		this.grid = props.grid
 		this.renderer = props.renderer
@@ -47,12 +47,12 @@ export class GamePresenter implements Presenter {
 	}
 
 	create({ columns, rows }: { columns: number; rows: number }) {
-		this.layout.setGameContainerSize(null)
+		this.layoutUI.setGameContainerSize(null)
 		this.grid.createGrid({ columns, rows })
 		this.field.generateTiles()
 		const gridSnapshot = this.grid.getSnapshot()
-		const layoutSnapshot = this.layout.updateSizes(gridSnapshot)
-		this.layout.setGameContainerSize({
+		const layoutSnapshot = this.layoutUI.updateSizes(gridSnapshot)
+		this.layoutUI.setGameContainerSize({
 			width: layoutSnapshot.gridWidth,
 			height: layoutSnapshot.gridHeight,
 		})
@@ -65,10 +65,10 @@ export class GamePresenter implements Presenter {
 	}
 
 	updateGameSize() {
-		this.layout.setGameContainerSize(null)
+		this.layoutUI.setGameContainerSize(null)
 		const gridSnapshot = this.grid.getSnapshot()
-		const layoutSnapshot = this.layout.updateSizes(gridSnapshot)
-		this.layout.setGameContainerSize({
+		const layoutSnapshot = this.layoutUI.updateSizes(gridSnapshot)
+		this.layoutUI.setGameContainerSize({
 			width: layoutSnapshot.gridWidth,
 			height: layoutSnapshot.gridHeight,
 		})
@@ -90,7 +90,7 @@ export class GamePresenter implements Presenter {
 	selectTile(tile: Tile) {
 		this.renderer.selectTile({
 			tileSnapshot: tile.getSnapshot(),
-			layoutSnapshot: this.layout.getSnapshot(),
+			layoutSnapshot: this.layoutUI.getSnapshot(),
 		})
 	}
 
@@ -102,7 +102,7 @@ export class GamePresenter implements Presenter {
 		return this.renderer.renderTiles({
 			tilesSnapshots: [tile.getSnapshot()],
 			gridSnapshot: this.grid.getSnapshot(),
-			layoutSnapshot: this.layout.getSnapshot(),
+			layoutSnapshot: this.layoutUI.getSnapshot(),
 		})
 	}
 
@@ -140,7 +140,7 @@ export class GamePresenter implements Presenter {
 		this.field.swapTiles(tile1, tile2)
 
 		const gridSnapshot = this.grid.getSnapshot()
-		const layoutSnapshot = this.layout.getSnapshot()
+		const layoutSnapshot = this.layoutUI.getSnapshot()
 
 		const promiseSelection = this.renderer
 			.selectTile({
@@ -192,7 +192,7 @@ export class GamePresenter implements Presenter {
 		}
 
 		const gridSnapshot = this.grid.getSnapshot()
-		const layoutSnapshot = this.layout.getSnapshot()
+		const layoutSnapshot = this.layoutUI.getSnapshot()
 
 		const newTilesSnapshotsByColumns = new Map<number, Array<TileSnapshot>>()
 		for (const tile of newTiles) {
@@ -238,7 +238,7 @@ export class GamePresenter implements Presenter {
 		const shuffleFieldPromise = this.renderer.shuffleTiles({
 			tilesSnapshots: Array.from(tiles).map((tile) => tile.getSnapshot()),
 			gridSnapshot: this.grid.getSnapshot(),
-			layoutSnapshot: this.layout.getSnapshot(),
+			layoutSnapshot: this.layoutUI.getSnapshot(),
 		})
 		return this.animationsManager.animate(shuffleFieldPromise)
 	}

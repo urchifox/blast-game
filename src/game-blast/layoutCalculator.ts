@@ -1,10 +1,8 @@
-import {
-	GAP_X,
-	MAX_TILE_WIDTH,
-	TILE_RATIO,
-	GAP_Y,
-	MAX_TILE_HEIGHT,
-} from "./renderingRules"
+const GAP_X = 0
+const GAP_Y = -0.1
+const TILE_RATIO = 100 / 112
+const MAX_TILE_WIDTH = 70
+const MAX_TILE_HEIGHT = MAX_TILE_WIDTH * TILE_RATIO
 
 export class LayoutCalculator {
 	getSizes({

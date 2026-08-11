@@ -1,21 +1,21 @@
-import { Layout, LayoutSnapshot } from "../layout"
 import { GridSnapshot } from "../domain/grid"
 import { TileSnapshot } from "../domain/tile"
+import { LayoutSnapshot, LayoutUIContract } from "../types"
 
 export type OnTileClickHandler = (id: string) => void
 
 export type RendererProps = {
 	container: HTMLElement
-	layout: Layout
+	layoutUI: LayoutUIContract
 }
 
 export abstract class Renderer {
 	protected readonly container: RendererProps["container"]
-	protected readonly layout: RendererProps["layout"]
+	protected readonly layoutUI: RendererProps["layoutUI"]
 
 	constructor(props: RendererProps) {
 		this.container = props.container
-		this.layout = props.layout
+		this.layoutUI = props.layoutUI
 	}
 
 	abstract init(): Promise<void>

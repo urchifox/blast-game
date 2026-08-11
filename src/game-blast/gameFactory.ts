@@ -12,16 +12,15 @@ import { PhaserRenderer } from "./rendering/phaserRenderer"
 import { Grid } from "./domain/grid"
 import { boosterManagerFactory } from "./boosters/boosterManagerFactory"
 import { tileClickManagerFactory } from "./tile-handlers/tileClickManagerFactory"
-import { Layout } from "./layout"
-import { LayoutCalculator } from "./layoutCalculator"
 import { ActionManager } from "./actionManager"
 import { ProgressCounter } from "./domain/progressCounter"
 import { Counter } from "../helpers/counter"
 import { BoosterUIMap } from "./boosters/types"
-import { ModalUIContract, ProgressUIContract } from "./types"
+import { LayoutUIContract, ModalUIContract, ProgressUIContract } from "./types"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
+	layoutUI: LayoutUIContract
 	boosterUIMap: BoosterUIMap
 	progressUI: ProgressUIContract
 	winModalUI: ModalUIContract
@@ -31,12 +30,6 @@ export type GameFactoryProps = {
 export function gameFactory(props: GameFactoryProps) {
 	const gameRules = new GameRules()
 	const randomizationFunction = Math.random
-
-	const layoutCalculator = new LayoutCalculator()
-	const layout = new Layout({
-		gameContainer: props.gameContainer,
-		layoutCalculator: layoutCalculator,
-	})
 
 	const grid = new Grid()
 
@@ -50,11 +43,11 @@ export function gameFactory(props: GameFactoryProps) {
 	const animationsManager = new AnimationsManager()
 	const renderer = new PhaserRenderer({
 		container: props.gameContainer,
-		layout: layout,
+		layoutUI: props.layoutUI,
 	})
 
 	const presenter = new GamePresenter({
-		layout: layout,
+		layoutUI: props.layoutUI,
 		field,
 		grid,
 		renderer,

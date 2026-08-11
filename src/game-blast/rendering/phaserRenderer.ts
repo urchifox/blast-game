@@ -12,8 +12,8 @@ export class PhaserRenderer extends Renderer {
 		super(props)
 
 		const rendererScene = new PhaserScene({
-			getContainerOffset: props.layout.getGameContainerOffset.bind(
-				props.layout
+			getContainerOffset: props.layoutUI.getGameContainerOffset.bind(
+				props.layoutUI
 			),
 			getTileImage: this.getTileImage.bind(this),
 		})
