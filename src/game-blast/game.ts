@@ -7,6 +7,7 @@ import { BoosterName, GameCompletionStatus } from "./domain/types"
 import { FieldQueries } from "./domain/fieldQueries"
 import { Presenter } from "./presenter"
 import { ActResult } from "./actionManager"
+import { ModalUIContract } from "./types"
 
 export type GameProps = {
 	fieldQueries: FieldQueries
@@ -16,8 +17,8 @@ export type GameProps = {
 	tileClickManager: TileClickManager
 	boosterManager: BoosterManager
 	completionManager: CompletionManager
-	openWinModal: () => void
-	openLossModal: () => void
+	winModalUI: ModalUIContract
+	lossModalUI: ModalUIContract
 }
 
 export class Game {
@@ -28,8 +29,8 @@ export class Game {
 	private readonly tileClickManager: GameProps["tileClickManager"]
 	private readonly boosterManager: GameProps["boosterManager"]
 	private readonly completionManager: GameProps["completionManager"]
-	private readonly openWinModal: GameProps["openWinModal"]
-	private readonly openLossModal: GameProps["openLossModal"]
+	private readonly winModalUI: GameProps["winModalUI"]
+	private readonly lossModalUI: GameProps["lossModalUI"]
 
 	private levelData: LevelData = {
 		columns: 0,
@@ -46,8 +47,8 @@ export class Game {
 		this.tileClickManager = props.tileClickManager
 		this.boosterManager = props.boosterManager
 		this.completionManager = props.completionManager
-		this.openWinModal = props.openWinModal
-		this.openLossModal = props.openLossModal
+		this.winModalUI = props.winModalUI
+		this.lossModalUI = props.lossModalUI
 	}
 
 	async init() {
@@ -157,10 +158,10 @@ export class Game {
 			case GameCompletionStatus.IN_PROGRESS:
 				return
 			case GameCompletionStatus.WIN:
-				this.openWinModal()
+				this.winModalUI.open()
 				break
 			case GameCompletionStatus.LOSS:
-				this.openLossModal()
+				this.lossModalUI.open()
 				break
 			default:
 				return

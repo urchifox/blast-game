@@ -1,21 +1,21 @@
-.loss-modal {
+.modal {
 	border: none;
 	padding: 0;
 
 	background-color: transparent;
 }
 
-.loss-modal--opening,
-.loss-modal--closing {
+.modal--opening,
+.modal--closing {
 	overflow: visible;
 	pointer-events: none;
 }
 
-.loss-modal::backdrop {
+.modal::backdrop {
 	background-color: rgba(0, 0, 0, 0.3);
 }
 
-.loss-modal__wrapper {
+.modal__wrapper {
 	padding: 40px 55px 50px 55px;
 
 	display: flex;
@@ -30,11 +30,11 @@
 	border-image-repeat: stretch;
 }
 
-.loss-modal--opening .loss-modal__wrapper {
-	animation: loss-modal-appear 900ms cubic-bezier(0.22, 0.9, 0.24, 1) both;
+.modal--opening .modal__wrapper {
+	animation: modal-appear 900ms cubic-bezier(0.22, 0.9, 0.24, 1) both;
 }
 
-@keyframes loss-modal-appear {
+@keyframes modal-appear {
 	0% {
 		opacity: 0;
 		transform: scale(0.5);
@@ -49,11 +49,11 @@
 	}
 }
 
-.loss-modal--closing .loss-modal__wrapper {
-	animation: loss-modal-close 600ms cubic-bezier(0.22, 0.9, 0.24, 1) both;
+.modal--closing .modal__wrapper {
+	animation: modal-close 600ms cubic-bezier(0.22, 0.9, 0.24, 1) both;
 }
 
-@keyframes loss-modal-close {
+@keyframes modal-close {
 	0% {
 		opacity: 1;
 		transform: scale(1);
@@ -68,7 +68,7 @@
 	}
 }
 
-.loss-modal__title {
+.modal__title {
 	margin: 0;
 
 	font-size: 30px;
@@ -78,7 +78,7 @@
 	text-transform: uppercase;
 }
 
-.loss-modal__button {
+.modal__button {
 	padding: 0;
 	border: none;
 

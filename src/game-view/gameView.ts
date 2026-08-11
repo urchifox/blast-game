@@ -1,14 +1,14 @@
 import "./assets/style/game-blast-container.css"
-import "./assets/style/win-modal.css"
-import "./assets/style/loss-modal.css"
+import "./assets/style/modal.css"
 
 import { View, ViewProps } from "../view/view"
 import { Game } from "../game-blast/game"
-import { isHtmlElement, queryElement } from "../helpers/dom"
+import { queryElement } from "../helpers/dom"
 import { gameFactory } from "../game-blast/gameFactory"
 import { BoosterName } from "../game-blast/domain/types"
 import { BoosterUI } from "./boosterUI"
 import { ProgressUI } from "./progressUI"
+import { ModalUI } from "./modalUI"
 
 type GameViewProps = Omit<ViewProps, "name">
 
@@ -16,10 +16,6 @@ export class GameView extends View {
 	override readonly needLoadingScreenOnMount: boolean = true
 	private game?: Game
 	private gameContainer?: HTMLElement
-	private winModal?: HTMLDialogElement
-	private winModalWrapper?: HTMLElement
-	private lossModal?: HTMLDialogElement
-	private lossModalWrapper?: HTMLElement
 
 	private boostersElementsMap: Record<
 		BoosterName,
@@ -37,10 +33,6 @@ export class GameView extends View {
 		super.mount()
 
 		this.gameContainer = queryElement("#canvas-container")
-		this.winModal = queryElement<HTMLDialogElement>("#win-modal")
-		this.winModalWrapper = queryElement(".win-modal__wrapper", this.winModal)
-		this.lossModal = queryElement<HTMLDialogElement>("#loss-modal")
-		this.lossModalWrapper = queryElement(".loss-modal__wrapper", this.lossModal)
 
 		this.boostersElementsMap = {
 			bomb: {
@@ -79,12 +71,26 @@ export class GameView extends View {
 			movesCounter: movesCounter,
 		})
 
+		const winModal = queryElement<HTMLDialogElement>("#win-modal")
+		const winModalUI = new ModalUI({
+			modal: winModal,
+			onButtonClick: () => this.game?.startNewLevel(),
+			onBackdropClick: () => this.game?.startNewLevel(),
+		})
+
+		const lossModal = queryElement<HTMLDialogElement>("#loss-modal")
+		const lossModalUI = new ModalUI({
+			modal: lossModal,
+			onButtonClick: () => this.game?.restartLevel(),
+			onBackdropClick: () => this.game?.restartLevel(),
+		})
+
 		this.game = gameFactory({
 			boosterUI: boosterUI,
 			gameContainer: this.gameContainer,
 			progressUI: progressUI,
-			openWinModal: this.openWinModal.bind(this),
-			openLossModal: this.openLossModal.bind(this),
+			winModalUI: winModalUI,
+			lossModalUI: lossModalUI,
 		})
 
 		this.setListeners()
@@ -93,8 +99,6 @@ export class GameView extends View {
 	}
 
 	private setListeners() {
-		this.setWinModalListeners()
-		this.setLossModalListeners()
 		this.setBoostersButtonsListeners()
 		window.addEventListener("resize", this.handleWindowResize)
 	}
@@ -127,150 +131,4 @@ export class GameView extends View {
 			button.addEventListener("click", onClick)
 		}
 	}
-
-	// #region Win Modal
-
-	private setWinModalListeners() {
-		this.winModal?.addEventListener("click", this.onWinModalClick.bind(this))
-		this.winModal?.addEventListener("cancel", (event: Event) =>
-			event.preventDefault()
-		)
-		this.winModal?.addEventListener("keydown", (event: KeyboardEvent) => {
-			if (event.key === "Escape") {
-				event.preventDefault()
-			}
-		})
-	}
-
-	private async openWinModal() {
-		this.winModal?.showModal()
-		this.winModal?.classList.add("win-modal--opening")
-		await new Promise<void>((resolve) => {
-			this.winModalWrapper?.addEventListener(
-				"animationend",
-				() => {
-					this.winModal?.classList.remove("win-modal--opening")
-					resolve()
-				},
-				{ once: true }
-			)
-		})
-	}
-
-	private onWinModalClick(event: Event) {
-		event.preventDefault()
-		const target = event.target
-		if (!isHtmlElement(target)) {
-			return
-		}
-		if (target.id === "win-modal-button") {
-			this.onWinModalButtonClick()
-			return
-		}
-		if (target.closest(".win-modal__wrapper") !== null) {
-			return
-		}
-		this.onWinModalBackdropClick()
-	}
-
-	private onWinModalButtonClick() {
-		this.game?.startNewLevel()
-		this.closeWinModal()
-	}
-
-	private onWinModalBackdropClick() {
-		this.game?.startNewLevel()
-		this.closeWinModal()
-	}
-
-	private async closeWinModal() {
-		this.winModal?.classList.add("win-modal--closing")
-		await new Promise<void>((resolve) => {
-			this.winModalWrapper?.addEventListener(
-				"animationend",
-				() => {
-					this.winModal?.classList.remove("win-modal--closing")
-					resolve()
-				},
-				{ once: true }
-			)
-		})
-
-		this.winModal?.close()
-	}
-
-	// #endregion
-
-	// #region Loss Modal
-
-	private setLossModalListeners() {
-		this.lossModal?.addEventListener("click", this.onLossModalClick.bind(this))
-		this.lossModal?.addEventListener("cancel", (event: Event) =>
-			event.preventDefault()
-		)
-		this.lossModal?.addEventListener("keydown", (event: KeyboardEvent) => {
-			if (event.key === "Escape") {
-				event.preventDefault()
-			}
-		})
-	}
-
-	private async openLossModal() {
-		this.lossModal?.showModal()
-		this.lossModal?.classList.add("loss-modal--opening")
-		await new Promise<void>((resolve) => {
-			this.lossModalWrapper?.addEventListener(
-				"animationend",
-				() => {
-					this.lossModal?.classList.remove("loss-modal--opening")
-					resolve()
-				},
-				{ once: true }
-			)
-		})
-	}
-
-	private onLossModalClick(event: Event) {
-		event.preventDefault()
-		const target = event.target
-		if (!isHtmlElement(target)) {
-			return
-		}
-		if (target.id === "loss-modal-button") {
-			this.onLossModalButtonClick()
-			return
-		}
-		if (target.closest(".loss-modal__wrapper") !== null) {
-			return
-		}
-		this.onLossModalBackdropClick()
-	}
-
-	private onLossModalButtonClick() {
-		this.game?.restartLevel()
-		this.closeLossModal()
-	}
-
-	private onLossModalBackdropClick() {
-		this.game?.restartLevel()
-		this.closeLossModal()
-	}
-
-	private async closeLossModal() {
-		this.lossModal?.classList.add("loss-modal--closing")
-		await new Promise<void>((resolve) => {
-			this.lossModalWrapper?.addEventListener(
-				"animationend",
-				() => {
-					this.lossModal?.classList.remove("loss-modal--closing")
-					resolve()
-				},
-				{ once: true }
-			)
-		})
-
-		this.lossModal?.close()
-	}
-
-	// #endregion
 }

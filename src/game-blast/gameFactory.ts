@@ -3,7 +3,7 @@ import { createId } from "../helpers/random"
 import { CompletionManager } from "./domain/completionManager"
 import { Field } from "./domain/field"
 import { FieldQueries } from "./domain/fieldQueries"
-import { Game, GameProps } from "./game"
+import { Game } from "./game"
 import { GamePresenter } from "./gamePresenter"
 import { GameRules } from "./domain/gameRules"
 import { LevelGenerator } from "./domain/levelGenerator"
@@ -19,13 +19,15 @@ import { ProgressCounter } from "./domain/progressCounter"
 import { Counter } from "../helpers/counter"
 import { BoosterUIContract } from "./boosters/types"
 import { BoosterName } from "./domain/types"
-import { ProgressUIContract } from "./types"
+import { ModalUIContract, ProgressUIContract } from "./types"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
 	boosterUI: Record<BoosterName, BoosterUIContract>
 	progressUI: ProgressUIContract
-} & Pick<GameProps, "openWinModal" | "openLossModal">
+	winModalUI: ModalUIContract
+	lossModalUI: ModalUIContract
+}
 
 export function gameFactory(props: GameFactoryProps) {
 	const gameRules = new GameRules()
@@ -107,7 +109,7 @@ export function gameFactory(props: GameFactoryProps) {
 		tileClickManager,
 		boosterManager,
 		completionManager,
-		openWinModal: props.openWinModal,
-		openLossModal: props.openLossModal,
+		winModalUI: props.winModalUI,
+		lossModalUI: props.lossModalUI,
 	})
 }
