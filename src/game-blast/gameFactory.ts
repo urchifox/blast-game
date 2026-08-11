@@ -17,13 +17,12 @@ import { LayoutCalculator } from "./layoutCalculator"
 import { ActionManager } from "./actionManager"
 import { ProgressCounter } from "./domain/progressCounter"
 import { Counter } from "../helpers/counter"
-import { BoosterUIContract } from "./boosters/types"
-import { BoosterName } from "./domain/types"
+import { BoosterUIMap } from "./boosters/types"
 import { ModalUIContract, ProgressUIContract } from "./types"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
-	boosterUI: Record<BoosterName, BoosterUIContract>
+	boosterUIMap: BoosterUIMap
 	progressUI: ProgressUIContract
 	winModalUI: ModalUIContract
 	lossModalUI: ModalUIContract
@@ -74,7 +73,7 @@ export function gameFactory(props: GameFactoryProps) {
 	})
 
 	const boosterManager = boosterManagerFactory({
-		boosterUI: props.boosterUI,
+		boosterUIMap: props.boosterUIMap,
 		fieldQueries: fieldQueries,
 		actionManager: actionManager,
 		gameRules: gameRules,

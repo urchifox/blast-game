@@ -4,6 +4,7 @@ export type BoosterUIProps = {
 	button: HTMLElement
 	counter: HTMLElement
 	toggleGameContainerRaised: (isRaised: boolean) => void
+	onClick: () => void
 }
 
 export class BoosterUI implements BoosterUIContract {
@@ -15,6 +16,7 @@ export class BoosterUI implements BoosterUIContract {
 		this.button = props.button
 		this.counter = props.counter
 		this.toggleGameContainerRaised = props.toggleGameContainerRaised
+		this.button.addEventListener("click", props.onClick)
 	}
 
 	updateBoosterCounter(currentValue: number) {

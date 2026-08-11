@@ -1,4 +1,4 @@
-import { BoosterUIContract } from "./types"
+
 import { ActionManager } from "../actionManager"
 import { BoosterCounter } from "../domain/boosterCounter"
 import { BoosterUseHandler } from "../domain/boosterUseHandler"
@@ -9,16 +9,17 @@ import { BoosterName } from "../domain/types"
 import { Booster } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { BoosterManager } from "./boosterManager"
+import { BoosterUIMap } from "./types"
 
 export type BoosterManagerFactoryProps = {
-	boosterUI: Record<BoosterName, BoosterUIContract>
+	boosterUIMap: BoosterUIMap
 	gameRules: GameRules
 	fieldQueries: FieldQueries
 	actionManager: ActionManager
 }
 
 export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
-	const { gameRules, fieldQueries, actionManager, boosterUI } = props
+	const { gameRules, fieldQueries, actionManager, boosterUIMap } = props
 
 	const boosterUseHandler = new BoosterUseHandler({
 		gameRules: gameRules,
@@ -34,7 +35,7 @@ export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
 
 			const booster = new Booster({
 				boosterCounter: boosterCounter,
-				boosterUI: boosterUI[name],
+				boosterUI: boosterUIMap[name],
 			})
 
 			acc[name] = new BoosterHandler({

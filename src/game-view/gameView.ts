@@ -5,10 +5,11 @@ import { View, ViewProps } from "../view/view"
 import { Game } from "../game-blast/game"
 import { queryElement } from "../helpers/dom"
 import { gameFactory } from "../game-blast/gameFactory"
-import { BoosterName } from "../game-blast/domain/types"
 import { BoosterUI } from "./boosterUI"
 import { ProgressUI } from "./progressUI"
 import { ModalUI } from "./modalUI"
+import { BOOSTER_NAMES } from "../game-blast/domain/config"
+import { BoosterUIMap } from "../game-blast/boosters/types"
 
 type GameViewProps = Omit<ViewProps, "name">
 
@@ -17,51 +18,35 @@ export class GameView extends View {
 	private game?: Game
 	private gameContainer?: HTMLElement
 
-	private boostersElementsMap: Record<
-		BoosterName,
-		{
-			button: HTMLElement
-			counter: HTMLElement
-		}
-	> | null = null
-
 	constructor(props: GameViewProps) {
 		super({ name: "game-blast", ...props })
 	}
 
 	override async mount() {
 		super.mount()
-
 		this.gameContainer = queryElement("#canvas-container")
 
-		this.boostersElementsMap = {
-			bomb: {
-				button: queryElement("#booster-bomb"),
-				counter: queryElement("#booster-counter-bomb"),
-			},
-			teleport: {
-				button: queryElement("#booster-teleport"),
-				counter: queryElement("#booster-counter-teleport"),
-			},
-		}
+		const boosterUIMap = BOOSTER_NAMES.reduce(
+			(acc, boosterName) => {
+				const button = queryElement(`#booster-${boosterName}`, this.appRoot)
+				const counter = queryElement(
+					`#booster-counter-${boosterName}`,
+					this.appRoot
+				)
+				const toggleGameContainerRaised =
+					this.toggleGameContainerRaised.bind(this)
+				const onClick = () => this.game?.onBoosterButtonClick(boosterName)
 
-		const boosterUI = Object.entries(this.boostersElementsMap).reduce(
-			(acc, [boosterName, booster]) => {
-				if (this.gameContainer === undefined) {
-					return acc
-				}
-				acc[boosterName as BoosterName] = new BoosterUI({
-					button: booster.button,
-					counter: booster.counter,
-					toggleGameContainerRaised: (isRaised) =>
-						this.gameContainer?.classList.toggle(
-							"game-blast-container__canvas-container--raised",
-							isRaised
-						),
+				acc[boosterName] = new BoosterUI({
+					button: button,
+					counter: counter,
+					toggleGameContainerRaised: toggleGameContainerRaised,
+					onClick: onClick,
 				})
+
 				return acc
 			},
-			{} as Record<BoosterName, BoosterUI>
+			{} as BoosterUIMap
 		)
 
 		const scoreCounter = queryElement("#points-counter-result", this.appRoot)
@@ -86,7 +71,7 @@ export class GameView extends View {
 		})
 
 		this.game = gameFactory({
-			boosterUI: boosterUI,
+			boosterUIMap: boosterUIMap,
 			gameContainer: this.gameContainer,
 			progressUI: progressUI,
 			winModalUI: winModalUI,
@@ -99,7 +84,6 @@ export class GameView extends View {
 	}
 
 	private setListeners() {
-		this.setBoostersButtonsListeners()
 		window.addEventListener("resize", this.handleWindowResize)
 	}
 
@@ -114,21 +98,10 @@ export class GameView extends View {
 		this.game?.onResize()
 	}
 
-	private setBoostersButtonsListeners() {
-		if (this.boostersElementsMap === null || this.game === undefined) {
-			return
-		}
-
-		for (const [boosterName, booster] of Object.entries(
-			this.boostersElementsMap
-		)) {
-			const button = booster.button
-			const onClick = this.game.onBoosterButtonClick.bind(
-				this.game,
-				boosterName as BoosterName
-			)
-
-			button.addEventListener("click", onClick)
-		}
+	private toggleGameContainerRaised(isRaised: boolean) {
+		this.gameContainer?.classList.toggle(
+			"game-blast-container__canvas-container--raised",
+			isRaised
+		)
 	}
 }
