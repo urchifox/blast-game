@@ -7,6 +7,7 @@ import { Game } from "../game-blast/game"
 import { isHtmlElement, queryElement } from "../helpers/dom"
 import { gameFactory } from "../game-blast/gameFactory"
 import { BoosterName } from "../game-blast/domain/types"
+import { BoosterUI } from "./boosterUI"
 
 type GameViewProps = Omit<ViewProps, "name">
 
@@ -55,12 +56,30 @@ export class GameView extends View {
 			},
 		}
 
+		const boosterUI = Object.entries(this.boostersElementsMap).reduce(
+			(acc, [boosterName, booster]) => {
+				if (this.gameContainer === undefined) {
+					return acc
+				}
+				acc[boosterName as BoosterName] = new BoosterUI({
+					button: booster.button,
+					counter: booster.counter,
+					toggleGameContainerRaised: (isRaised) =>
+						this.gameContainer?.classList.toggle(
+							"game-blast-container__canvas-container--raised",
+							isRaised
+						),
+				})
+				return acc
+			},
+			{} as Record<BoosterName, BoosterUI>
+		)
+
 		this.game = gameFactory({
+			boosterUI: boosterUI,
 			gameContainer: this.gameContainer,
 			toggleGameContainerResetSizes:
 				this.toggleGameContainerResetSizes.bind(this),
-			updateBoosterCounter: this.updateBoosterCounter.bind(this),
-			toggleBoosterButtonActive: this.toggleBoosterButtonActive.bind(this),
 			updateScoreCounter: this.updateScoreCounter.bind(this),
 			updateMovesCounter: this.updateMovesCounter.bind(this),
 			openWinModal: this.openWinModal.bind(this),
@@ -120,14 +139,6 @@ export class GameView extends View {
 		this.scoreCounter.textContent = `${score}/${goalScore}`
 	}
 
-	private updateBoosterCounter(booster: BoosterName, currentValue: number) {
-		if (this.boostersElementsMap === null) {
-			return
-		}
-		const counter = this.boostersElementsMap[booster].counter
-		counter.textContent = currentValue.toString()
-	}
-
 	private setBoostersButtonsListeners() {
 		if (this.boostersElementsMap === null || this.game === undefined) {
 			return
@@ -144,22 +155,6 @@ export class GameView extends View {
 
 			button.addEventListener("click", onClick)
 		}
-	}
-
-	private toggleBoosterButtonActive(boosterName: BoosterName, active: boolean) {
-		if (this.boostersElementsMap === null) {
-			return
-		}
-		const button = this.boostersElementsMap[boosterName].button
-		button.classList.toggle("booster--active", active)
-		button.parentElement?.classList.toggle(
-			"boosters-container__item--raised",
-			active
-		)
-		this.gameContainer?.classList.toggle(
-			"game-blast-container__canvas-container--raised",
-			active
-		)
 	}
 
 	// #region Win Modal

@@ -1,3 +1,4 @@
+import { BoosterUIContract } from "./types"
 import { ActionManager } from "../actionManager"
 import { BoosterCounter } from "../domain/boosterCounter"
 import { BoosterUseHandler } from "../domain/boosterUseHandler"
@@ -10,15 +11,14 @@ import { BoosterHandler } from "./boosterHandler"
 import { BoosterManager } from "./boosterManager"
 
 export type BoosterManagerFactoryProps = {
-	updateCounter: (boosterName: BoosterName, currentValue: number) => void
-	onActivationChange: (boosterName: BoosterName, isActivated: boolean) => void
+	boosterUI: Record<BoosterName, BoosterUIContract>
 	gameRules: GameRules
 	fieldQueries: FieldQueries
 	actionManager: ActionManager
 }
 
 export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
-	const { gameRules, fieldQueries, actionManager, ...boosterProps } = props
+	const { gameRules, fieldQueries, actionManager, boosterUI } = props
 
 	const boosterUseHandler = new BoosterUseHandler({
 		gameRules: gameRules,
@@ -27,17 +27,14 @@ export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
 
 	const boostersHandlersMap = BOOSTER_NAMES.reduce(
 		(acc, name) => {
-			const updateCounter = (currentValue: number) =>
-				boosterProps.updateCounter(name, currentValue)
 			const boosterCounter = new BoosterCounter({
 				startValue: gameRules.BOOSTER_INITIAL_VALUE[name],
 				endValue: 0,
 			})
+
 			const booster = new Booster({
-				...boosterProps,
-				name: name,
 				boosterCounter: boosterCounter,
-				updateCounter: updateCounter,
+				boosterUI: boosterUI[name],
 			})
 
 			acc[name] = new BoosterHandler({

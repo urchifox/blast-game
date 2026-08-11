@@ -11,20 +11,20 @@ import { ProgressManager } from "./progressManager"
 import { PhaserRenderer } from "./rendering/phaserRenderer"
 import { Grid } from "./domain/grid"
 import { boosterManagerFactory } from "./boosters/boosterManagerFactory"
-import { BoosterName } from "./domain/types"
 import { tileClickManagerFactory } from "./tile-handlers/tileClickManagerFactory"
 import { Layout } from "./layout"
 import { LayoutCalculator } from "./layoutCalculator"
 import { ActionManager } from "./actionManager"
 import { ProgressCounter } from "./domain/progressCounter"
 import { Counter } from "../helpers/counter"
+import { BoosterUIContract } from "./boosters/types"
+import { BoosterName } from "./domain/types"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
 	toggleGameContainerResetSizes: (isResetSizes: boolean) => void
 
-	updateBoosterCounter: (booster: BoosterName, currentValue: number) => void
-	toggleBoosterButtonActive: (booster: BoosterName, active: boolean) => void
+	boosterUI: Record<BoosterName, BoosterUIContract>
 
 	updateScoreCounter: (props: { score: number; goalScore: number }) => void
 	updateMovesCounter: (props: { movesLeft: number }) => void
@@ -76,11 +76,10 @@ export function gameFactory(props: GameFactoryProps) {
 	})
 
 	const boosterManager = boosterManagerFactory({
+		boosterUI: props.boosterUI,
 		fieldQueries: fieldQueries,
 		actionManager: actionManager,
 		gameRules: gameRules,
-		updateCounter: props.updateBoosterCounter,
-		onActivationChange: props.toggleBoosterButtonActive,
 	})
 
 	const progressCounter = new ProgressCounter({

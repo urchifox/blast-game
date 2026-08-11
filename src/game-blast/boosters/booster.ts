@@ -1,31 +1,25 @@
-import { BoosterName } from "../domain/types"
 import { BoosterCounter } from "../domain/boosterCounter"
+import { BoosterUIContract } from "./types"
 
 export type BoosterCommonProps = {
-	updateCounter: (currentValue: number) => void
-	onActivationChange?: (boosterName: BoosterName, isActivated: boolean) => void
+	boosterUI: BoosterUIContract
 }
 
 export type BoosterCustomProps = {
-	name: BoosterName
 	boosterCounter: BoosterCounter
 }
 
 export type BoosterProps = BoosterCommonProps & BoosterCustomProps
 
 export class Booster {
-	private readonly name: BoosterProps["name"]
 	private readonly boosterCounter: BoosterProps["boosterCounter"]
-	private readonly onActivationChange?: BoosterProps["onActivationChange"]
-	private readonly updateCounter: BoosterProps["updateCounter"]
+	private readonly boosterUI: BoosterProps["boosterUI"]
 
 	private _isActivated = false
 
 	constructor(props: BoosterProps) {
-		this.name = props.name
 		this.boosterCounter = props.boosterCounter
-		this.onActivationChange = props.onActivationChange
-		this.updateCounter = props.updateCounter
+		this.boosterUI = props.boosterUI
 	}
 
 	reset() {
@@ -40,7 +34,7 @@ export class Booster {
 	}
 
 	private renderCounter() {
-		this.updateCounter(this.boosterCounter.getCurrentValue())
+		this.boosterUI.updateBoosterCounter(this.boosterCounter.getCurrentValue())
 	}
 
 	clear() {
@@ -64,6 +58,6 @@ export class Booster {
 			return
 		}
 		this._isActivated = flag
-		this.onActivationChange?.(this.name, flag)
+		this.boosterUI.toggleBoosterButtonActive(flag)
 	}
 }
