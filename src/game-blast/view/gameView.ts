@@ -17,7 +17,7 @@ import { ModalUI } from "./modalUI"
 import { BOOSTER_NAMES } from "../domain/config"
 import { BoosterUIMap } from "../types"
 import { LayoutUI } from "./layoutUI"
-import { LayoutCalculator } from "../flow/layoutCalculator"
+import { LayoutCalculator } from "./layoutCalculator"
 
 type GameViewProps = Omit<ViewProps, "name">
 
