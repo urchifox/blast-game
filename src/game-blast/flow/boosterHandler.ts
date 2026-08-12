@@ -1,8 +1,8 @@
 import { Booster } from "./booster"
-import { Tile } from "./domain/tile"
+import { Tile } from "../domain/tile"
 import { ActionManager, ActionName, ActResult } from "./actionManager"
-import { BoosterUseHandler } from "./domain/boosterUseHandler"
-import { BoosterName } from "./domain/types"
+import { BoosterUseHandler } from "../domain/boosterUseHandler"
+import { BoosterName } from "../domain/types"
 
 export type BoosterHandlerResult = {
 	isUsed: boolean

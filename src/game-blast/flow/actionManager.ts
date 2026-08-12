@@ -1,6 +1,6 @@
-import { Command, CommandName } from "./domain/command"
-import { Tile, TileKind, TilePosition } from "./domain/tile"
-import { PresenterContract } from "./types"
+import { Command, CommandName } from "../domain/command"
+import { Tile, TileKind, TilePosition } from "../domain/tile"
+import { PresenterContract } from "../types"
 
 export type Action<T extends ActionName = ActionName> = {
 	[K in T]: {

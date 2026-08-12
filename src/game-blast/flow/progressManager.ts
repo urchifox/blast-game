@@ -1,5 +1,5 @@
-import { ProgressCounter } from "./domain/progressCounter"
-import { ProgressUIContract } from "./types"
+import { ProgressCounter } from "../domain/progressCounter"
+import { ProgressUIContract } from "../types"
 
 export type ProgressManagerProps = {
 	progressCounter: ProgressCounter

@@ -1,15 +1,15 @@
-import { Field } from "./domain/field"
-import { Grid } from "./domain/grid"
-import { Tile, TileKind, TilePosition, TileSnapshot } from "./domain/tile"
-import { wait } from "../helpers/time"
+import { Field } from "../domain/field"
+import { Grid } from "../domain/grid"
+import { Tile, TileKind, TilePosition, TileSnapshot } from "../domain/tile"
+import { wait } from "../../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./animationRules"
-import { AnimationsManager } from "../helpers/animationManager"
+import { AnimationsManager } from "../../helpers/animationManager"
 import {
 	LayoutUIContract,
 	PresenterContract,
 	RendererContract,
 	OnTileClickCallback,
-} from "./types"
+} from "../types"
 
 type PresenterProps = {
 	layoutUI: LayoutUIContract

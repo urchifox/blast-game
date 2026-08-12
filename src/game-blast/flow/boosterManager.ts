@@ -1,6 +1,6 @@
-import { Tile } from "./domain/tile"
+import { Tile } from "../domain/tile"
 import { BoosterHandler, BoosterHandlerResult } from "./boosterHandler"
-import { BoosterName } from "./domain/types"
+import { BoosterName } from "../domain/types"
 
 export type BoosterManagerProps = {
 	boostersHandlersMap: Record<BoosterName, BoosterHandler>

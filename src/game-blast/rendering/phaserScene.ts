@@ -11,7 +11,7 @@ import {
 	MIN_TILE_FALL_DURATION_MS,
 	TILE_FALL_SPEED,
 	TILE_SHUFFLE_DURATION_MS,
-} from "../animationRules"
+} from "../flow/animationRules"
 import { easeInOutBack } from "../../helpers/animation"
 import { GridSnapshot } from "../domain/grid"
 import { RendererParams } from "./phaserRenderer"

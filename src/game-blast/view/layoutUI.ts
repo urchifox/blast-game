@@ -1,7 +1,7 @@
 import { getElementInnerSize } from "../../helpers/dom"
 import { GridSnapshot } from "../domain/grid"
 import { LayoutSnapshot, LayoutUIContract } from "../types"
-import { LayoutCalculator } from "../layoutCalculator"
+import { LayoutCalculator } from "../flow/layoutCalculator"
 
 export type LayoutProps = {
 	gameContainer: HTMLElement

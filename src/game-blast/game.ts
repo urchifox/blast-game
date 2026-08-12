@@ -1,12 +1,12 @@
-import { TileClickManager } from "./tileClickManager"
-import { BoosterManager } from "./boosterManager"
+import { TileClickManager } from "./flow/tileClickManager"
+import { BoosterManager } from "./flow/boosterManager"
 import { CompletionManager } from "./domain/completionManager"
-import { ProgressManager } from "./progressManager"
+import { ProgressManager } from "./flow/progressManager"
 import { LevelData, LevelGenerator } from "./domain/levelGenerator"
 import { BoosterName, GameCompletionStatus } from "./domain/types"
 import { FieldQueries } from "./domain/fieldQueries"
 import { PresenterContract, ModalUIContract } from "./types"
-import { ActResult } from "./actionManager"
+import { ActResult } from "./flow/actionManager"
 
 export type GameProps = {
 	fieldQueries: FieldQueries
