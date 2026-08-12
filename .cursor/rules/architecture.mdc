@@ -1,0 +1,59 @@
+---
+globs: ["src/**/*.ts"]
+alwaysApply: false
+---
+# Architecture Rules
+
+## Clean Architecture
+
+- Follow Clean Architecture principles.
+- Dependencies must point toward the domain layer or the framework-independent shared kernel.
+- Business logic must not depend on rendering, UI, browser APIs, DOM, Phaser or any infrastructure library.
+- Infrastructure communicates with the domain only through abstractions.
+- External integrations must be implemented as adapters.
+
+## Shared Kernel
+
+- `src/helpers/` contains project-wide reusable utilities.
+- Domain code may import only framework-independent, side-effect-free helpers, such as collection, randomization, and generic type utilities.
+- Shared-kernel helpers must not depend on feature, application, presentation, rendering, or infrastructure modules.
+
+## Domain
+
+- Business logic belongs only to the domain layer.
+- Domain classes must remain framework-independent.
+- Domain classes must not access browser APIs directly.
+- Domain classes must not manipulate the DOM.
+- Domain classes must not perform rendering.
+- Domain classes must not access localStorage, sessionStorage or network APIs directly.
+
+## Rendering
+
+- Rendering must be completely separated from business logic.
+- Business logic communicates with rendering only through interfaces.
+- Rendering implementation must be replaceable with another renderer or a mock implementation without modifying domain code.
+
+## Dependency Injection
+
+- Dependencies must be injected.
+- Do not instantiate infrastructure dependencies inside business classes.
+- Depend on abstractions instead of concrete implementations.
+
+## SOLID
+
+- Follow all SOLID principles.
+- Prefer extension over modification.
+- Keep every class focused on a single responsibility.
+- New functionality should be implemented by extending the architecture instead of modifying unrelated classes.
+
+## DRY
+
+- Avoid duplicated business logic.
+- Extract reusable behavior instead of copying implementations.
+
+## OOP
+
+- Prefer object-oriented design.
+- Encapsulate behavior together with state.
+- Avoid procedural orchestration of domain logic.
+- Objects should collaborate through well-defined responsibilities.

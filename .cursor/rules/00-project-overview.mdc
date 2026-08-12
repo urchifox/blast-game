@@ -1,0 +1,16 @@
+---
+description: General rules for Cursor when working with this project.
+alwaysApply: true
+---
+
+# Project Rules
+
+## Core Rules
+
+- Follow all project rules before generating or modifying code.
+- If project rules conflict, architecture rules have the highest priority.
+- Do not introduce new libraries, frameworks, build tools, state managers or project dependencies unless explicitly requested by the user.
+- Do not replace existing architectural patterns with alternative approaches unless explicitly requested.
+- Preserve backward compatibility unless the user explicitly requests breaking changes.
+- When architecture changes (new modules, layers, services, public APIs, project structure or interaction flow), update the project README accordingly.
+- When requirements are ambiguous, prefer consistency with existing project architecture over introducing a new approach.

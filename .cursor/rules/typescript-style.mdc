@@ -1,0 +1,40 @@
+---
+description: "TypeScript and code style conventions"
+globs: ["src/**/*.ts"]
+alwaysApply: false
+---
+
+# TypeScript Style Rules
+
+## Conditions
+
+- Always use explicit comparisons in "if" blocks and ternary operator.
+- Prefer `value !== null` over `!value`.
+- Prefer `value === undefined` over falsy checks when checking for undefined.
+- Avoid implicit truthiness checks unless the value is explicitly boolean.
+
+## Code Style
+
+- Write clear, predictable and strongly typed TypeScript.
+- Prefer explicit intent over shorter syntax.
+- Keep public APIs strongly typed.
+- Avoid `any` unless explicitly requested by the user.
+
+## Type strictness
+- `strict`, `noUnusedLocals`, and `noImplicitOverride` are enabled — never
+  weaken these in `tsconfig.json` to make code compile.
+- Avoid `any`. If a third-party type is genuinely unknown, use `unknown` and
+  narrow it, or add a short comment explaining why `any` is unavoidable in
+  that specific spot.
+
+## Naming
+- Classes/types: PascalCase. Functions/variables: camelCase. File names
+  follow the existing casing already used in each directory (do not introduce
+  a new casing convention in a directory that has an established one).
+- Boolean-returning functions/methods read as a predicate:
+  `isPossibleToMakeMove`, `isPossibleToMakeMove()` — not `checkMove` or
+  `moveStatus`.
+
+## CSS / DOM (outside the canvas)
+- Prefer CSS custom properties for values that scale with layout (already the
+  pattern for field/tile sizing) over hardcoded pixel values in TS.

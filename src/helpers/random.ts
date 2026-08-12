@@ -1,18 +1,27 @@
+import { nanoid } from "nanoid"
+
+export type RandomizationFunction = () => number
+export type IdGenerator = () => string
+
 export function pickRandomItem<Item>(
-	array: Array<Item> | Readonly<Array<Item>>
+	array: Array<Item> | ReadonlyArray<Item>,
+	randomizationFunction: RandomizationFunction = Math.random
 ): Item {
-	return array[Math.floor(Math.random() * array.length)]
+	return array[Math.floor(randomizationFunction() * array.length)]
 }
 
-export function getRandomNumber({
-	min,
-	max,
-	step = 1,
-}: {
-	min: number
-	max: number
-	step?: number
-}): number {
+export function getRandomNumber(
+	{
+		min,
+		max,
+		step = 1,
+	}: {
+		min: number
+		max: number
+		step?: number
+	},
+	randomizationFunction: RandomizationFunction = Math.random
+): number {
 	if (step <= 0) {
 		throw new Error("Step must be greater than 0")
 	}
@@ -22,5 +31,9 @@ export function getRandomNumber({
 	}
 
 	const stepsCount = Math.floor((max - min) / step)
-	return min + Math.floor(Math.random() * (stepsCount + 1)) * step
+	return min + Math.floor(randomizationFunction() * (stepsCount + 1)) * step
+}
+
+export function createId(): string {
+	return nanoid()
 }

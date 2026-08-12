@@ -1,0 +1,41 @@
+.boosters-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 13px;
+}
+
+.boosters-container__title {
+	margin: 0;
+	font-size: 30px;
+	text-transform: uppercase;
+	text-align: center;
+	line-height: 100%;
+}
+
+.boosters-container__list {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 24px;
+
+	list-style: none;
+}
+
+.boosters-container__item {
+	flex-shrink: 1;
+	flex-basis: 90px;
+	transition: z-index 0s 0.3s ease allow-discrete;
+}
+.boosters-container__item--raised {
+	z-index: 1;
+	transition: z-index 0s 0s ease allow-discrete;
+}
+
+.boosters-container__booster {
+	width: calc(100% + 13px * 2);
+}

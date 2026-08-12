@@ -1,0 +1,57 @@
+.game-blast-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 19px;
+
+	background-image: url("./../img/background.png");
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.game-blast-container__content {
+	padding-top: 14px;
+	padding-bottom: 22px;
+	height: 100%;
+
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	grid-template-columns: 1fr;
+	justify-items: center;
+	gap: 15px;
+
+	overflow: hidden;
+}
+
+.game-blast-container__progress-block {
+	z-index: 1;
+	min-width: min(323px, 100%);
+}
+
+.game-blast-container__canvas-container {
+	z-index: 0;
+	align-self: center;
+	justify-self: center;
+
+	width: var(--field-width, 1px);
+	height: var(--field-height, 1px);
+	box-sizing: content-box;
+	transition: z-index 0s 0.3s ease allow-discrete;
+}
+.game-blast-container__canvas-container--raised {
+	transition: z-index 0s 0s ease allow-discrete;
+	z-index: 2;
+}
+.game-blast-container__canvas-container--fullsize {
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	box-sizing: border-box;
+}
+
+.game-blast-container__boosters-container {
+	z-index: 1;
+	width: 100%;
+}

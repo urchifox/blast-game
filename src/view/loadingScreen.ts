@@ -1,9 +1,15 @@
-import "./../assets/style/loading-screen.css"
+import "./assets/style/loading-screen.css"
 
-import { queryElement } from "../helpers/dom"
+type LoadingScreenProps = {
+	root: HTMLElement
+}
 
-class LoadingScreen {
-	private readonly loadingScreen: HTMLElement = queryElement("#loading-screen")
+export class LoadingScreen {
+	private readonly loadingScreen: HTMLElement
+
+	constructor(props: LoadingScreenProps) {
+		this.loadingScreen = props.root
+	}
 
 	show() {
 		this.toggleVisibility(true)
@@ -14,8 +20,6 @@ class LoadingScreen {
 	}
 
 	private toggleVisibility(visible: boolean) {
-		this.loadingScreen.classList.toggle("hidden", !visible)
+		this.loadingScreen.classList.toggle("loading-screen--hidden", !visible)
 	}
 }
-
-export const loadingScreen = new LoadingScreen()

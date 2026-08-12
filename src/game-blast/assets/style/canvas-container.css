@@ -1,0 +1,21 @@
+.canvas-container {
+	padding: 22px 18px 18px 18px;
+	width: 100%;
+	height: 100%;
+
+	border-image-source: url("../img/canvas-container-bg.png");
+	border-image-slice: 94 88 94 88 fill;
+	border-image-width: 35px 33px 35px 33px;
+	border-image-repeat: stretch;
+}
+
+.canvas-container__canvas {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+.canvas-container__canvas--fullsize {
+	display: none;
+}

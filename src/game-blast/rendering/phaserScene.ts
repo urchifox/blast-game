@@ -1,8 +1,7 @@
 import Phaser from "phaser"
 
-import { GridSnapshot } from "../grid"
-import { OnTileClickHandler, RendererParams } from "./renderer"
-import { TileSnapshot } from "../tile"
+import { OnTileClickCallback, LayoutSnapshot } from "../types"
+import { TileSnapshot } from "../domain/tile"
 import { wait } from "../../helpers/time"
 import {
 	TILE_APPEAR_DURATION_MS,
@@ -12,8 +11,10 @@ import {
 	MIN_TILE_FALL_DURATION_MS,
 	TILE_FALL_SPEED,
 	TILE_SHUFFLE_DURATION_MS,
-} from "../config"
+} from "../flow/animationRules"
 import { easeInOutBack } from "../../helpers/animation"
+import { GridSnapshot } from "../domain/grid"
+import { RendererParams } from "./phaserRenderer"
 
 export const SCENE_KEY = "blast"
 const tileTextureModules = import.meta.glob("../assets/img/*.png", {
@@ -23,10 +24,12 @@ const tileTextureModules = import.meta.glob("../assets/img/*.png", {
 
 export type PhaserSceneProps = {
 	getContainerOffset: () => { offsetX: number; offsetY: number }
+	getTileImage: (tileSnapshot: TileSnapshot) => string
 }
 
 export class PhaserScene extends Phaser.Scene {
 	private readonly getContainerOffset: PhaserSceneProps["getContainerOffset"]
+	private readonly getTileImage: PhaserSceneProps["getTileImage"]
 
 	private readonly tilesMap = new Map<string, Phaser.GameObjects.Sprite>()
 	private readonly scaleTweens = new Map<
@@ -39,7 +42,7 @@ export class PhaserScene extends Phaser.Scene {
 	>()
 	private isReady = false
 	private onReadyCallbacks: Array<() => void> = []
-	private onTileClick: OnTileClickHandler | null = null
+	private onTileClick: OnTileClickCallback | null = null
 
 	private offsetX = 0
 	private offsetY = 0
@@ -47,6 +50,7 @@ export class PhaserScene extends Phaser.Scene {
 	constructor(props: PhaserSceneProps) {
 		super(SCENE_KEY)
 		this.getContainerOffset = props.getContainerOffset
+		this.getTileImage = props.getTileImage
 	}
 
 	// #region Initialization
@@ -54,7 +58,7 @@ export class PhaserScene extends Phaser.Scene {
 	preload() {
 		Object.entries(tileTextureModules).forEach(([modulePath, textureUrl]) => {
 			const fileName = modulePath.split("/").pop()
-			if (!fileName) {
+			if (fileName === undefined) {
 				return
 			}
 
@@ -86,23 +90,28 @@ export class PhaserScene extends Phaser.Scene {
 
 	// #region Resizing
 
-	resize({ tilesSnapshots, gridSnapshot }: RendererParams<"resize">) {
+	resize({
+		tilesSnapshots,
+		gridSnapshot,
+		layoutSnapshot,
+	}: RendererParams<"resize">) {
 		for (const tileSnapshot of tilesSnapshots) {
 			const tileSprite = this.tilesMap.get(tileSnapshot.id)
 			if (tileSprite === undefined) {
 				continue
 			}
-			this.updateTile(tileSnapshot, tileSprite, gridSnapshot)
+			this.updateTile(tileSnapshot, tileSprite, gridSnapshot, layoutSnapshot)
 		}
 	}
 
 	private updateTile(
 		tileSnapshot: TileSnapshot,
 		tileSprite: Phaser.GameObjects.Sprite,
-		gridSnapshot: GridSnapshot
+		gridSnapshot: GridSnapshot,
+		layoutSnapshot: LayoutSnapshot
 	) {
 		const { x, y, zIndex, tileWidth, tileHeight } =
-			this.getTileVisualProperties(tileSnapshot, gridSnapshot)
+			this.getTileVisualProperties(tileSnapshot, gridSnapshot, layoutSnapshot)
 		tileSprite.setPosition(x, y)
 		tileSprite.setDepth(zIndex)
 		tileSprite.setDisplaySize(tileWidth, tileHeight)
@@ -115,11 +124,12 @@ export class PhaserScene extends Phaser.Scene {
 	async renderTiles({
 		tilesSnapshots,
 		gridSnapshot,
+		layoutSnapshot,
 		isAppearOnDefaultPosition,
 	}: RendererParams<"renderTiles">) {
 		let pauseDuration = 0
-		if (isAppearOnDefaultPosition) {
-			const tileHeight = gridSnapshot.tileHeight
+		if (isAppearOnDefaultPosition === true) {
+			const tileHeight = layoutSnapshot.tileHeight
 			const fallingDuration = this.getFallingDuration({
 				distance: tileHeight,
 				tileHeight: tileHeight,
@@ -131,6 +141,7 @@ export class PhaserScene extends Phaser.Scene {
 			await this.renderTile({
 				tileSnapshot: tile,
 				gridSnapshot,
+				layoutSnapshot,
 				isAppearOnDefaultPosition,
 				pauseDuration: index * pauseDuration,
 			})
@@ -142,11 +153,13 @@ export class PhaserScene extends Phaser.Scene {
 	private async renderTile({
 		tileSnapshot,
 		gridSnapshot,
+		layoutSnapshot,
 		isAppearOnDefaultPosition,
 		pauseDuration,
 	}: {
 		tileSnapshot: TileSnapshot
 		gridSnapshot: GridSnapshot
+		layoutSnapshot: LayoutSnapshot
 		isAppearOnDefaultPosition?: boolean
 		pauseDuration?: number
 	}) {
@@ -154,6 +167,7 @@ export class PhaserScene extends Phaser.Scene {
 			this.getTileVisualProperties(
 				tileSnapshot,
 				gridSnapshot,
+				layoutSnapshot,
 				isAppearOnDefaultPosition
 			)
 
@@ -167,25 +181,29 @@ export class PhaserScene extends Phaser.Scene {
 		this.tilesMap.set(id, tileSprite)
 		tileSprite.on("pointerdown", () => this.onTileClick?.(id))
 
-		await this.animateAppear({ tileSprite, gridSnapshot, pauseDuration })
-		if (isAppearOnDefaultPosition) {
-			await this.animateFallingToCurrentPosition(tileSnapshot, gridSnapshot)
+		await this.animateAppear({ tileSprite, layoutSnapshot, pauseDuration })
+		if (isAppearOnDefaultPosition === true) {
+			await this.animateFallingToCurrentPosition(
+				tileSnapshot,
+				gridSnapshot,
+				layoutSnapshot
+			)
 		}
 	}
 
 	private async animateAppear({
 		tileSprite,
-		gridSnapshot,
+		layoutSnapshot,
 		pauseDuration,
 	}: {
 		tileSprite: Phaser.GameObjects.Sprite
-		gridSnapshot: GridSnapshot
+		layoutSnapshot: LayoutSnapshot
 		pauseDuration?: number
 	}) {
 		tileSprite.disableInteractive()
 		const { scaleX, scaleY } = this.getInitialTileScale(
 			tileSprite,
-			gridSnapshot
+			layoutSnapshot
 		)
 		tileSprite.setScale(0)
 		tileSprite.setAlpha(0)
@@ -222,9 +240,14 @@ export class PhaserScene extends Phaser.Scene {
 	async fallTilesToCurrentPositions({
 		tilesSnapshots,
 		gridSnapshot,
+		layoutSnapshot,
 	}: RendererParams<"fallTilesToCurrentPositions">) {
 		const moveTasks = tilesSnapshots.map((tileSnapshot) =>
-			this.animateFallingToCurrentPosition(tileSnapshot, gridSnapshot)
+			this.animateFallingToCurrentPosition(
+				tileSnapshot,
+				gridSnapshot,
+				layoutSnapshot
+			)
 		)
 
 		await Promise.all(moveTasks)
@@ -232,7 +255,8 @@ export class PhaserScene extends Phaser.Scene {
 
 	private async animateFallingToCurrentPosition(
 		tileSnapshot: TileSnapshot,
-		gridSnapshot: GridSnapshot
+		gridSnapshot: GridSnapshot,
+		layoutSnapshot: LayoutSnapshot
 	) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
 		if (tileSprite === undefined) {
@@ -241,7 +265,8 @@ export class PhaserScene extends Phaser.Scene {
 
 		const { x, y, zIndex, tileHeight } = this.getTileVisualProperties(
 			tileSnapshot,
-			gridSnapshot
+			gridSnapshot,
+			layoutSnapshot
 		)
 
 		/* Prevent false moving upwards */
@@ -310,9 +335,10 @@ export class PhaserScene extends Phaser.Scene {
 	async swapTiles({
 		tilesSnapshots,
 		gridSnapshot,
+		layoutSnapshot,
 	}: RendererParams<"swapTiles">) {
 		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
-			this.animateShuffling(tileSnapshot, gridSnapshot)
+			this.animateShuffling(tileSnapshot, gridSnapshot, layoutSnapshot)
 		)
 		await Promise.all(shuffleTasks)
 	}
@@ -353,19 +379,21 @@ export class PhaserScene extends Phaser.Scene {
 	async shuffleTiles({
 		tilesSnapshots,
 		gridSnapshot,
+		layoutSnapshot,
 	}: RendererParams<"shuffleTiles">) {
 		const shuffleTasks = tilesSnapshots.map((tileSnapshot) =>
-			this.animateShuffling(tileSnapshot, gridSnapshot)
+			this.animateShuffling(tileSnapshot, gridSnapshot, layoutSnapshot)
 		)
 		await Promise.all(shuffleTasks)
 	}
 
 	private async animateShuffling(
 		tileSnapshot: TileSnapshot,
-		gridSnapshot: GridSnapshot
+		gridSnapshot: GridSnapshot,
+		layoutSnapshot: LayoutSnapshot
 	) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
-		if (!tileSprite) {
+		if (tileSprite === undefined) {
 			return
 		}
 
@@ -377,12 +405,13 @@ export class PhaserScene extends Phaser.Scene {
 		tileSprite.setDepth(Infinity)
 		const { x, y, zIndex } = this.getTileVisualProperties(
 			tileSnapshot,
-			gridSnapshot
+			gridSnapshot,
+			layoutSnapshot
 		)
 
 		const { scaleX, scaleY } = this.getInitialTileScale(
 			tileSprite,
-			gridSnapshot
+			layoutSnapshot
 		)
 		const scale = 1.05
 
@@ -436,16 +465,16 @@ export class PhaserScene extends Phaser.Scene {
 
 	async selectTile({
 		tileSnapshot,
-		gridSnapshot,
+		layoutSnapshot,
 	}: RendererParams<"selectTile">) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
-		if (!tileSprite) {
+		if (tileSprite === undefined) {
 			return
 		}
 		tileSprite.setDepth(Infinity)
 		const { scaleX, scaleY } = this.getInitialTileScale(
 			tileSprite,
-			gridSnapshot
+			layoutSnapshot
 		)
 
 		const scale = 1.1
@@ -467,22 +496,24 @@ export class PhaserScene extends Phaser.Scene {
 	async unselectTile({
 		tileSnapshot,
 		gridSnapshot,
+		layoutSnapshot,
 	}: RendererParams<"unselectTile">) {
 		const tileSprite = this.tilesMap.get(tileSnapshot.id)
-		if (!tileSprite) {
+		if (tileSprite === undefined) {
 			return
 		}
 
 		const { scaleX, scaleY } = this.getInitialTileScale(
 			tileSprite,
-			gridSnapshot
+			layoutSnapshot
 		)
 
 		await new Promise<void>((resolve) => {
 			const onEnd = () => {
 				const { zIndex } = this.getTileVisualProperties(
 					tileSnapshot,
-					gridSnapshot
+					gridSnapshot,
+					layoutSnapshot
 				)
 				tileSprite.setDepth(zIndex)
 				tileSprite.setInteractive({ useHandCursor: true })
@@ -513,16 +544,19 @@ export class PhaserScene extends Phaser.Scene {
 	private getTileVisualProperties(
 		tileSnapshot: TileSnapshot,
 		gridSnapshot: GridSnapshot,
+		layoutSnapshot: LayoutSnapshot,
 		isAppearOnDefaultPosition?: boolean
 	) {
-		const { column, row, image } = tileSnapshot
-		const { tileWidth, tileHeight, tileGapX, tileGapY, rows } = gridSnapshot
+		const { column, row } = tileSnapshot
+		const { rows } = gridSnapshot
+		const { tileWidth, tileHeight, tileGapX, tileGapY } = layoutSnapshot
 		const x = column * (tileWidth + tileGapX) + tileWidth / 2 + this.offsetX
-		const y = isAppearOnDefaultPosition
-			? this.offsetY + tileHeight / 2
-			: row * (tileHeight + tileGapY) + tileHeight / 2 + this.offsetY
+		const y =
+			isAppearOnDefaultPosition === true
+				? this.offsetY + tileHeight / 2
+				: row * (tileHeight + tileGapY) + tileHeight / 2 + this.offsetY
 		const zIndex = rows - row
-		const imageKey = image
+		const imageKey = this.getTileImage(tileSnapshot)
 
 		return { x, y, zIndex, tileWidth, tileHeight, imageKey }
 	}
@@ -542,9 +576,9 @@ export class PhaserScene extends Phaser.Scene {
 
 	getInitialTileScale(
 		tileSprite: Phaser.GameObjects.Sprite,
-		gridSnapshot: GridSnapshot
+		layoutSnapshot: LayoutSnapshot
 	) {
-		const { tileWidth, tileHeight } = gridSnapshot
+		const { tileWidth, tileHeight } = layoutSnapshot
 		const frameWidth = tileSprite.frame.width
 		const frameHeight = tileSprite.frame.height
 		const scaleX = tileWidth / frameWidth

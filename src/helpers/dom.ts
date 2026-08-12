@@ -46,11 +46,11 @@ export function getElementInnerSize(props: {
 
 	const style = window.getComputedStyle(element)
 	const bordersInlineSum =
-		parseFloat(style.borderLeftWidth || "0") +
-		parseFloat(style.borderRightWidth || "0")
+		parseFloat(style.borderLeftWidth ?? "0") +
+		parseFloat(style.borderRightWidth ?? "0")
 	const bordersBlockSum =
-		parseFloat(style.borderTopWidth || "0") +
-		parseFloat(style.borderBottomWidth || "0")
+		parseFloat(style.borderTopWidth ?? "0") +
+		parseFloat(style.borderBottomWidth ?? "0")
 
 	size.width = Math.floor(size.width - bordersInlineSum)
 	size.height = Math.floor(size.height - bordersBlockSum)
@@ -60,9 +60,9 @@ export function getElementInnerSize(props: {
 	}
 
 	const paddingInlineSum =
-		parseFloat(style.paddingLeft || "0") + parseFloat(style.paddingRight || "0")
+		parseFloat(style.paddingLeft ?? "0") + parseFloat(style.paddingRight ?? "0")
 	const paddingBlockSum =
-		parseFloat(style.paddingTop || "0") + parseFloat(style.paddingBottom || "0")
+		parseFloat(style.paddingTop ?? "0") + parseFloat(style.paddingBottom ?? "0")
 
 	size.width = Math.floor(size.width - paddingInlineSum)
 	size.height = Math.floor(size.height - paddingBlockSum)
