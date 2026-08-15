@@ -1,5 +1,5 @@
 import { Field } from "./field"
-import { Tile, TilePosition } from "./tile"
+import { Tile, TilePosition, TileSnapshot } from "./tile"
 import { Grid } from "./grid"
 import { TilesCollector } from "./tilesCollector"
 
@@ -17,28 +17,76 @@ export class FieldQueries {
 		this.grid = props.grid
 	}
 
-	getPositions() {
-		return this.field.getPositions()
-	}
-
-	getTiles() {
+	getTiles(): Array<Tile> {
 		return this.field.getTiles()
 	}
 
-	getTilesInRadius(position: TilePosition, radius: number) {
-		return this.field.getTilesInRadius(position, radius)
+	getPositions(tiles?: Array<Tile>): Array<TilePosition> {
+		return this.field.getPositions(tiles)
 	}
 
-	getTilesInRow(row: number) {
-		return this.field.getTilesInRow(row)
+	getTilesSnapshots(): Array<TileSnapshot> {
+		return this.getTiles().map((tile) => tile.getSnapshot())
 	}
 
-	getTilesInColumn(column: number) {
-		return this.field.getTilesInColumn(column)
+	getTileByPosition({ column, row }: TilePosition) {
+		return this.getTiles().find(
+			(tile) =>
+				tile.getPosition().column === column && tile.getPosition().row === row
+		)
 	}
 
 	getTileById(id: string) {
-		return this.field.getTileById(id)
+		return this.getTiles().find((tile) => tile?.getId() === id)
+	}
+
+	getTilesInRadius(position: TilePosition, radius: number) {
+		const { columns, rows } = this.grid.getSnapshot()
+		const { column: centerColumn, row: centerRow } = position
+		const minColumn = Math.max(0, centerColumn - radius)
+		const maxColumn = Math.min(columns - 1, centerColumn + radius)
+		const minRow = Math.max(0, centerRow - radius)
+		const maxRow = Math.min(rows - 1, centerRow + radius)
+
+		const collector = new TilesCollector()
+
+		for (let column = minColumn; column <= maxColumn; column++) {
+			for (let row = minRow; row <= maxRow; row++) {
+				const tile = this.getTileByPosition({ column, row })
+				if (tile === undefined) {
+					continue
+				}
+				collector.collect(tile)
+			}
+		}
+
+		return collector.getCollection()
+	}
+
+	getTilesInRow(row: number) {
+		const collector = new TilesCollector()
+
+		for (const tile of this.getTiles()) {
+			if (tile === undefined || tile.getPosition().row !== row) {
+				continue
+			}
+			collector.collect(tile)
+		}
+
+		return collector.getCollection()
+	}
+
+	getTilesInColumn(column: number) {
+		const collector = new TilesCollector()
+
+		for (const tile of this.getTiles()) {
+			if (tile === undefined || tile.getPosition().column !== column) {
+				continue
+			}
+			collector.collect(tile)
+		}
+
+		return collector.getCollection()
 	}
 
 	getSameKindNeighbourTiles(tile: Tile) {
@@ -56,7 +104,7 @@ export class FieldQueries {
 					continue
 				}
 
-				const neighborTile = this.field.getTile(neighborPosition)
+				const neighborTile = this.getTileByPosition(neighborPosition)
 				if (
 					neighborTile !== undefined &&
 					neighborTile.getKind() === kind &&

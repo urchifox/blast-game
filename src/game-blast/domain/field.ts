@@ -6,30 +6,39 @@ import {
 } from "../../helpers/random"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
-import { Tile, TileKind, TilePosition, TileSnapshot } from "./tile"
-import { TilesCollector } from "./tilesCollector"
+import { Tile, TileKind, TilePosition } from "./tile"
 
 export type FieldProps = {
-	getFieldSnapshot: () => GridSnapshot
+	getGridSnapshot: () => GridSnapshot
 	randomizationFunction: RandomizationFunction
 	createId: IdGenerator
 }
 
 export class Field {
-	private readonly getFieldSnapshot: FieldProps["getFieldSnapshot"]
+	private readonly getGridSnapshot: FieldProps["getGridSnapshot"]
 	private readonly randomizationFunction: FieldProps["randomizationFunction"]
 	private readonly createId: FieldProps["createId"]
 
 	private tilesByColumns: Array<Array<Tile | undefined>> = []
 
 	constructor(props: FieldProps) {
-		this.getFieldSnapshot = props.getFieldSnapshot
+		this.getGridSnapshot = props.getGridSnapshot
 		this.randomizationFunction = props.randomizationFunction
 		this.createId = props.createId
 	}
 
+	getTiles(): Array<Tile> {
+		return this.tilesByColumns
+			.flat()
+			.filter((tile) => tile !== undefined)
+	}
+
+	getPositions(tiles?: Array<Tile>): Array<TilePosition> {
+		return (tiles ?? this.getTiles()).map((tile) => tile.getPosition())
+	}
+
 	generateTiles() {
-		const { columns, rows } = this.getFieldSnapshot()
+		const { columns, rows } = this.getGridSnapshot()
 
 		for (let column = 0; column < columns; column++) {
 			this.tilesByColumns[column] = []
@@ -45,28 +54,8 @@ export class Field {
 		}
 	}
 
-	getTiles(): Array<Tile> {
-		return this.tilesByColumns.flat().filter((tile) => tile !== undefined)
-	}
-
-	getPositions(tiles?: Array<Tile>): Array<TilePosition> {
-		return (tiles ?? this.getTiles()).map((tile) => tile.getPosition())
-	}
-
-	getTilesSnapshots(): Array<TileSnapshot> {
-		return this.getTiles().map((tile) => tile.getSnapshot())
-	}
-
-	getTileById(id: string) {
-		return this.getTiles().find((tile) => tile?.getId() === id)
-	}
-
 	clearTiles() {
 		this.tilesByColumns = []
-	}
-
-	getTile(position: TilePosition) {
-		return this.tilesByColumns[position.column][position.row]
 	}
 
 	removeTile(position: TilePosition) {
@@ -79,7 +68,7 @@ export class Field {
 			columnsWithRemovedTiles.add(position.column)
 		}
 
-		const { rows } = this.getFieldSnapshot()
+		const { rows } = this.getGridSnapshot()
 
 		const movedTiles = new Set<Tile>()
 		const newTiles = new Set<Tile>()
@@ -144,57 +133,6 @@ export class Field {
 		this.placeTile(tile2)
 	}
 
-	getTilesInColumn(column: number) {
-		const tilesInColumn = this.tilesByColumns[column]
-
-		const collector = new TilesCollector()
-
-		for (const tile of tilesInColumn) {
-			if (tile === undefined) {
-				continue
-			}
-			collector.collect(tile)
-		}
-
-		return collector.getCollection()
-	}
-
-	getTilesInRow(row: number) {
-		const collector = new TilesCollector()
-
-		for (const tile of this.getTiles()) {
-			if (tile === undefined || tile.getPosition().row !== row) {
-				continue
-			}
-			collector.collect(tile)
-		}
-
-		return collector.getCollection()
-	}
-
-	getTilesInRadius(position: TilePosition, radius: number) {
-		const { columns, rows } = this.getFieldSnapshot()
-		const { column: centerColumn, row: centerRow } = position
-		const minColumn = Math.max(0, centerColumn - radius)
-		const maxColumn = Math.min(columns - 1, centerColumn + radius)
-		const minRow = Math.max(0, centerRow - radius)
-		const maxRow = Math.min(rows - 1, centerRow + radius)
-
-		const collector = new TilesCollector()
-
-		for (let column = minColumn; column <= maxColumn; column++) {
-			for (let row = minRow; row <= maxRow; row++) {
-				const tile = this.getTile({ column, row })
-				if (tile === undefined) {
-					continue
-				}
-				collector.collect(tile)
-			}
-		}
-
-		return collector.getCollection()
-	}
-
 	shuffle() {
 		const tiles = this.getTiles()
 		const positions = this.getPositions(tiles)
@@ -205,7 +143,7 @@ export class Field {
 			const position = shuffledPositions[index]
 			tile.setPosition(position)
 		}
-		const { columns } = this.getFieldSnapshot()
+		const { columns } = this.getGridSnapshot()
 		this.tilesByColumns = Array.from({ length: columns }, () => [])
 
 		for (const tile of tiles) {

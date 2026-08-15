@@ -38,7 +38,7 @@ export function gameFactory(props: GameFactoryProps) {
 	const grid = new Grid()
 
 	const field = new Field({
-		getFieldSnapshot: grid.getSnapshot.bind(grid),
+		getGridSnapshot: grid.getSnapshot.bind(grid),
 		randomizationFunction,
 		createId,
 	})

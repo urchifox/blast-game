@@ -65,7 +65,7 @@ export class Presenter implements PresenterContract {
 		})
 		this.renderer.updateFieldOffsets()
 		return this.renderer.renderTiles({
-			tilesSnapshots: this.field.getTilesSnapshots(),
+			tilesSnapshots: this.fieldQueries.getTilesSnapshots(),
 			gridSnapshot,
 			layoutSnapshot,
 		})
@@ -79,7 +79,7 @@ export class Presenter implements PresenterContract {
 			width: layoutSnapshot.gridWidth,
 			height: layoutSnapshot.gridHeight,
 		})
-		const tilesSnapshots = this.field.getTilesSnapshots()
+		const tilesSnapshots = this.fieldQueries.getTilesSnapshots()
 		this.renderer.resize({
 			tilesSnapshots,
 			gridSnapshot,
