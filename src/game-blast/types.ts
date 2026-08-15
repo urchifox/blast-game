@@ -50,7 +50,6 @@ export type PresenterContract = {
 	addTile(props: { kind: TileKind; position: TilePosition }): Tile
 	renderTile(tile: Tile): Promise<void>
 
-	removeTiles(tiles: Set<Tile>): Promise<void>
 	removeTilesFromCenter(
 		tiles: Set<Tile>,
 		centerPosition: TilePosition

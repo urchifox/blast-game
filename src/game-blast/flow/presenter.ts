@@ -10,10 +10,12 @@ import {
 	RendererContract,
 	OnTileClickCallback,
 } from "../types"
+import { FieldQueries } from "../domain/fieldQueries"
 
 type PresenterProps = {
 	layoutUI: LayoutUIContract
 	field: Field
+	fieldQueries: FieldQueries
 	grid: Grid
 	renderer: RendererContract
 	animationsManager: AnimationsManager
@@ -22,6 +24,7 @@ type PresenterProps = {
 export class Presenter implements PresenterContract {
 	private readonly layoutUI: PresenterProps["layoutUI"]
 	private readonly field: PresenterProps["field"]
+	private readonly fieldQueries: PresenterProps["fieldQueries"]
 	private readonly grid: PresenterProps["grid"]
 	private readonly renderer: PresenterProps["renderer"]
 	private readonly animationsManager: PresenterProps["animationsManager"]
@@ -29,6 +32,7 @@ export class Presenter implements PresenterContract {
 	constructor(props: PresenterProps) {
 		this.layoutUI = props.layoutUI
 		this.field = props.field
+		this.fieldQueries = props.fieldQueries
 		this.grid = props.grid
 		this.renderer = props.renderer
 		this.animationsManager = props.animationsManager
@@ -109,33 +113,23 @@ export class Presenter implements PresenterContract {
 		})
 	}
 
-	async removeTiles(tiles: Set<Tile>): Promise<void> {
-		const ids = new Set<string>()
-		for (const tile of tiles) {
-			const removedTileId = tile.getId()
-			tile.isBlocked = true
-			this.field.removeTile(tile.getPosition())
-			ids.add(removedTileId)
-		}
-
-		ids.forEach((id) => {
-			this.renderer.removeTile(id)
-		})
-
-		await wait(TILE_DELAY_BETWEEN_REMOVALS_MS)
-	}
-
 	async removeTilesFromCenter(
 		tiles: Set<Tile>,
 		centerPosition: TilePosition
 	): Promise<void> {
-		const sortedGroupedTiles = this.field.getTilesGroupedFromCenter(
+		for (const tile of tiles) {
+			tile.isBlocked = true
+			this.field.removeTile(tile.getPosition())
+		}
+
+		const sortedGroupedTiles = this.fieldQueries.getSortedGroupedTiles(
 			tiles,
 			centerPosition
 		)
 
 		for (const [_, tiles] of sortedGroupedTiles) {
-			await this.removeTiles(tiles)
+			tiles.forEach((tile) => this.renderer.removeTile(tile.getId()))
+			await wait(TILE_DELAY_BETWEEN_REMOVALS_MS)
 		}
 	}
 

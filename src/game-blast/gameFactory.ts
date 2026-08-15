@@ -53,6 +53,7 @@ export function gameFactory(props: GameFactoryProps) {
 	const presenter = new Presenter({
 		layoutUI: props.layoutUI,
 		field,
+		fieldQueries,
 		grid,
 		renderer,
 		animationsManager,
