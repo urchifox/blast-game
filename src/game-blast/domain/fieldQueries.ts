@@ -108,7 +108,7 @@ export class FieldQueries {
 				if (
 					neighborTile !== undefined &&
 					neighborTile.getKind() === kind &&
-					!neighborTile.isBlocked
+					!neighborTile.isAnimationInProcess
 				) {
 					collector.collect(neighborTile)
 				}

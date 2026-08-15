@@ -1,6 +1,12 @@
 import { Field } from "../domain/field"
 import { Grid } from "../domain/grid"
-import { Tile, TileKind, TilePosition, TileSnapshot } from "../domain/tile"
+import {
+	Tile,
+	TileAnimation,
+	TileKind,
+	TilePosition,
+	TileSnapshot,
+} from "../domain/tile"
 import { wait } from "../../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./animationRules"
 import { AnimationsManager } from "../../helpers/animationManager"
@@ -118,7 +124,11 @@ export class Presenter implements PresenterContract {
 		centerPosition: TilePosition
 	): Promise<void> {
 		for (const tile of tiles) {
-			tile.isBlocked = true
+			if (tile.isAnimationInProcess) {
+				tiles.delete(tile)
+				continue
+			}
+			tile.currentAnimation = TileAnimation.REMOVE
 			this.field.removeTile(tile.getPosition())
 		}
 
@@ -127,8 +137,8 @@ export class Presenter implements PresenterContract {
 			centerPosition
 		)
 
-		for (const [_, tiles] of sortedGroupedTiles) {
-			tiles.forEach((tile) => this.renderer.removeTile(tile.getId()))
+		for (const [_, tilesGroup] of sortedGroupedTiles) {
+			tilesGroup.forEach((tile) => this.renderer.removeTile(tile.getId()))
 			await wait(TILE_DELAY_BETWEEN_REMOVALS_MS)
 		}
 	}
@@ -181,11 +191,11 @@ export class Presenter implements PresenterContract {
 
 		for (const movedTile of movedTiles) {
 			temporaryBlockedTiles.add(movedTile)
-			movedTile.isBlocked = true
+			movedTile.currentAnimation = TileAnimation.MOVE
 		}
 		for (const newTile of newTiles) {
 			temporaryBlockedTiles.add(newTile)
-			newTile.isBlocked = true
+			newTile.currentAnimation = TileAnimation.APPEAR
 		}
 
 		const gridSnapshot = this.grid.getSnapshot()
@@ -224,7 +234,7 @@ export class Presenter implements PresenterContract {
 			await Promise.all(renderTasks)
 		} finally {
 			for (const blockedTile of temporaryBlockedTiles) {
-				blockedTile.isBlocked = false
+				blockedTile.currentAnimation = TileAnimation.NONE
 			}
 		}
 	}

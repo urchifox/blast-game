@@ -103,7 +103,7 @@ export class Game {
 		}
 
 		const tile = this.fieldQueries.getTileById(id)
-		if (tile === undefined || tile.isBlocked) {
+		if (tile === undefined || tile.isAnimationInProcess) {
 			return
 		}
 

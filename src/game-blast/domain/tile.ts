@@ -27,6 +27,13 @@ export type TilePosition = {
 	column: number
 }
 
+export enum TileAnimation {
+	NONE = "none",
+	APPEAR = "appear",
+	MOVE = "move",
+	REMOVE = "remove",
+}
+
 export type TileProps = {
 	kind: TileKind
 	position: TilePosition
@@ -38,20 +45,25 @@ export class Tile {
 	private readonly position: TileProps["position"]
 
 	private readonly id: string
-	private _isBlocked = false
+
+	private _current_animation: TileAnimation = TileAnimation.NONE
 
 	constructor(props: TileProps) {
 		this.kind = props.kind
 		this.position = props.position
 		this.id = props.id
 	}
-
-	get isBlocked(): boolean {
-		return this._isBlocked
+	
+	get currentAnimation(): TileAnimation {
+		return this._current_animation
 	}
 
-	set isBlocked(isBlocked: boolean) {
-		this._isBlocked = isBlocked
+	set currentAnimation(animation: TileAnimation) {
+		this._current_animation = animation
+	}
+
+	get isAnimationInProcess() {
+		return this.currentAnimation !== TileAnimation.NONE
 	}
 
 	getId(): string {
