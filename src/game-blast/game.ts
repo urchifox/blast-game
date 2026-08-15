@@ -121,9 +121,9 @@ export class Game {
 		this.boosterManager.onBoosterButtonClick(boosterName)
 	}
 
-	private processActResult(actResult: Promise<ActResult>) {
+	private processActResult(actResult: ActResult) {
 		const animationPromise = async () => {
-			const result = await actResult
+			const result = actResult
 			const { removedTiles } = result
 			const removedPositions = new Set(
 				[...removedTiles].map((tile) => tile.getPosition())

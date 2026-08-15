@@ -6,7 +6,7 @@ import { BoosterName } from "../domain/types"
 
 export type BoosterHandlerResult = {
 	isUsed: boolean
-	actResult: Promise<ActResult> | null
+	actResult: ActResult | null
 }
 
 export type BoosterHandlerProps = {
