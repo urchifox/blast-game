@@ -11,7 +11,7 @@ import { ProgressManager } from "./flow/progressManager"
 import { PhaserRenderer } from "./rendering/phaserRenderer"
 import { Grid } from "./domain/grid"
 import { boosterManagerFactory } from "./flow/boosterManagerFactory"
-import { tileClickManagerFactory } from "./flow/tileClickManagerFactory"
+import { tilesManagerFactory } from "./flow/tilesManagerFactory"
 import { ActionManager } from "./flow/actionManager"
 import { ProgressCounter } from "./domain/progressCounter"
 import { Counter } from "../helpers/counter"
@@ -63,7 +63,7 @@ export function gameFactory(props: GameFactoryProps) {
 		presenter: presenter,
 	})
 
-	const tileClickManager = tileClickManagerFactory({
+	const tilesManager = tilesManagerFactory({
 		fieldQueries: fieldQueries,
 		actionManager: actionManager,
 		gameRules: gameRules,
@@ -103,7 +103,7 @@ export function gameFactory(props: GameFactoryProps) {
 		presenter,
 		levelGenerator,
 		progressManager,
-		tileClickManager,
+		tilesManager,
 		boosterManager,
 		completionManager,
 		winModalUI: props.winModalUI,

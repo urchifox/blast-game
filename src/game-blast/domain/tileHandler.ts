@@ -4,20 +4,20 @@ import { FieldQueries } from "./fieldQueries"
 import { GameRules } from "./gameRules"
 import { isTileKindNormal, Tile, TileKind } from "./tile"
 
-export type TileClickHandlerProps = {
+export type TileHandlerProps = {
 	gameRules: GameRules
 	fieldQueries: FieldQueries
 	randomizationFunction: RandomizationFunction
 }
 
-export class TileClickHandler {
-	private readonly gameRules: TileClickHandlerProps["gameRules"]
-	private readonly fieldQueries: TileClickHandlerProps["fieldQueries"]
-	private readonly randomizationFunction: TileClickHandlerProps["randomizationFunction"]
+export class TileHandler {
+	private readonly gameRules: TileHandlerProps["gameRules"]
+	private readonly fieldQueries: TileHandlerProps["fieldQueries"]
+	private readonly randomizationFunction: TileHandlerProps["randomizationFunction"]
 
 	private rewardableComboSizesSorted: Array<number>
 
-	constructor(props: TileClickHandlerProps) {
+	constructor(props: TileHandlerProps) {
 		this.gameRules = props.gameRules
 		this.fieldQueries = props.fieldQueries
 		this.randomizationFunction = props.randomizationFunction
@@ -146,5 +146,30 @@ export class TileClickHandler {
 
 		const nextValue = this.rewardableComboSizesSorted[index + 1]
 		return nextValue > comboSize
+	}
+
+	onRemove(tile: Tile) {
+		if (isTileKindNormal(tile.getKind())) {
+			return null
+		}
+
+		const connection = this.getConnections(tile)
+		if (connection === null) {
+			return null
+		}
+
+		const availableTiles = Array.from(connection.tiles).filter(
+			(tile) => !tile.isLocked()
+		)
+
+		return [
+			{
+				name: CommandName.REMOVE,
+				payload: {
+					tiles: new Set(availableTiles),
+					removingFromPosition: tile.getPosition(),
+				},
+			},
+		] satisfies Array<Command>
 	}
 }
