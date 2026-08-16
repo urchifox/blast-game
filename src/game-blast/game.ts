@@ -122,11 +122,12 @@ export class Game {
 	}
 
 	private processActResult(actResult: ActResult) {
+		const result = actResult
+		const { removedTiles } = result
+		
+		this.progressManager.processMove(removedTiles.size)
+		
 		const animationPromise = async () => {
-			const result = actResult
-			const { removedTiles } = result
-			
-			this.progressManager.processMove(removedTiles.size)
 			await this.presenter.processRemovedTiles(removedTiles)
 			await this.maybeShuffle()
 		}
