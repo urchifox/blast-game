@@ -103,7 +103,7 @@ export class Game {
 		}
 
 		const tile = this.fieldQueries.getTileById(id)
-		if (tile === undefined || tile.isBlocked) {
+		if (tile === undefined || tile.isLocked()) {
 			return
 		}
 
@@ -121,20 +121,15 @@ export class Game {
 		this.boosterManager.onBoosterButtonClick(boosterName)
 	}
 
-	private processActResult(actResult: Promise<ActResult>) {
-		const animationPromise = async () => {
-			const result = await actResult
-			const { removedTiles } = result
-			const removedPositions = new Set(
-				[...removedTiles].map((tile) => tile.getPosition())
-			)
-			this.progressManager.processMove(removedTiles.size)
-			await this.presenter.fillEmptyPositions(removedPositions)
-			await this.maybeShuffle()
-		}
-		this.presenter.animateAndWaitForAll(animationPromise()).then(() => {
-			this.processGameCompletion()
-		})
+	private async processActResult(actResult: ActResult) {
+		const result = actResult
+		const { removedTiles } = result
+		
+		this.progressManager.processMove(removedTiles.size)
+
+		await this.presenter.processRemovedTiles(removedTiles)
+		await this.maybeShuffle()
+		this.processGameCompletion()
 	}
 
 	async maybeShuffle() {

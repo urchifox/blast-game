@@ -1,4 +1,4 @@
-import { AnimationsManager } from "../helpers/animationManager"
+import { AnimationsManager } from "./flow/animationManager"
 import { createId } from "../helpers/random"
 import { CompletionManager } from "./domain/completionManager"
 import { Field } from "./domain/field"
@@ -38,7 +38,7 @@ export function gameFactory(props: GameFactoryProps) {
 	const grid = new Grid()
 
 	const field = new Field({
-		getFieldSnapshot: grid.getSnapshot.bind(grid),
+		getGridSnapshot: grid.getSnapshot.bind(grid),
 		randomizationFunction,
 		createId,
 	})
@@ -53,6 +53,7 @@ export function gameFactory(props: GameFactoryProps) {
 	const presenter = new Presenter({
 		layoutUI: props.layoutUI,
 		field,
+		fieldQueries,
 		grid,
 		renderer,
 		animationsManager,

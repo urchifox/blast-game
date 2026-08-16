@@ -99,11 +99,11 @@ export class ActionManager {
 		return actions
 	}
 
-	async doActions(actions: Array<Action>) {
+	doActions(actions: Array<Action>) {
 		const results: Array<ActionResult> = []
 
 		for (const action of actions) {
-			const result = await this.getActionResult(action)
+			const result = this.getActionResult(action)
 			if (result !== null) {
 				results.push(result)
 			}
@@ -153,18 +153,18 @@ export class ActionManager {
 		}
 	}
 
-	private async add(
+	private add(
 		payload: ActionPayloadMap[ActionName.ADD]
-	): Promise<ActionResultMap[ActionName.ADD]> {
+	): ActionResultMap[ActionName.ADD] {
 		const tile = this.presenter.addTile(payload)
-		await this.presenter.renderTile(tile)
+		this.presenter.renderTile(tile)
 		return { addedTile: tile }
 	}
 
-	private async remove(
+	private remove(
 		payload: ActionPayloadMap[ActionName.REMOVE]
-	): Promise<ActionResultMap[ActionName.REMOVE]> {
-		await this.presenter.removeTilesFromCenter(
+	): ActionResultMap[ActionName.REMOVE] {
+		this.presenter.removeTilesFromCenter(
 			payload.tiles,
 			payload.centerPosition
 		)
@@ -178,10 +178,10 @@ export class ActionManager {
 		return { selectedTile: payload }
 	}
 
-	private async swap(
+	private swap(
 		payload: ActionPayloadMap[ActionName.SWAP]
-	): Promise<ActionResultMap[ActionName.SWAP]> {
-		await this.presenter.swapTiles(...payload)
+	): ActionResultMap[ActionName.SWAP] {
+		this.presenter.swapTiles(...payload)
 		return { swappedTiles: payload }
 	}
 }

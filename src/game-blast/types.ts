@@ -42,15 +42,13 @@ export type PresenterContract = {
 	updateGameSize(): void
 
 	shuffleField(): Promise<void>
-	fillEmptyPositions(positions: Set<TilePosition>): Promise<void>
-	animateAndWaitForAll(promise: Promise<void>): Promise<void>
+	processRemovedTiles(removedTiles: Set<Tile>): Promise<void>
 
 	selectTile(tile: Tile): void
 	swapTiles(tile1: Tile, tile2: Tile): Promise<void>
 	addTile(props: { kind: TileKind; position: TilePosition }): Tile
 	renderTile(tile: Tile): Promise<void>
 
-	removeTiles(tiles: Set<Tile>): Promise<void>
 	removeTilesFromCenter(
 		tiles: Set<Tile>,
 		centerPosition: TilePosition

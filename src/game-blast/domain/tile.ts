@@ -38,20 +38,12 @@ export class Tile {
 	private readonly position: TileProps["position"]
 
 	private readonly id: string
-	private _isBlocked = false
+	private _isLocked = false
 
 	constructor(props: TileProps) {
 		this.kind = props.kind
 		this.position = props.position
 		this.id = props.id
-	}
-
-	get isBlocked(): boolean {
-		return this._isBlocked
-	}
-
-	set isBlocked(isBlocked: boolean) {
-		this._isBlocked = isBlocked
 	}
 
 	getId(): string {
@@ -66,6 +58,10 @@ export class Tile {
 		return { ...this.position }
 	}
 
+	isLocked(): boolean {
+		return this._isLocked
+	}
+
 	getSnapshot(): TileSnapshot {
 		return {
 			id: this.id,
@@ -78,6 +74,14 @@ export class Tile {
 	setPosition(position: TilePosition) {
 		this.position.row = position.row
 		this.position.column = position.column
+	}
+
+	lock() {
+		this._isLocked = true
+	}
+
+	unlock() {
+		this._isLocked = false
 	}
 }
 

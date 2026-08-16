@@ -27,6 +27,7 @@ export class CompletionManager {
 	}
 
 	isGameCompleted() {
+		this.checkGameCompletion()
 		return this.isCompleted
 	}
 
