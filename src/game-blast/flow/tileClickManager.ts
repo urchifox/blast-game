@@ -1,23 +1,23 @@
 import { Tile } from "../domain/tile"
-import { TileClickHandler } from "../domain/tileClickHandler"
+import { TileHandler } from "../domain/tileHandler"
 import { ActionManager } from "./actionManager"
 
 export type TileClickManagerProps = {
 	actionManager: ActionManager
-	tileClickHandler: TileClickHandler
+	tileHandler: TileHandler
 }
 
 export class TileClickManager {
 	private readonly actionManager: TileClickManagerProps["actionManager"]
-	private readonly tileClickHandler: TileClickManagerProps["tileClickHandler"]
+	private readonly tileHandler: TileClickManagerProps["tileHandler"]
 
 	constructor(props: TileClickManagerProps) {
 		this.actionManager = props.actionManager
-		this.tileClickHandler = props.tileClickHandler
+		this.tileHandler = props.tileHandler
 	}
 
 	onClick(tile: Tile) {
-		const commands = this.tileClickHandler.onClick(tile)
+		const commands = this.tileHandler.onClick(tile)
 		if (commands === null) {
 			return null
 		}
