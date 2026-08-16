@@ -32,6 +32,9 @@ export class ModalUI implements ModalUIContract {
 	}
 
 	async open() {
+		if (this.modal.open) {
+			return
+		}
 		this.modal.showModal()
 		this.modal.classList.add("modal--opening")
 		await new Promise<void>((resolve) => {
@@ -73,6 +76,9 @@ export class ModalUI implements ModalUIContract {
 	}
 
 	private async close() {
+		if (!this.modal.open) {
+			return
+		}
 		this.modal.classList.add("modal--closing")
 		await new Promise<void>((resolve) => {
 			this.modalWrapper.addEventListener(
