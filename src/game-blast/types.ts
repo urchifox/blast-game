@@ -44,6 +44,7 @@ export type PresenterContract = {
 	shuffleField(): Promise<void>
 	processRemovedTiles(removedTiles: Set<Tile>): Promise<void>
 
+	waitForTileAnimations(tile: Tile): Promise<void>
 	selectTile(tile: Tile): void
 	swapTiles(tile1: Tile, tile2: Tile): Promise<void>
 	addTile(props: { kind: TileKind; position: TilePosition }): Tile

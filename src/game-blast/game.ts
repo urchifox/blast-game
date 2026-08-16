@@ -6,7 +6,7 @@ import { LevelData, LevelGenerator } from "./domain/levelGenerator"
 import { BoosterName, GameCompletionStatus } from "./domain/types"
 import { FieldQueries } from "./domain/fieldQueries"
 import { PresenterContract, ModalUIContract } from "./types"
-import { ActResult } from "./flow/actionManager"
+import { Tile } from "./domain/tile"
 
 export type GameProps = {
 	fieldQueries: FieldQueries
@@ -114,17 +114,44 @@ export class Game {
 		if (actResult === null) {
 			return
 		}
-		this.processActResult(actResult)
+		this.processRemovingTiles(actResult.removedTiles)
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {
 		this.boosterManager.onBoosterButtonClick(boosterName)
 	}
 
-	private async processActResult(actResult: ActResult) {
-		const result = actResult
-		const { removedTiles } = result
-		
+	private async processRemovingTiles(removedTiles: Set<Tile>) {
+		const processed = new Set<Tile>()
+
+		const pending = [...removedTiles]
+		while (pending.length > 0) {
+			const tile = pending.shift()
+			if (tile === undefined || processed.has(tile)) {
+				continue
+			}
+
+			processed.add(tile)
+			this.presenter.waitForTileAnimations(tile).then(() => {
+				const actResult = this.tilesManager.onRemove(tile)
+				if (actResult === null) {
+					return
+				}
+				for (const removedTile of actResult.removedTiles) {
+					if (!removedTiles.has(removedTile)) {
+						removedTiles.add(removedTile)
+						pending.push(removedTile)
+					}
+				}
+			})
+		}
+
+		await Promise.all(
+			Array.from(processed).map((tile) =>
+				this.presenter.waitForTileAnimations(tile)
+			)
+		)
+
 		this.progressManager.processMove(removedTiles.size)
 
 		await this.presenter.processRemovedTiles(removedTiles)

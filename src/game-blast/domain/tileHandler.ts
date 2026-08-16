@@ -147,4 +147,29 @@ export class TileHandler {
 		const nextValue = this.rewardableComboSizesSorted[index + 1]
 		return nextValue > comboSize
 	}
+
+	onRemove(tile: Tile) {
+		if (isTileKindNormal(tile.getKind())) {
+			return null
+		}
+
+		const connection = this.getConnections(tile)
+		if (connection === null) {
+			return null
+		}
+
+		const availableTiles = Array.from(connection.tiles).filter(
+			(tile) => !tile.isLocked()
+		)
+
+		return [
+			{
+				name: CommandName.REMOVE,
+				payload: {
+					tiles: new Set(availableTiles),
+					removingFromPosition: tile.getPosition(),
+				},
+			},
+		] satisfies Array<Command>
+	}
 }

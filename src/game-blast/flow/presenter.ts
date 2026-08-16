@@ -89,6 +89,10 @@ export class Presenter implements PresenterContract {
 
 	// #region Tiles Manipulation
 
+	waitForTileAnimations(tile: Tile) {
+		return this.animationsManager.waitForTileAnimations(tile)
+	}
+
 	selectTile(tile: Tile) {
 		this.renderer.selectTile({
 			tileSnapshot: tile.getSnapshot(),

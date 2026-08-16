@@ -24,4 +24,13 @@ export class TilesManager {
 
 		return this.actionManager.doCommands(commands)
 	}
+
+	onRemove(tile: Tile) {
+		const commands = this.tileHandler.onRemove(tile)
+		if (commands === null) {
+			return null
+		}
+
+		return this.actionManager.doCommands(commands)
+	}
 }
