@@ -2,12 +2,12 @@ import {
 	TileHandler,
 	TileHandlerProps,
 } from "../domain/tileHandler"
-import { TileClickManager, TileClickManagerProps } from "./tileClickManager"
+import { TilesManager, TilesManagerProps } from "./tilesManager"
 
-type TileClickManagerFactoryProps = TileHandlerProps &
-	Omit<TileClickManagerProps, "tileHandler">
+type TilesManagerFactoryProps = TileHandlerProps &
+	Omit<TilesManagerProps, "tileHandler">
 
-export function tileClickManagerFactory(props: TileClickManagerFactoryProps) {
+export function tilesManagerFactory(props: TilesManagerFactoryProps) {
 	const { fieldQueries, actionManager, gameRules, randomizationFunction } =
 		props
 
@@ -17,7 +17,7 @@ export function tileClickManagerFactory(props: TileClickManagerFactoryProps) {
 		randomizationFunction: randomizationFunction,
 	})
 
-	return new TileClickManager({
+	return new TilesManager({
 		actionManager: actionManager,
 		tileHandler: tileHandler,
 	})

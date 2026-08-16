@@ -1,4 +1,4 @@
-import { TileClickManager } from "./flow/tileClickManager"
+import { TilesManager } from "./flow/tilesManager"
 import { BoosterManager } from "./flow/boosterManager"
 import { CompletionManager } from "./domain/completionManager"
 import { ProgressManager } from "./flow/progressManager"
@@ -13,7 +13,7 @@ export type GameProps = {
 	presenter: PresenterContract
 	levelGenerator: LevelGenerator
 	progressManager: ProgressManager
-	tileClickManager: TileClickManager
+	tilesManager: TilesManager
 	boosterManager: BoosterManager
 	completionManager: CompletionManager
 	winModalUI: ModalUIContract
@@ -25,7 +25,7 @@ export class Game {
 	private readonly presenter: GameProps["presenter"]
 	private readonly levelGenerator: GameProps["levelGenerator"]
 	private readonly progressManager: GameProps["progressManager"]
-	private readonly tileClickManager: GameProps["tileClickManager"]
+	private readonly tilesManager: GameProps["tilesManager"]
 	private readonly boosterManager: GameProps["boosterManager"]
 	private readonly completionManager: GameProps["completionManager"]
 	private readonly winModalUI: GameProps["winModalUI"]
@@ -43,7 +43,7 @@ export class Game {
 		this.presenter = props.presenter
 		this.levelGenerator = props.levelGenerator
 		this.progressManager = props.progressManager
-		this.tileClickManager = props.tileClickManager
+		this.tilesManager = props.tilesManager
 		this.boosterManager = props.boosterManager
 		this.completionManager = props.completionManager
 		this.winModalUI = props.winModalUI
@@ -110,7 +110,7 @@ export class Game {
 		const boosterHandlerResult = this.boosterManager.maybeUseBooster(tile)
 		const actResult = boosterHandlerResult.isUsed
 			? boosterHandlerResult.actResult
-			: this.tileClickManager.onClick(tile)
+			: this.tilesManager.onClick(tile)
 		if (actResult === null) {
 			return
 		}

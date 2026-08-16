@@ -2,16 +2,16 @@ import { Tile } from "../domain/tile"
 import { TileHandler } from "../domain/tileHandler"
 import { ActionManager } from "./actionManager"
 
-export type TileClickManagerProps = {
+export type TilesManagerProps = {
 	actionManager: ActionManager
 	tileHandler: TileHandler
 }
 
-export class TileClickManager {
-	private readonly actionManager: TileClickManagerProps["actionManager"]
-	private readonly tileHandler: TileClickManagerProps["tileHandler"]
+export class TilesManager {
+	private readonly actionManager: TilesManagerProps["actionManager"]
+	private readonly tileHandler: TilesManagerProps["tileHandler"]
 
-	constructor(props: TileClickManagerProps) {
+	constructor(props: TilesManagerProps) {
 		this.actionManager = props.actionManager
 		this.tileHandler = props.tileHandler
 	}
