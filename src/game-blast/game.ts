@@ -125,11 +125,9 @@ export class Game {
 		const animationPromise = async () => {
 			const result = actResult
 			const { removedTiles } = result
-			const removedPositions = new Set(
-				[...removedTiles].map((tile) => tile.getPosition())
-			)
+			
 			this.progressManager.processMove(removedTiles.size)
-			await this.presenter.fillEmptyPositions(removedPositions)
+			await this.presenter.processRemovedTiles(removedTiles)
 			await this.maybeShuffle()
 		}
 		this.presenter.animateAndWaitForAll(animationPromise()).then(() => {

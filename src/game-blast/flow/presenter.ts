@@ -1,12 +1,6 @@
 import { Field } from "../domain/field"
 import { Grid } from "../domain/grid"
-import {
-	Tile,
-	TileAnimation,
-	TileKind,
-	TilePosition,
-	TileSnapshot,
-} from "../domain/tile"
+import { Tile, TileAnimation, TileKind, TilePosition } from "../domain/tile"
 import { wait } from "../../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./animationRules"
 import { AnimationsManager } from "../../helpers/animationManager"
@@ -129,6 +123,7 @@ export class Presenter implements PresenterContract {
 				continue
 			}
 			tile.currentAnimation = TileAnimation.REMOVE
+			tile.createRemovingPromise()
 			this.field.removeTile(tile.getPosition())
 		}
 
@@ -138,7 +133,11 @@ export class Presenter implements PresenterContract {
 		)
 
 		for (const [_, tilesGroup] of sortedGroupedTiles) {
-			tilesGroup.forEach((tile) => this.renderer.removeTile(tile.getId()))
+			tilesGroup.forEach((tile) => {
+				this.renderer.removeTile(tile.getId()).then(() => {
+					tile.resolveRemovingPromise()
+				})
+			})
 			await wait(TILE_DELAY_BETWEEN_REMOVALS_MS)
 		}
 	}
@@ -184,59 +183,126 @@ export class Presenter implements PresenterContract {
 
 	// #region Field Manipulation
 
-	async fillEmptyPositions(positions: Set<TilePosition>) {
+	async processRemovedTiles(removedTiles: Set<Tile>) {
+		const positions = new Set(
+			[...removedTiles].map((tile) => tile.getPosition())
+		)
 		const { movedTiles, newTiles } = this.field.fillEmptyPositions(positions)
 
-		const temporaryBlockedTiles = new Set<Tile>()
-
 		for (const movedTile of movedTiles) {
-			temporaryBlockedTiles.add(movedTile)
 			movedTile.currentAnimation = TileAnimation.MOVE
 		}
 		for (const newTile of newTiles) {
-			temporaryBlockedTiles.add(newTile)
 			newTile.currentAnimation = TileAnimation.APPEAR
 		}
 
-		const gridSnapshot = this.grid.getSnapshot()
-		const layoutSnapshot = this.layoutUI.getSnapshot()
+		const groupsByColumns = this.getGroupsByColumns({
+			removedTiles,
+			movedTiles,
+			newTiles,
+		})
 
-		const newTilesSnapshotsByColumns = new Map<number, Array<TileSnapshot>>()
-		for (const tile of newTiles) {
-			const column = tile.getPosition().column
-			const tilesSnapshots = newTilesSnapshotsByColumns.get(column) ?? []
-			tilesSnapshots.push(tile.getSnapshot())
-			newTilesSnapshotsByColumns.set(column, tilesSnapshots)
-		}
-
-		const renderTasks: Array<Promise<void>> = []
-		for (const [_, tilesSnapshots] of newTilesSnapshotsByColumns) {
-			tilesSnapshots.sort((a, b) => b.row - a.row)
-
-			renderTasks.push(
-				this.renderer.renderTiles({
-					tilesSnapshots: tilesSnapshots,
-					gridSnapshot,
-					layoutSnapshot,
-					isAppearOnDefaultPosition: true,
-				})
+		await Promise.all(
+			groupsByColumns.map((infoByColumn) =>
+				this.animateFillingColumn(infoByColumn)
 			)
+		)
+	}
+
+	private getGroupsByColumns({
+		removedTiles,
+		movedTiles,
+		newTiles,
+	}: {
+		removedTiles: Set<Tile>
+		movedTiles: Set<Tile>
+		newTiles: Set<Tile>
+	}) {
+		const removeTilesByColumn = this.groupByColumns(removedTiles)
+		const movedTilesByColumn = this.groupByColumns(movedTiles)
+		const newTilesByColumn = this.groupByColumns(newTiles)
+
+		const infoByColumns = new Map<
+			number,
+			{
+				removedTiles: Array<Tile>
+				movedTiles: Array<Tile>
+				newTiles: Array<Tile>
+			}
+		>()
+
+		const columnsSet = new Set<number>([
+			...removeTilesByColumn.keys(),
+			...movedTilesByColumn.keys(),
+			...newTilesByColumn.keys(),
+		])
+		for (const column of columnsSet) {
+			const removedTiles = removeTilesByColumn.get(column) ?? []
+			const movedTiles = movedTilesByColumn.get(column) ?? []
+			const newTiles = newTilesByColumn.get(column) ?? []
+
+			infoByColumns.set(column, {
+				removedTiles,
+				movedTiles,
+				newTiles,
+			})
 		}
 
-		try {
-			await this.renderer.fallTilesToCurrentPositions({
-				tilesSnapshots: Array.from(movedTiles).map((tile_1) =>
-					tile_1.getSnapshot()
-				),
-				gridSnapshot,
-				layoutSnapshot,
-			})
-			await Promise.all(renderTasks)
-		} finally {
-			for (const blockedTile of temporaryBlockedTiles) {
-				blockedTile.currentAnimation = TileAnimation.NONE
-			}
+		return Array.from(infoByColumns.values())
+	}
+
+	private groupByColumns(tiles: Set<Tile>) {
+		const tilesByColumn = new Map<number, Array<Tile>>()
+		
+		for (const tile of tiles) {
+			const column = tile.getPosition().column
+
+			const tiles = tilesByColumn.get(column) ?? []
+			tiles.push(tile)
+			tilesByColumn.set(column, tiles)
 		}
+
+		return tilesByColumn
+	}
+
+	private async animateFillingColumn({
+		removedTiles,
+		movedTiles,
+		newTiles,
+	}: {
+		removedTiles: Array<Tile>
+		movedTiles: Array<Tile>
+		newTiles: Array<Tile>
+	}) {
+		await Promise.all(
+			removedTiles.map((tile) => tile.removingPromise ?? Promise.resolve())
+		)
+
+		await this.renderer.fallTilesToCurrentPositions({
+			tilesSnapshots: this.getSnapshotsSortedByRow(movedTiles),
+			gridSnapshot: this.grid.getSnapshot(),
+			layoutSnapshot: this.layoutUI.getSnapshot(),
+		})
+		movedTiles.forEach((tile) => {
+			tile.currentAnimation = TileAnimation.NONE
+		})
+
+		await this.renderer.renderTiles({
+			tilesSnapshots: this.getSnapshotsSortedByRow(newTiles),
+			gridSnapshot: this.grid.getSnapshot(),
+			layoutSnapshot: this.layoutUI.getSnapshot(),
+			isAppearOnDefaultPosition: true,
+		})
+		newTiles.forEach((tile) => {
+			tile.currentAnimation = TileAnimation.NONE
+		})
+	}
+
+	private getSnapshotsSortedByRow(tiles: Array<Tile>) {
+		return tiles
+			.map((tile) => tile.getSnapshot())
+			.slice()
+			.sort((a, b) => b.row - a.row)
 	}
 
 	shuffleField() {

@@ -42,7 +42,7 @@ export type PresenterContract = {
 	updateGameSize(): void
 
 	shuffleField(): Promise<void>
-	fillEmptyPositions(positions: Set<TilePosition>): Promise<void>
+	processRemovedTiles(removedTiles: Set<Tile>): Promise<void>
 	animateAndWaitForAll(promise: Promise<void>): Promise<void>
 
 	selectTile(tile: Tile): void

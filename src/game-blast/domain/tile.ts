@@ -47,6 +47,9 @@ export class Tile {
 	private readonly id: string
 
 	private _current_animation: TileAnimation = TileAnimation.NONE
+	private resolveRemoving: (() => void) | null = null
+
+	removingPromise: Promise<void> | null = null
 
 	constructor(props: TileProps) {
 		this.kind = props.kind
@@ -64,6 +67,20 @@ export class Tile {
 
 	get isAnimationInProcess() {
 		return this.currentAnimation !== TileAnimation.NONE
+	}
+
+	createRemovingPromise() {
+		this.removingPromise = new Promise<void>((resolve) => {
+			this.resolveRemoving = resolve
+		})
+	}
+
+	resolveRemovingPromise() {
+		if (this.resolveRemoving === null) {
+			return
+		}
+		this.resolveRemoving()
+		this.resolveRemoving = null
 	}
 
 	getId(): string {
