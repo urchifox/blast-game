@@ -27,13 +27,6 @@ export type TilePosition = {
 	column: number
 }
 
-export enum TileAnimation {
-	NONE = "none",
-	APPEAR = "appear",
-	MOVE = "move",
-	REMOVE = "remove",
-}
-
 export type TileProps = {
 	kind: TileKind
 	position: TilePosition
@@ -45,42 +38,12 @@ export class Tile {
 	private readonly position: TileProps["position"]
 
 	private readonly id: string
-
-	private _current_animation: TileAnimation = TileAnimation.NONE
-	private resolveRemoving: (() => void) | null = null
-
-	removingPromise: Promise<void> | null = null
+	private _isLocked = false
 
 	constructor(props: TileProps) {
 		this.kind = props.kind
 		this.position = props.position
 		this.id = props.id
-	}
-	
-	get currentAnimation(): TileAnimation {
-		return this._current_animation
-	}
-
-	set currentAnimation(animation: TileAnimation) {
-		this._current_animation = animation
-	}
-
-	get isAnimationInProcess() {
-		return this.currentAnimation !== TileAnimation.NONE
-	}
-
-	createRemovingPromise() {
-		this.removingPromise = new Promise<void>((resolve) => {
-			this.resolveRemoving = resolve
-		})
-	}
-
-	resolveRemovingPromise() {
-		if (this.resolveRemoving === null) {
-			return
-		}
-		this.resolveRemoving()
-		this.resolveRemoving = null
 	}
 
 	getId(): string {
@@ -95,6 +58,10 @@ export class Tile {
 		return { ...this.position }
 	}
 
+	isLocked(): boolean {
+		return this._isLocked
+	}
+
 	getSnapshot(): TileSnapshot {
 		return {
 			id: this.id,
@@ -107,6 +74,14 @@ export class Tile {
 	setPosition(position: TilePosition) {
 		this.position.row = position.row
 		this.position.column = position.column
+	}
+
+	lock() {
+		this._isLocked = true
+	}
+
+	unlock() {
+		this._isLocked = false
 	}
 }
 

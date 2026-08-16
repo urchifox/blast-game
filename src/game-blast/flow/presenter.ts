@@ -1,9 +1,9 @@
 import { Field } from "../domain/field"
 import { Grid } from "../domain/grid"
-import { Tile, TileAnimation, TileKind, TilePosition } from "../domain/tile"
+import { Tile, TileKind, TilePosition } from "../domain/tile"
 import { wait } from "../../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./animationRules"
-import { AnimationsManager } from "../../helpers/animationManager"
+import { AnimationsManager } from "./animationManager"
 import {
 	LayoutUIContract,
 	PresenterContract,
@@ -87,11 +87,6 @@ export class Presenter implements PresenterContract {
 		})
 	}
 
-	async animateAndWaitForAll(promise: Promise<void>) {
-		this.animationsManager.animate(promise)
-		await this.animationsManager.waitAllAnimations()
-	}
-
 	// #region Tiles Manipulation
 
 	selectTile(tile: Tile) {
@@ -118,12 +113,7 @@ export class Presenter implements PresenterContract {
 		centerPosition: TilePosition
 	): Promise<void> {
 		for (const tile of tiles) {
-			if (tile.isAnimationInProcess) {
-				tiles.delete(tile)
-				continue
-			}
-			tile.currentAnimation = TileAnimation.REMOVE
-			tile.createRemovingPromise()
+			tile.lock()
 			this.field.removeTile(tile.getPosition())
 		}
 
@@ -132,23 +122,36 @@ export class Presenter implements PresenterContract {
 			centerPosition
 		)
 
-		for (const [_, tilesGroup] of sortedGroupedTiles) {
+		for (const [distance, tilesGroup] of sortedGroupedTiles) {
 			tilesGroup.forEach((tile) => {
-				this.renderer.removeTile(tile.getId()).then(() => {
-					tile.resolveRemovingPromise()
-				})
+				const promise = async () => {
+					await wait(distance * TILE_DELAY_BETWEEN_REMOVALS_MS)
+					await this.renderer.removeTile(tile.getId())
+				}
+
+				this.animationsManager
+					.setAnimation({
+						tile,
+						promise: promise(),
+					})
+					.finally(() => tile.unlock())
 			})
-			await wait(TILE_DELAY_BETWEEN_REMOVALS_MS)
 		}
+
+		await Promise.allSettled(
+			Array.from(tiles).map((tile) => this.animationsManager.waitForTileAnimations(tile))
+		)
 	}
 
 	async swapTiles(tile1: Tile, tile2: Tile) {
+		tile1.lock()
+		tile2.lock()
 		this.field.swapTiles(tile1, tile2)
 
 		const gridSnapshot = this.grid.getSnapshot()
 		const layoutSnapshot = this.layoutUI.getSnapshot()
 
-		const promiseSelection = this.renderer
+		const promiseAnimation = this.renderer
 			.selectTile({
 				tileSnapshot: tile2.getSnapshot(),
 				layoutSnapshot,
@@ -161,7 +164,7 @@ export class Presenter implements PresenterContract {
 				})
 			})
 			.then(() => {
-				return Promise.all([
+				return Promise.allSettled([
 					this.renderer.unselectTile({
 						tileSnapshot: tile1.getSnapshot(),
 						gridSnapshot,
@@ -176,7 +179,16 @@ export class Presenter implements PresenterContract {
 			})
 			.then(() => {})
 
-		await this.animationsManager.animate(promiseSelection)
+		await Promise.allSettled(
+			[tile1, tile2].map((tile) =>
+				this.animationsManager
+					.setAnimation({
+						tile,
+						promise: promiseAnimation,
+					})
+					.finally(() => tile.unlock())
+			)
+		)
 	}
 
 	// #endregion
@@ -189,11 +201,8 @@ export class Presenter implements PresenterContract {
 		)
 		const { movedTiles, newTiles } = this.field.fillEmptyPositions(positions)
 
-		for (const movedTile of movedTiles) {
-			movedTile.currentAnimation = TileAnimation.MOVE
-		}
-		for (const newTile of newTiles) {
-			newTile.currentAnimation = TileAnimation.APPEAR
+		for (const tile of [...movedTiles, ...newTiles]) {
+			tile.lock()
 		}
 
 		const groupsByColumns = this.getGroupsByColumns({
@@ -202,7 +211,7 @@ export class Presenter implements PresenterContract {
 			newTiles,
 		})
 
-		await Promise.all(
+		await Promise.allSettled(
 			groupsByColumns.map((infoByColumn) =>
 				this.animateFillingColumn(infoByColumn)
 			)
@@ -253,7 +262,7 @@ export class Presenter implements PresenterContract {
 
 	private groupByColumns(tiles: Set<Tile>) {
 		const tilesByColumn = new Map<number, Array<Tile>>()
-		
+
 		for (const tile of tiles) {
 			const column = tile.getPosition().column
 
@@ -274,28 +283,44 @@ export class Presenter implements PresenterContract {
 		movedTiles: Array<Tile>
 		newTiles: Array<Tile>
 	}) {
-		await Promise.all(
-			removedTiles.map((tile) => tile.removingPromise ?? Promise.resolve())
+		await Promise.allSettled(
+			removedTiles.map((tile) =>
+				this.animationsManager.waitForTileAnimations(tile)
+			)
 		)
 
-		await this.renderer.fallTilesToCurrentPositions({
+		const fallAnimationPromise = this.renderer.fallTilesToCurrentPositions({
 			tilesSnapshots: this.getSnapshotsSortedByRow(movedTiles),
 			gridSnapshot: this.grid.getSnapshot(),
 			layoutSnapshot: this.layoutUI.getSnapshot(),
 		})
-		movedTiles.forEach((tile) => {
-			tile.currentAnimation = TileAnimation.NONE
-		})
+		await Promise.allSettled(
+			movedTiles.map((tile) =>
+				this.animationsManager
+					.setAnimation({
+						tile,
+						promise: fallAnimationPromise,
+					})
+					.finally(() => tile.unlock())
+			)
+		)
 
-		await this.renderer.renderTiles({
+		const renderAnimationPromise = this.renderer.renderTiles({
 			tilesSnapshots: this.getSnapshotsSortedByRow(newTiles),
 			gridSnapshot: this.grid.getSnapshot(),
 			layoutSnapshot: this.layoutUI.getSnapshot(),
 			isAppearOnDefaultPosition: true,
 		})
-		newTiles.forEach((tile) => {
-			tile.currentAnimation = TileAnimation.NONE
-		})
+		await Promise.allSettled(
+			newTiles.map((tile) =>
+				this.animationsManager
+					.setAnimation({
+						tile,
+						promise: renderAnimationPromise,
+					})
+					.finally(() => tile.unlock())
+			)
+		)
 	}
 
 	private getSnapshotsSortedByRow(tiles: Array<Tile>) {
@@ -305,15 +330,28 @@ export class Presenter implements PresenterContract {
 			.sort((a, b) => b.row - a.row)
 	}
 
-	shuffleField() {
+	async shuffleField() {
 		this.field.shuffle()
-		const tiles = this.field.getTiles()
+		const tiles = Array.from(this.field.getTiles())
+		for (const tile of tiles) {
+			tile.lock()
+		}
 		const shuffleFieldPromise = this.renderer.shuffleTiles({
-			tilesSnapshots: Array.from(tiles).map((tile) => tile.getSnapshot()),
+			tilesSnapshots: tiles.map((tile) => tile.getSnapshot()),
 			gridSnapshot: this.grid.getSnapshot(),
 			layoutSnapshot: this.layoutUI.getSnapshot(),
 		})
-		return this.animationsManager.animate(shuffleFieldPromise)
+
+		await Promise.allSettled(
+			tiles.map((tile) =>
+				this.animationsManager
+					.setAnimation({
+						tile,
+						promise: shuffleFieldPromise,
+					})
+					.finally(() => tile.unlock())
+			)
+		)
 	}
 
 	// #endregion

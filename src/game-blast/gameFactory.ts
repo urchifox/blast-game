@@ -1,4 +1,4 @@
-import { AnimationsManager } from "../helpers/animationManager"
+import { AnimationsManager } from "./flow/animationManager"
 import { createId } from "../helpers/random"
 import { CompletionManager } from "./domain/completionManager"
 import { Field } from "./domain/field"

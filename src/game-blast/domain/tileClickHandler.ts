@@ -35,12 +35,14 @@ export class TileClickHandler {
 			return null
 		}
 
-		const { tiles } = connection
+		const availableTiles = Array.from(connection.tiles).filter(
+			(tile) => !tile.isLocked()
+		)
 		const minTilesCount = isTileKindNormal(tile.getKind())
 			? this.gameRules.MIN_COMBO_SIZE
 			: 1
 
-		const tilesNumber = tiles.size
+		const tilesNumber = availableTiles.length
 		if (tilesNumber < minTilesCount) {
 			return null
 		}
@@ -49,7 +51,7 @@ export class TileClickHandler {
 			{
 				name: CommandName.REMOVE,
 				payload: {
-					tiles: tiles,
+					tiles: new Set(availableTiles),
 					removingFromPosition: tile.getPosition(),
 				},
 			},
