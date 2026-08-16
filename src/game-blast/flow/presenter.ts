@@ -143,7 +143,9 @@ export class Presenter implements PresenterContract {
 		}
 
 		await Promise.allSettled(
-			Array.from(tiles).map((tile) => this.animationsManager.waitForTileAnimations(tile))
+			Array.from(tiles).map((tile) =>
+				this.animationsManager.waitForTileAnimations(tile)
+			)
 		)
 	}
 

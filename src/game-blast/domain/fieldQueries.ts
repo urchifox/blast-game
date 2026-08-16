@@ -105,10 +105,7 @@ export class FieldQueries {
 				}
 
 				const neighborTile = this.getTileByPosition(neighborPosition)
-				if (
-					neighborTile !== undefined &&
-					neighborTile.getKind() === kind
-				) {
+				if (neighborTile !== undefined && neighborTile.getKind() === kind) {
 					collector.collect(neighborTile)
 				}
 			}

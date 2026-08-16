@@ -164,10 +164,7 @@ export class ActionManager {
 	private remove(
 		payload: ActionPayloadMap[ActionName.REMOVE]
 	): ActionResultMap[ActionName.REMOVE] {
-		this.presenter.removeTilesFromCenter(
-			payload.tiles,
-			payload.centerPosition
-		)
+		this.presenter.removeTilesFromCenter(payload.tiles, payload.centerPosition)
 		return { removedTiles: payload.tiles }
 	}
 

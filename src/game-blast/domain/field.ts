@@ -28,9 +28,7 @@ export class Field {
 	}
 
 	getTiles(): Array<Tile> {
-		return this.tilesByColumns
-			.flat()
-			.filter((tile) => tile !== undefined)
+		return this.tilesByColumns.flat().filter((tile) => tile !== undefined)
 	}
 
 	getPositions(tiles?: Array<Tile>): Array<TilePosition> {

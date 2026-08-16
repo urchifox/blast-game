@@ -1,7 +1,4 @@
-import {
-	TileHandler,
-	TileHandlerProps,
-} from "../domain/tileHandler"
+import { TileHandler, TileHandlerProps } from "../domain/tileHandler"
 import { TilesManager, TilesManagerProps } from "./tilesManager"
 
 type TilesManagerFactoryProps = TileHandlerProps &
