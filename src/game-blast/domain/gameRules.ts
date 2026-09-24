@@ -39,6 +39,9 @@ export class GameRules {
 	private readonly GROWTH_EXPONENT = 1.5
 	/** Uses power scale formula */
 	getPoints(removedTilesNumber: number) {
+		if (removedTilesNumber < this.MIN_COMBO_SIZE) {
+			return 0
+		}
 		return Math.round(
 			this.BASE_SCORE * Math.pow(removedTilesNumber, this.GROWTH_EXPONENT)
 		)
