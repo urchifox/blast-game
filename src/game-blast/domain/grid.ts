@@ -17,8 +17,8 @@ export class Grid {
 	}
 
 	createGrid({ columns, rows }: { columns: number; rows: number }) {
-		this.rows = rows
-		this.columns = columns
+		this.rows = Math.max(0, rows)
+		this.columns = Math.max(0, columns)
 	}
 
 	getNeighbourPositions(position: TilePosition): TilePosition[] {
