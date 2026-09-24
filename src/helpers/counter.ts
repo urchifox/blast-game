@@ -72,10 +72,4 @@ export class Counter {
 			? this.currentValue <= this.endValue
 			: this.currentValue >= this.endValue
 	}
-
-	getRemainingValue() {
-		return this.isDirectionDown()
-			? this.startValue - this.currentValue
-			: this.currentValue - this.endValue
-	}
 }
