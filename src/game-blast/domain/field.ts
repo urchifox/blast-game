@@ -108,7 +108,7 @@ export class Field {
 		return this.placeTile(tile)
 	}
 
-	placeTile(tile: Tile) {
+	private placeTile(tile: Tile) {
 		const position = tile.getPosition()
 		const column = this.tilesByColumns[position.column]
 		const isPositionEmpty = column[position.row] === undefined
@@ -121,6 +121,9 @@ export class Field {
 	}
 
 	swapTiles(tile1: Tile, tile2: Tile) {
+		if (tile1 === tile2) {
+			return
+		}
 		const position1 = tile1.getPosition()
 		const position2 = tile2.getPosition()
 		this.removeTile(position1)
