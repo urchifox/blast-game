@@ -1,6 +1,6 @@
 import { Field } from "../domain/field"
 import { Grid } from "../domain/grid"
-import { Tile, TileKind, TilePosition } from "../domain/tile"
+import { Tile, TileKind, TilePosition, TileProps } from "../domain/tile"
 import { wait } from "../../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./animationRules"
 import { AnimationsManager } from "./animationManager"
@@ -53,10 +53,18 @@ export class Presenter implements PresenterContract {
 		this.animationsManager.clear()
 	}
 
-	create({ columns, rows }: { columns: number; rows: number }) {
+	create({
+		columns,
+		rows,
+		tilesProps,
+	}: {
+		columns: number
+		rows: number
+		tilesProps: Set<TileProps>
+	}) {
 		this.layoutUI.setGameContainerSize(null)
 		this.grid.createGrid({ columns, rows })
-		this.field.generateTiles()
+		this.field.createInitialTiles(tilesProps)
 		const gridSnapshot = this.grid.getSnapshot()
 		const layoutSnapshot = this.layoutUI.updateSizes(gridSnapshot)
 		this.layoutUI.setGameContainerSize({

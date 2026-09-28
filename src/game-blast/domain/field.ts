@@ -6,7 +6,7 @@ import {
 } from "../../helpers/random"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GridSnapshot } from "./grid"
-import { Tile, TileKind, TilePosition } from "./tile"
+import { Tile, TileKind, TilePosition, TileProps } from "./tile"
 
 export type FieldProps = {
 	getGridSnapshot: () => GridSnapshot
@@ -35,19 +35,21 @@ export class Field {
 		return (tiles ?? this.getTiles()).map((tile) => tile.getPosition())
 	}
 
-	generateTiles() {
+	createInitialTiles(tilesProps: Set<TileProps>) {
 		const { columns, rows } = this.getGridSnapshot()
+		const tilesPropsArray = Array.from(tilesProps)
 
 		for (let column = 0; column < columns; column++) {
 			this.tilesByColumns[column] = []
 			for (let row = 0; row < rows; row++) {
-				const kind = pickRandomItem(
-					TILES_KINDS_NORMAL,
-					this.randomizationFunction
+				const tileInfo = tilesPropsArray.find(
+					(tileInfo) =>
+						tileInfo.position.column === column && tileInfo.position.row === row
 				)
-				const position = { row, column }
-				const tile = new Tile({ kind, position, id: this.createId() })
-				this.tilesByColumns[column].push(tile)
+				if (tileInfo !== undefined) {
+					const tile = new Tile(tileInfo)
+					this.tilesByColumns[column].push(tile)
+				}
 			}
 		}
 	}

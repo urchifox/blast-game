@@ -96,6 +96,7 @@ export function gameFactory(props: GameFactoryProps) {
 	const levelGenerator = new LevelGenerator({
 		gameRules,
 		randomizationFunction,
+		createId,
 	})
 
 	return new Game({
