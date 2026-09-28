@@ -8,7 +8,7 @@ describe("grid creation", () => {
 	])("creates a grid with positive values", ({ columns, rows }) => {
 		const grid = new Grid()
 		grid.createGrid({ columns, rows })
-        const snapshot = grid.getSnapshot()
+		const snapshot = grid.getSnapshot()
 		expect(snapshot.columns).toBe(columns)
 		expect(snapshot.rows).toBe(rows)
 	})
@@ -147,7 +147,7 @@ describe("grid neighbour positions", () => {
 			position: { row: 2, column: -2 },
 			expectedPositions: [],
 		},
-        {
+		{
 			position: { row: 10, column: 0 },
 			expectedPositions: [{ row: 9, column: 0 }],
 		},
@@ -159,11 +159,11 @@ describe("grid neighbour positions", () => {
 			position: { row: 10, column: 5 },
 			expectedPositions: [],
 		},
-        {
+		{
 			position: { row: 11, column: 0 },
 			expectedPositions: [],
 		},
-        {
+		{
 			position: { row: 0, column: 6 },
 			expectedPositions: [],
 		},
