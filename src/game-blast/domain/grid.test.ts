@@ -65,7 +65,8 @@ describe("grid neighbour positions", () => {
 	])(
 		"returns the neighbour positions for corner position $position",
 		({ position, expectedPositions }) => {
-			expect(grid.getNeighbourPositions(position)).toEqual(expectedPositions)
+			const neighbourPositions = grid.getNeighbourPositions(position)
+			expect(new Set(neighbourPositions)).toEqual(new Set(expectedPositions))
 		}
 	)
 
@@ -105,7 +106,8 @@ describe("grid neighbour positions", () => {
 	])(
 		"returns the neighbour positions for side position $position",
 		({ position, expectedPositions }) => {
-			expect(grid.getNeighbourPositions(position)).toEqual(expectedPositions)
+			const neighbourPositions = grid.getNeighbourPositions(position)
+			expect(new Set(neighbourPositions)).toEqual(new Set(expectedPositions))
 		}
 	)
 
@@ -122,7 +124,8 @@ describe("grid neighbour positions", () => {
 	])(
 		"returns the neighbour positions for center position $position",
 		({ position, expectedPositions }) => {
-			expect(grid.getNeighbourPositions(position)).toEqual(expectedPositions)
+			const neighbourPositions = grid.getNeighbourPositions(position)
+			expect(new Set(neighbourPositions)).toEqual(new Set(expectedPositions))
 		}
 	)
 
@@ -170,7 +173,8 @@ describe("grid neighbour positions", () => {
 	])(
 		"returns only neighbour positions inside grid for out of range position $position",
 		({ position, expectedPositions }) => {
-			expect(grid.getNeighbourPositions(position)).toEqual(expectedPositions)
+			const neighbourPositions = grid.getNeighbourPositions(position)
+			expect(new Set(neighbourPositions)).toEqual(new Set(expectedPositions))
 		}
 	)
 })

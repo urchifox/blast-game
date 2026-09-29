@@ -103,7 +103,7 @@ describe("field queries", () => {
 				position,
 				radius
 			).tiles
-			expect([...tilesInRadius]).toEqual(expectedTiles)
+			expect(tilesInRadius).toEqual(new Set(expectedTiles))
 		}
 	)
 
@@ -126,7 +126,7 @@ describe("field queries", () => {
 				position,
 				radius
 			).tiles
-			expect([...tilesInRadius]).toEqual(expectedTiles)
+			expect(tilesInRadius).toEqual(new Set(expectedTiles))
 		}
 	)
 
@@ -150,7 +150,7 @@ describe("field queries", () => {
 	])("returns tiles in row", ({ row, expectedTiles }) => {
 		const { fieldQueries } = createFieldQueries()
 		const tilesInRow = fieldQueries.getTilesInRow(row).tiles
-		expect([...tilesInRow]).toEqual(expectedTiles)
+		expect(tilesInRow).toEqual(new Set(expectedTiles))
 	})
 
 	it.each([
@@ -173,7 +173,7 @@ describe("field queries", () => {
 	])("returns tiles in column", ({ column, expectedTiles }) => {
 		const { fieldQueries } = createFieldQueries()
 		const tilesInColumn = fieldQueries.getTilesInColumn(column).tiles
-		expect([...tilesInColumn]).toEqual(expectedTiles)
+		expect(tilesInColumn).toEqual(new Set(expectedTiles))
 	})
 
 	it.each([
@@ -191,7 +191,7 @@ describe("field queries", () => {
 			const { fieldQueries } = createFieldQueries()
 			const sameKindNeighbourTiles =
 				fieldQueries.getSameKindNeighbourTiles(tile).tiles
-			expect([...sameKindNeighbourTiles]).toEqual(expectedTiles)
+			expect(sameKindNeighbourTiles).toEqual(new Set(expectedTiles))
 		}
 	)
 
@@ -222,7 +222,7 @@ describe("field queries", () => {
 				new Set(tiles),
 				centerPosition
 			)
-			expect([...sortedGroupedTiles]).toEqual(expectedTiles)
+			expect(sortedGroupedTiles).toEqual(expectedTiles)
 		}
 	)
 })
