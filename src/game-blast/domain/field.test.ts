@@ -71,9 +71,16 @@ describe("field", () => {
 		const movedTilesPositions = [...movedTiles].map((tile) =>
 			tile.getPosition()
 		)
+		const newTilesPositions = [...newTiles].map((tile) => tile.getPosition())
 
 		expect(new Set(movedTilesPositions)).toEqual(new Set(positionsToDelete))
-		expect(newTiles.size).toBe(positionsToDelete.length)
+		expect(new Set(newTilesPositions)).toEqual(
+			new Set([
+				{ row: 0, column: 0 },
+				{ row: 0, column: 1 },
+				{ row: 0, column: 2 },
+			])
+		)
 	})
 
 	it("swaps tiles", () => {
