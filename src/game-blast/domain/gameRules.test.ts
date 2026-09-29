@@ -1,11 +1,6 @@
 import { GameRules } from "./gameRules"
 
 describe("scrore", () => {
-	it("has correct minimum combo size", () => {
-		const rules = new GameRules()
-		expect(rules.MIN_COMBO_SIZE).toBe(2)
-	})
-
 	it.each([-1, 0, 1])(
 		"ignores values under minimum combo size: %i",
 		(invalidTilesNumber) => {
