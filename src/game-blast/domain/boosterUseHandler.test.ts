@@ -118,9 +118,7 @@ describe("booster use handling", () => {
 			expect(commands).toBeDefined()
 			expect(commands?.length).toEqual(1)
 			expect(command.name).toEqual(CommandName.REMOVE)
-			expect(command.payload.removingFromPosition).toEqual(
-				expectedPositionsToRemove[0]
-			)
+			expect(command.payload.removingFromPosition).toEqual(positions[0])
 			expect(new Set(tilesPositionsInPayload)).toEqual(
 				new Set(expectedPositionsToRemove)
 			)
