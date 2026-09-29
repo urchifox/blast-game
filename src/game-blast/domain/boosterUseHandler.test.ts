@@ -1,82 +1,69 @@
 import { BoosterUseHandler } from "./boosterUseHandler"
 import { CommandName } from "./command"
-import { Field } from "./field"
-import { FieldQueries } from "./fieldQueries"
 import { GameRules } from "./gameRules"
-import { Grid } from "./grid"
-import { Tile } from "./tile"
+import { createField } from "./testHelpers"
+import { Tile, TileProps } from "./tile"
 import { BoosterName } from "./types"
 
-let boosterUseHandler: BoosterUseHandler
-beforeEach(() => {
-	const grid = new Grid()
-	grid.createGrid({ columns: 3, rows: 3 })
-
-	const randomizationFunction = () => 0
-	let nextId = 1
-	const createId = () => String(nextId++)
-
-	const field = new Field({
-		getGridSnapshot: grid.getSnapshot.bind(grid),
-		randomizationFunction,
-		createId,
+function createBoosterUseHandler() {
+	const { fieldQueries } = createField({
+		columns: 3,
+		rows: 3,
+		tilesProps: new Set(tilesProps),
 	})
-	vi.spyOn(field, "getTiles").mockReturnValue(expectedGeneratedTiles)
-	const fieldQueries = new FieldQueries({ field, grid })
-
-	boosterUseHandler = new BoosterUseHandler({
+	return new BoosterUseHandler({
 		gameRules: new GameRules(),
 		fieldQueries: fieldQueries,
 	})
-})
+}
 
-const expectedGeneratedTiles: Array<Tile> = [
-	new Tile({
+const tilesProps = [
+	{
 		kind: "red",
 		position: { row: 0, column: 0 },
 		id: "1",
-	}),
-	new Tile({
+	},
+	{
 		kind: "red",
 		position: { row: 1, column: 0 },
 		id: "2",
-	}),
-	new Tile({
+	},
+	{
 		kind: "yellow",
 		position: { row: 2, column: 0 },
 		id: "3",
-	}),
-	new Tile({
+	},
+	{
 		kind: "red",
 		position: { row: 0, column: 1 },
 		id: "4",
-	}),
-	new Tile({
+	},
+	{
 		kind: "yellow",
 		position: { row: 1, column: 1 },
 		id: "5",
-	}),
-	new Tile({
+	},
+	{
 		kind: "blue",
 		position: { row: 2, column: 1 },
 		id: "6",
-	}),
-	new Tile({
+	},
+	{
 		kind: "yellow",
 		position: { row: 0, column: 2 },
 		id: "7",
-	}),
-	new Tile({
+	},
+	{
 		kind: "blue",
 		position: { row: 1, column: 2 },
 		id: "8",
-	}),
-	new Tile({
+	},
+	{
 		kind: "yellow",
 		position: { row: 2, column: 2 },
 		id: "9",
-	}),
-]
+	},
+] satisfies Array<TileProps>
 
 describe("booster use handling", () => {
 	it.each([
@@ -84,11 +71,12 @@ describe("booster use handling", () => {
 		{ boosterName: "teleport" as BoosterName, tiles: [] },
 		{
 			boosterName: "teleport" as BoosterName,
-			tiles: [expectedGeneratedTiles[0]],
+			tiles: [new Tile(tilesProps[0])],
 		},
 	])(
 		"should return null if the tiles are not the required count",
 		({ boosterName, tiles }) => {
+			const boosterUseHandler = createBoosterUseHandler()
 			const result = boosterUseHandler.use({ boosterName, tiles })
 			expect(result).toBeNull()
 		}
@@ -96,12 +84,13 @@ describe("booster use handling", () => {
 
 	it.each([
 		{
-			tiles: [expectedGeneratedTiles[0]],
-			expectedTilesToRemove: expectedGeneratedTiles,
+			tiles: [new Tile(tilesProps[0])],
+			expectedTilesToRemove: tilesProps.map((tile) => new Tile(tile)),
 		},
 	])(
 		"bomb should return commands to remove tiles",
 		({ tiles, expectedTilesToRemove }) => {
+			const boosterUseHandler = createBoosterUseHandler()
 			const result = boosterUseHandler.use({
 				boosterName: "bomb" as BoosterName,
 				tiles,
@@ -120,9 +109,10 @@ describe("booster use handling", () => {
 
 	it.each([
 		{
-			tiles: [expectedGeneratedTiles[0], expectedGeneratedTiles[1]],
+			tiles: [new Tile(tilesProps[0]), new Tile(tilesProps[1])],
 		},
 	])("tile should return commands to swap tiles", ({ tiles }) => {
+		const boosterUseHandler = createBoosterUseHandler()
 		const result = boosterUseHandler.use({
 			boosterName: "teleport" as BoosterName,
 			tiles,
