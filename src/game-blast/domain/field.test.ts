@@ -83,16 +83,15 @@ describe("field", () => {
 		expect(newTiles.size).toBe(positionsToDelete.length)
 	})
 
-	it.each([
-		{ tile1: new Tile(tilesProps[0]), tile2: new Tile(tilesProps[1]) },
-		{ tile1: new Tile(tilesProps[0]), tile2: new Tile(tilesProps[0]) },
-	])("swaps tiles", ({ tile1, tile2 }) => {
+	it("swaps tiles", () => {
 		const { field } = createField({
 			columns: 3,
 			rows: 3,
 			tilesProps: new Set(tilesProps),
 		})
+		const tile1 = field.getTiles()[0]
 		const tile1Position = tile1.getPosition()
+		const tile2 = field.getTiles()[1]
 		const tile2Position = tile2.getPosition()
 
 		field.swapTiles(tile1, tile2)
