@@ -1,5 +1,5 @@
 import { BoosterUseHandler } from "./boosterUseHandler"
-import { CommandName } from "./command"
+import { Command, CommandName } from "./command"
 import { GameRules } from "./gameRules"
 import { createField } from "./testHelpers"
 import { Tile, TileProps } from "./tile"
@@ -11,10 +11,15 @@ function createBoosterUseHandler() {
 		rows: 3,
 		tilesProps: new Set(tilesProps),
 	})
-	return new BoosterUseHandler({
+	const boosterUseHandler = new BoosterUseHandler({
 		gameRules: new GameRules(),
 		fieldQueries: fieldQueries,
 	})
+
+	return {
+		boosterUseHandler,
+		fieldQueries,
+	}
 }
 
 const tilesProps = [
@@ -67,61 +72,84 @@ const tilesProps = [
 
 describe("booster use handling", () => {
 	it.each([
-		{ boosterName: "bomb" as BoosterName, tiles: [] },
-		{ boosterName: "teleport" as BoosterName, tiles: [] },
+		{ boosterName: "bomb" as BoosterName, positions: [] },
+		{ boosterName: "teleport" as BoosterName, positions: [] },
 		{
 			boosterName: "teleport" as BoosterName,
-			tiles: [new Tile(tilesProps[0])],
+			positions: [{ row: 0, column: 0 }],
 		},
 	])(
 		"should return null if the tiles are not the required count",
-		({ boosterName, tiles }) => {
-			const boosterUseHandler = createBoosterUseHandler()
+		({ boosterName, positions }) => {
+			const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
+			const tiles = positions.map((position) =>
+				fieldQueries.getTileByPosition(position)
+			) as Array<Tile>
+
 			const result = boosterUseHandler.use({ boosterName, tiles })
+
 			expect(result).toBeNull()
 		}
 	)
 
 	it.each([
 		{
-			tiles: [new Tile(tilesProps[0])],
-			expectedTilesToRemove: tilesProps.map((tile) => new Tile(tile)),
+			positions: [{ row: 0, column: 0 }],
+			expectedPositionsToRemove: tilesProps.map((props) => props.position),
 		},
 	])(
-		"bomb should return commands to remove tiles",
-		({ tiles, expectedTilesToRemove }) => {
-			const boosterUseHandler = createBoosterUseHandler()
-			const result = boosterUseHandler.use({
+		"bomb should return command to remove tiles",
+		({ positions, expectedPositionsToRemove }) => {
+			const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
+			const tiles = positions.map((position) =>
+				fieldQueries.getTileByPosition(position)
+			) as Array<Tile>
+
+			const commands = boosterUseHandler.use({
 				boosterName: "bomb" as BoosterName,
 				tiles,
 			})
-			expect(result).toEqual([
-				{
-					name: CommandName.REMOVE,
-					payload: {
-						tiles: new Set(expectedTilesToRemove),
-						removingFromPosition: tiles[0].getPosition(),
-					},
-				},
-			])
+			const command = commands?.[0] as Command<CommandName.REMOVE>
+			const tilesInPayload = command.payload.tiles
+			const tilesPositionsInPayload = [...tilesInPayload].map((tile) =>
+				tile.getPosition()
+			)
+
+			expect(commands).toBeDefined()
+			expect(commands?.length).toEqual(1)
+			expect(command.name).toEqual(CommandName.REMOVE)
+			expect(command.payload.removingFromPosition).toEqual(
+				expectedPositionsToRemove[0]
+			)
+			expect(new Set(tilesPositionsInPayload)).toEqual(
+				new Set(expectedPositionsToRemove)
+			)
 		}
 	)
 
 	it.each([
 		{
-			tiles: [new Tile(tilesProps[0]), new Tile(tilesProps[1])],
+			positions: [
+				{ row: 0, column: 0 },
+				{ row: 1, column: 0 },
+			],
 		},
-	])("tile should return commands to swap tiles", ({ tiles }) => {
-		const boosterUseHandler = createBoosterUseHandler()
-		const result = boosterUseHandler.use({
+	])("tile should return commands to swap tiles", ({ positions }) => {
+		const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
+		const tiles = positions.map((position) =>
+			fieldQueries.getTileByPosition(position)
+		) as Array<Tile>
+
+		const commands = boosterUseHandler.use({
 			boosterName: "teleport" as BoosterName,
 			tiles,
 		})
-		expect(result).toEqual([
-			{
-				name: CommandName.SWAP,
-				payload: tiles,
-			},
-		])
+		const command = commands?.[0] as Command<CommandName.SWAP>
+		const tilesInPayload = command.payload
+
+		expect(commands).toBeDefined()
+		expect(commands?.length).toEqual(1)
+		expect(command.name).toEqual(CommandName.SWAP)
+		expect(new Set(tilesInPayload)).toEqual(new Set(tiles))
 	})
 })

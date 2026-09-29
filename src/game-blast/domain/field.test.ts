@@ -1,5 +1,5 @@
 import { createField } from "./testHelpers"
-import { Tile, TileProps } from "./tile"
+import { TileProps } from "./tile"
 
 const tilesProps = [
 	{
@@ -68,18 +68,11 @@ describe("field", () => {
 		const { movedTiles, newTiles } = field.fillEmptyPositions(
 			new Set(positionsToDelete)
 		)
-
 		const movedTilesPositions = [...movedTiles].map((tile) =>
 			tile.getPosition()
 		)
-		const movesTilesPositionsExpected = [
-			new Tile(tilesProps[0]),
-			new Tile(tilesProps[3]),
-			new Tile(tilesProps[6]),
-		].map((tile) => tile.getPosition())
-		expect(new Set(movedTilesPositions)).toEqual(
-			new Set(movesTilesPositionsExpected)
-		)
+
+		expect(new Set(movedTilesPositions)).toEqual(new Set(positionsToDelete))
 		expect(newTiles.size).toBe(positionsToDelete.length)
 	})
 

@@ -1,4 +1,4 @@
-import { CommandName } from "./command"
+import { Command, CommandName } from "./command"
 import { GameRules } from "./gameRules"
 import { createField } from "./testHelpers"
 import { Tile, TileProps } from "./tile"
@@ -10,11 +10,15 @@ function createTileHandler() {
 		rows: 3,
 		tilesProps: new Set(tilesProps),
 	})
-	return new TileHandler({
+	const tileHandler = new TileHandler({
 		gameRules: new GameRules(),
 		fieldQueries: fieldQueries,
 		randomizationFunction: () => 0,
 	})
+	return {
+		tileHandler,
+		fieldQueries,
+	}
 }
 
 const tilesProps = [
@@ -67,37 +71,49 @@ const tilesProps = [
 
 describe("tile click handling", () => {
 	it("should return null if there is no connection", () => {
-		const tileHandler = createTileHandler()
-		const clickedTile = new Tile(tilesProps[2])
-		const result = tileHandler.onClick(clickedTile)
-		expect(result).toBeNull()
+		const { tileHandler, fieldQueries } = createTileHandler()
+		const clickedPosition = { row: 2, column: 0 }
+		const clickedTile = fieldQueries.getTileByPosition(clickedPosition) as Tile
+
+		const commands = tileHandler.onClick(clickedTile)
+
+		expect(commands).toBeNull()
 	})
 
 	it("should return commands to remove and add tiles", () => {
-		const tileHandler = createTileHandler()
-		const clickedTile = new Tile(tilesProps[0])
-		const result = tileHandler.onClick(clickedTile)
-		expect(result).toEqual([
-			{
-				name: CommandName.REMOVE,
-				payload: {
-					removingFromPosition: clickedTile.getPosition(),
-					tiles: new Set([
-						new Tile(tilesProps[0]),
-						new Tile(tilesProps[1]),
-						new Tile(tilesProps[3]),
-					]),
-				},
-			},
-		])
+		const { tileHandler, fieldQueries } = createTileHandler()
+		const clickedPosition = { row: 0, column: 0 }
+		const clickedTile = fieldQueries.getTileByPosition(clickedPosition) as Tile
+
+		const commands = tileHandler.onClick(clickedTile)
+		const command = commands?.[0] as Command<CommandName.REMOVE>
+		const tilesInPayload = command.payload.tiles
+		const tilesPositionsInPayload = [...tilesInPayload].map((tile) =>
+			tile.getPosition()
+		)
+
+		expect(commands).toBeDefined()
+		expect(commands?.length).toEqual(1)
+		expect(command.name).toEqual(CommandName.REMOVE)
+		expect(command.payload.removingFromPosition).toEqual(clickedPosition)
+		expect(new Set(tilesPositionsInPayload)).toEqual(
+			new Set([
+				{ row: 0, column: 0 },
+				{ row: 1, column: 0 },
+				{ row: 0, column: 1 },
+			])
+		)
 	})
 })
 
 describe("tile remove handling", () => {
 	it("should return null for normal kind", () => {
-		const tileHandler = createTileHandler()
-		const tile = new Tile(tilesProps[0])
+		const { tileHandler, fieldQueries } = createTileHandler()
+		const position = { row: 0, column: 0 }
+		const tile = fieldQueries.getTileByPosition(position) as Tile
+
 		const result = tileHandler.onRemove(tile)
+
 		expect(result).toBeNull()
 	})
 })

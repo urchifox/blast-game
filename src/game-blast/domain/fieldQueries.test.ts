@@ -49,8 +49,6 @@ const tilesProps = [
 	},
 ] satisfies Array<TileProps>
 
-const tilesFromProps = tilesProps.map((tileProps) => new Tile(tileProps))
-
 function createFieldQueries() {
 	return createField({
 		columns: 3,
@@ -60,50 +58,60 @@ function createFieldQueries() {
 }
 
 describe("field queries", () => {
-	it.each(tilesFromProps)("finds tile by its position", (expectedTile) => {
-		const { fieldQueries } = createFieldQueries()
-		const tileByPosition = fieldQueries.getTileByPosition(
-			expectedTile.getPosition()
-		)
-		expect(tileByPosition).toEqual(expectedTile)
-	})
+	it.each(tilesProps)(
+		"finds tile by its position",
+		({ position, id, kind }) => {
+			const { fieldQueries } = createFieldQueries()
+			const tileByPosition = fieldQueries.getTileByPosition(position)
+			expect(tileByPosition?.getPosition()).toEqual(position)
+			expect(tileByPosition?.getId()).toEqual(id)
+			expect(tileByPosition?.getKind()).toEqual(kind)
+		}
+	)
 
-	it.each(tilesFromProps)("finds tile by its id", (expectedTile) => {
+	it.each(tilesProps)("finds tile by its id", ({ position, id, kind }) => {
 		const { fieldQueries } = createFieldQueries()
-		const tileById = fieldQueries.getTileById(expectedTile.getId())
-		expect(tileById).toEqual(expectedTile)
+		const tileById = fieldQueries.getTileById(id)
+		expect(tileById?.getId()).toEqual(id)
+		expect(tileById?.getPosition()).toEqual(position)
+		expect(tileById?.getKind()).toEqual(kind)
 	})
 
 	it.each([
 		{
-			position: tilesFromProps[0].getPosition(),
+			position: { row: 0, column: 0 },
 			radius: 1,
-			expectedTiles: [
-				tilesFromProps[0],
-				tilesFromProps[1],
-				tilesFromProps[3],
-				tilesFromProps[4],
+			expectedPositions: [
+				{ row: 0, column: 0 },
+				{ row: 1, column: 0 },
+				{ row: 0, column: 1 },
+				{ row: 1, column: 1 },
 			],
 		},
 		{
-			position: tilesFromProps[4].getPosition(),
+			position: { row: 1, column: 1 },
 			radius: 1,
-			expectedTiles: tilesFromProps,
+			expectedPositions: tilesProps.map((tileProps) => tileProps.position),
 		},
 		{
-			position: tilesFromProps[8].getPosition(),
+			position: { row: 2, column: 2 },
 			radius: 2,
-			expectedTiles: tilesFromProps,
+			expectedPositions: tilesProps.map((tileProps) => tileProps.position),
 		},
 	])(
 		"returns tiles in radius for position in range",
-		({ position, radius, expectedTiles }) => {
+		({ position, radius, expectedPositions }) => {
 			const { fieldQueries } = createFieldQueries()
 			const tilesInRadius = fieldQueries.getTilesInRadius(
 				position,
 				radius
 			).tiles
-			expect(tilesInRadius).toEqual(new Set(expectedTiles))
+			const tilesInRadiusPositions = [...tilesInRadius].map((tile) =>
+				tile.getPosition()
+			)
+			expect(new Set(tilesInRadiusPositions)).toEqual(
+				new Set(expectedPositions)
+			)
 		}
 	)
 
@@ -111,118 +119,168 @@ describe("field queries", () => {
 		{
 			position: { row: -1, column: -1 },
 			radius: 1,
-			expectedTiles: [tilesFromProps[0]],
+			expectedPositions: [{ row: 0, column: 0 }],
 		},
 		{
 			position: { row: 3, column: 3 },
 			radius: 1,
-			expectedTiles: [tilesFromProps[8]],
+			expectedPositions: [{ row: 2, column: 2 }],
 		},
 	])(
 		"returns tiles in radius for position out of range",
-		({ position, radius, expectedTiles }) => {
+		({ position, radius, expectedPositions }) => {
 			const { fieldQueries } = createFieldQueries()
 			const tilesInRadius = fieldQueries.getTilesInRadius(
 				position,
 				radius
 			).tiles
-			expect(tilesInRadius).toEqual(new Set(expectedTiles))
+			const tilesInRadiusPositions = [...tilesInRadius].map((tile) =>
+				tile.getPosition()
+			)
+			expect(new Set(tilesInRadiusPositions)).toEqual(
+				new Set(expectedPositions)
+			)
 		}
 	)
 
 	it.each([
 		{
 			row: 0,
-			expectedTiles: [tilesFromProps[0], tilesFromProps[3], tilesFromProps[6]],
+			expectedPositions: [
+				{ row: 0, column: 0 },
+				{ row: 0, column: 1 },
+				{ row: 0, column: 2 },
+			],
 		},
 		{
 			row: 2,
-			expectedTiles: [tilesFromProps[2], tilesFromProps[5], tilesFromProps[8]],
+			expectedPositions: [
+				{ row: 2, column: 0 },
+				{ row: 2, column: 1 },
+				{ row: 2, column: 2 },
+			],
 		},
 		{
 			row: -1,
-			expectedTiles: [],
+			expectedPositions: [],
 		},
 		{
 			row: 3,
-			expectedTiles: [],
+			expectedPositions: [],
 		},
-	])("returns tiles in row", ({ row, expectedTiles }) => {
+	])("returns tiles in row", ({ row, expectedPositions }) => {
 		const { fieldQueries } = createFieldQueries()
 		const tilesInRow = fieldQueries.getTilesInRow(row).tiles
-		expect(tilesInRow).toEqual(new Set(expectedTiles))
+		const tilesInRowPositions = [...tilesInRow].map((tile) =>
+			tile.getPosition()
+		)
+		expect(new Set(tilesInRowPositions)).toEqual(new Set(expectedPositions))
 	})
 
 	it.each([
 		{
 			column: 0,
-			expectedTiles: [tilesFromProps[0], tilesFromProps[1], tilesFromProps[2]],
+			expectedPositions: [
+				{ row: 0, column: 0 },
+				{ row: 1, column: 0 },
+				{ row: 2, column: 0 },
+			],
 		},
 		{
 			column: 2,
-			expectedTiles: [tilesFromProps[6], tilesFromProps[7], tilesFromProps[8]],
+			expectedPositions: [
+				{ row: 0, column: 2 },
+				{ row: 1, column: 2 },
+				{ row: 2, column: 2 },
+			],
 		},
 		{
 			column: -1,
-			expectedTiles: [],
+			expectedPositions: [],
 		},
 		{
 			column: 3,
-			expectedTiles: [],
+			expectedPositions: [],
 		},
-	])("returns tiles in column", ({ column, expectedTiles }) => {
+	])("returns tiles in column", ({ column, expectedPositions }) => {
 		const { fieldQueries } = createFieldQueries()
 		const tilesInColumn = fieldQueries.getTilesInColumn(column).tiles
-		expect(tilesInColumn).toEqual(new Set(expectedTiles))
+		const tilesInColumnPositions = [...tilesInColumn].map((tile) =>
+			tile.getPosition()
+		)
+		expect(new Set(tilesInColumnPositions)).toEqual(new Set(expectedPositions))
 	})
 
 	it.each([
 		{
-			tile: tilesFromProps[0],
-			expectedTiles: [tilesFromProps[0], tilesFromProps[1], tilesFromProps[3]],
+			tilePosition: { row: 0, column: 0 },
+			expectedPositions: [
+				{ row: 0, column: 0 },
+				{ row: 1, column: 0 },
+				{ row: 0, column: 1 },
+			],
 		},
 		{
-			tile: tilesFromProps[2],
-			expectedTiles: [tilesFromProps[2]],
+			tilePosition: { row: 2, column: 0 },
+			expectedPositions: [{ row: 2, column: 0 }],
 		},
 	])(
 		"finds same kind neighbour tiles for provided tile",
-		({ tile, expectedTiles }) => {
+		({ tilePosition, expectedPositions }) => {
 			const { fieldQueries } = createFieldQueries()
+			const tile = fieldQueries.getTileByPosition(tilePosition) as Tile
 			const sameKindNeighbourTiles =
 				fieldQueries.getSameKindNeighbourTiles(tile).tiles
-			expect(sameKindNeighbourTiles).toEqual(new Set(expectedTiles))
+			const sameKindNeighbourTilesPositions = [...sameKindNeighbourTiles].map(
+				(tile) => tile.getPosition()
+			)
+			expect(new Set(sameKindNeighbourTilesPositions)).toEqual(
+				new Set(expectedPositions)
+			)
 		}
 	)
 
 	it.each([
 		{
-			tiles: tilesFromProps,
-			centerPosition: tilesFromProps[0].getPosition(),
-			expectedTiles: [
-				[0, new Set([tilesFromProps[0]])],
-				[1, new Set([tilesFromProps[1], tilesFromProps[3], tilesFromProps[4]])],
+			centerPosition: { row: 0, column: 0 },
+			expectedGroups: [
+				[0, new Set([{ row: 0, column: 0 }])],
+				[
+					1,
+					new Set([
+						{ row: 1, column: 0 },
+						{ row: 0, column: 1 },
+						{ row: 1, column: 1 },
+					]),
+				],
 				[
 					2,
 					new Set([
-						tilesFromProps[2],
-						tilesFromProps[5],
-						tilesFromProps[8],
-						tilesFromProps[6],
-						tilesFromProps[7],
+						{ row: 2, column: 0 },
+						{ row: 2, column: 1 },
+						{ row: 2, column: 2 },
+						{ row: 0, column: 2 },
+						{ row: 1, column: 2 },
 					]),
 				],
 			],
 		},
 	])(
 		"groups and sorts tile by their distance from the center position",
-		({ tiles, centerPosition, expectedTiles }) => {
+		({ centerPosition, expectedGroups }) => {
 			const { fieldQueries } = createFieldQueries()
+			const tiles = fieldQueries.getTiles()
 			const sortedGroupedTiles = fieldQueries.getSortedGroupedTiles(
 				new Set(tiles),
 				centerPosition
 			)
-			expect(sortedGroupedTiles).toEqual(expectedTiles)
+			const sortedGroupedPositions = sortedGroupedTiles.map(
+				([distance, tiles]) => [
+					distance,
+					new Set([...tiles].map((tile) => tile.getPosition())),
+				]
+			)
+			expect(sortedGroupedPositions).toEqual(expectedGroups)
 		}
 	)
 })
