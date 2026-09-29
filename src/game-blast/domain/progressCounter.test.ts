@@ -3,19 +3,15 @@ import { GameRules } from "./gameRules"
 import { ProgressCounter } from "./progressCounter"
 import { GameCompletionStatus } from "./types"
 
-describe("progressCounter", () => {
-	let progressCounter: ProgressCounter
-	beforeEach(() => {
-		progressCounter = new ProgressCounter({
-			scoreCounter: new Counter({ startValue: 0, endValue: 50 }),
-			movesCounter: new Counter({ startValue: 3, endValue: 0 }),
-			gameRules: new GameRules(),
-		})
+function createProgressCounter() {
+	return new ProgressCounter({
+		scoreCounter: new Counter({ startValue: 0, endValue: 50 }),
+		movesCounter: new Counter({ startValue: 3, endValue: 0 }),
+		gameRules: new GameRules(),
 	})
-	afterEach(() => {
-		progressCounter.clear()
-	})
+}
 
+describe("progressCounter", () => {
 	it.each([
 		{
 			removedTilesCount: 2,
@@ -45,6 +41,7 @@ describe("progressCounter", () => {
 	])(
 		"has status $completionStatus after processing $removedTilesCount removed tiles $repeatCount times",
 		({ removedTilesCount, repeatCount, completionStatus }) => {
+			const progressCounter = createProgressCounter()
 			for (let i = 0; i < repeatCount; i++) {
 				progressCounter.processMove(removedTilesCount)
 			}
