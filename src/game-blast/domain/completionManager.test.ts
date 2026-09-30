@@ -233,4 +233,30 @@ describe("completion manager", () => {
 		)
 		expect(completionManager.isShuffleNeeded()).toBe(false)
 	})
+
+	it("loss after unsuccessful shuffle", () => {
+		const { completionManager } = createCompletionManager(tilesPropsWithNoMatch)
+
+		const statusBeforeShuffle = completionManager.checkGameCompletion()
+		const isCompletedBeforeShuffle = completionManager.isGameCompleted()
+		completionManager.updateShuffleAttempts()
+
+		expect(statusBeforeShuffle).toBe(GameCompletionStatus.IN_PROGRESS)
+		expect(isCompletedBeforeShuffle).toBe(false)
+		expect(completionManager.checkGameCompletion()).toBe(
+			GameCompletionStatus.LOSS
+		)
+		expect(completionManager.isGameCompleted()).toBe(true)
+	})
+
+	it("continues after a shuffle when a move exists", () => {
+		const { completionManager } = createCompletionManager(tilesPropsWithMatch)
+
+		completionManager.updateShuffleAttempts()
+
+		expect(completionManager.checkGameCompletion()).toBe(
+			GameCompletionStatus.IN_PROGRESS
+		)
+		expect(completionManager.isGameCompleted()).toBe(false)
+	})
 })
