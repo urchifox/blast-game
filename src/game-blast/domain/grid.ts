@@ -9,6 +9,35 @@ export class Grid {
 	private rows?: number
 	private columns?: number
 
+	private get range(): {
+		minRow: number
+		maxRow: number
+		minColumn: number
+		maxColumn: number
+	} {
+		const minRow = 0
+		const minColumn = 0
+		const maxRow = Math.max(minRow, (this.rows ?? 0) - 1)
+		const maxColumn = Math.max(minColumn, (this.columns ?? 0) - 1)
+
+		return {
+			minRow,
+			maxRow,
+			minColumn,
+			maxColumn,
+		}
+	}
+
+	private isColumnInRange(column: number): boolean {
+		const { minColumn, maxColumn } = this.range
+		return column >= minColumn && column <= maxColumn
+	}
+
+	private isRowInRange(row: number): boolean {
+		const { minRow, maxRow } = this.range
+		return row >= minRow && row <= maxRow
+	}
+
 	getSnapshot(): GridSnapshot {
 		return {
 			rows: this.rows ?? 0,
@@ -17,29 +46,43 @@ export class Grid {
 	}
 
 	createGrid({ columns, rows }: { columns: number; rows: number }) {
-		this.rows = rows
-		this.columns = columns
+		this.rows = Math.max(0, rows)
+		this.columns = Math.max(0, columns)
 	}
 
 	getNeighbourPositions(position: TilePosition): TilePosition[] {
+		const { minRow, maxRow, minColumn, maxColumn } = this.range
 		const { row, column } = position
+		const isPositionColumnInRange = this.isColumnInRange(column)
+		const isPositionRowInRange = this.isRowInRange(row)
 		const neighbourPositions: TilePosition[] = []
 
-		// upper
-		if (row > 0) {
-			neighbourPositions.push({ row: row - 1, column })
+		if (row > minRow && isPositionColumnInRange) {
+			const upperRow = row - 1
+			if (this.isRowInRange(upperRow)) {
+				neighbourPositions.push({ row: upperRow, column })
+			}
 		}
-		// lower
-		if (row < (this.rows ?? 0) - 1) {
-			neighbourPositions.push({ row: row + 1, column })
+
+		if (row < maxRow && isPositionColumnInRange) {
+			const lowerRow = row + 1
+			if (this.isRowInRange(lowerRow)) {
+				neighbourPositions.push({ row: lowerRow, column })
+			}
 		}
-		// left
-		if (column > 0) {
-			neighbourPositions.push({ row, column: column - 1 })
+
+		if (column > minColumn && isPositionRowInRange) {
+			const leftColumn = column - 1
+			if (this.isColumnInRange(leftColumn)) {
+				neighbourPositions.push({ row, column: leftColumn })
+			}
 		}
-		// right
-		if (column < (this.columns ?? 0) - 1) {
-			neighbourPositions.push({ row, column: column + 1 })
+
+		if (column < maxColumn && isPositionRowInRange) {
+			const rightColumn = column + 1
+			if (this.isColumnInRange(rightColumn)) {
+				neighbourPositions.push({ row, column: rightColumn })
+			}
 		}
 
 		return neighbourPositions

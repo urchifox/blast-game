@@ -32,6 +32,7 @@ export class Game {
 	private readonly lossModalUI: GameProps["lossModalUI"]
 
 	private levelData: LevelData = {
+		tilesProps: new Set(),
 		columns: 0,
 		rows: 0,
 		goalScore: 0,
@@ -89,9 +90,9 @@ export class Game {
 	}
 
 	private async createLevel() {
-		const { columns, rows, goalScore, movesLimit } = this.levelData
+		const { columns, rows, goalScore, movesLimit, tilesProps } = this.levelData
 		this.boosterManager.reset()
-		await this.presenter.create({ columns, rows })
+		await this.presenter.create({ columns, rows, tilesProps })
 		this.progressManager.setInitialValues({ goalScore, movesLimit })
 	}
 

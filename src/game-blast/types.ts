@@ -1,5 +1,11 @@
 import { GridSnapshot } from "./domain/grid"
-import { TilePosition, Tile, TileKind, TileSnapshot } from "./domain/tile"
+import {
+	TilePosition,
+	Tile,
+	TileKind,
+	TileSnapshot,
+	TileProps,
+} from "./domain/tile"
 import { BoosterName } from "./domain/types"
 
 export type LayoutSnapshot = {
@@ -38,7 +44,11 @@ export type PresenterContract = {
 	init(onTileClick: OnTileClickCallback): Promise<void>
 	destroy(): void
 	clear(): Promise<void>
-	create(props: { columns: number; rows: number }): Promise<void>
+	create(props: {
+		columns: number
+		rows: number
+		tilesProps: Set<TileProps>
+	}): Promise<void>
 	updateGameSize(): void
 
 	shuffleField(): Promise<void>

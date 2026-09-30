@@ -42,7 +42,7 @@ export class Tile {
 
 	constructor(props: TileProps) {
 		this.kind = props.kind
-		this.position = props.position
+		this.position = { ...props.position }
 		this.id = props.id
 	}
 
