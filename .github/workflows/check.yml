@@ -16,12 +16,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "24"
 
       - name: Install dependencies
         run: npm install
 
       - name: Run checks
-        run: npm run check
+        run: |
+          npm run check
+          npm run test
+
         env:
           FORCE_COLOR: true
