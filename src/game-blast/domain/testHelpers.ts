@@ -7,10 +7,12 @@ export function createField({
 	columns,
 	rows,
 	tilesProps,
+	randomizationFunction,
 }: {
 	columns: number
 	rows: number
 	tilesProps: Set<TileProps>
+	randomizationFunction?: () => number
 }) {
 	const grid = new Grid()
 	grid.createGrid({ columns, rows })
@@ -18,10 +20,9 @@ export function createField({
 
 	let nextId = 1
 	const createId = () => String(nextId++)
-	const randomizationFunction = () => 0
 	const field = new Field({
 		getGridSnapshot,
-		randomizationFunction,
+		randomizationFunction: randomizationFunction || (() => 0),
 		createId,
 	})
 	field.createInitialTiles(tilesProps)
