@@ -6,11 +6,11 @@ import { createField } from "./testHelpers"
 import { TileProps } from "./tile"
 import { GameCompletionStatus } from "./types"
 
-function createCompletionManager() {
+function createCompletionManager(tileProps: Array<TileProps>) {
 	const { fieldQueries } = createField({
 		columns: 3,
 		rows: 3,
-		tilesProps: new Set(tilesProps),
+		tilesProps: new Set(tileProps),
 	})
 
 	const progressCounter = new ProgressCounter({
@@ -28,7 +28,7 @@ function createCompletionManager() {
 	return { completionManager, progressCounter }
 }
 
-const tilesProps = [
+const tilesPropsWithMatch = [
 	{
 		kind: "red",
 		position: { row: 0, column: 0 },
@@ -61,6 +61,102 @@ const tilesProps = [
 	},
 	{
 		kind: "yellow",
+		position: { row: 0, column: 2 },
+		id: "7",
+	},
+	{
+		kind: "blue",
+		position: { row: 1, column: 2 },
+		id: "8",
+	},
+	{
+		kind: "yellow",
+		position: { row: 2, column: 2 },
+		id: "9",
+	},
+] satisfies Array<TileProps>
+
+const tilesPropsWithNoMatch = [
+	{
+		kind: "red",
+		position: { row: 0, column: 0 },
+		id: "1",
+	},
+	{
+		kind: "blue",
+		position: { row: 1, column: 0 },
+		id: "2",
+	},
+	{
+		kind: "yellow",
+		position: { row: 2, column: 0 },
+		id: "3",
+	},
+	{
+		kind: "yellow",
+		position: { row: 0, column: 1 },
+		id: "4",
+	},
+	{
+		kind: "red",
+		position: { row: 1, column: 1 },
+		id: "5",
+	},
+	{
+		kind: "blue",
+		position: { row: 2, column: 1 },
+		id: "6",
+	},
+	{
+		kind: "red",
+		position: { row: 0, column: 2 },
+		id: "7",
+	},
+	{
+		kind: "blue",
+		position: { row: 1, column: 2 },
+		id: "8",
+	},
+	{
+		kind: "yellow",
+		position: { row: 2, column: 2 },
+		id: "9",
+	},
+] satisfies Array<TileProps>
+
+const tilesPropsWithSpecialTile = [
+	{
+		kind: "red",
+		position: { row: 0, column: 0 },
+		id: "1",
+	},
+	{
+		kind: "blue",
+		position: { row: 1, column: 0 },
+		id: "2",
+	},
+	{
+		kind: "yellow",
+		position: { row: 2, column: 0 },
+		id: "3",
+	},
+	{
+		kind: "yellow",
+		position: { row: 0, column: 1 },
+		id: "4",
+	},
+	{
+		kind: "bomb",
+		position: { row: 1, column: 1 },
+		id: "5",
+	},
+	{
+		kind: "blue",
+		position: { row: 2, column: 1 },
+		id: "6",
+	},
+	{
+		kind: "red",
 		position: { row: 0, column: 2 },
 		id: "7",
 	},
@@ -111,7 +207,8 @@ describe("completion manager", () => {
 	])(
 		"check status after moves",
 		({ removedTilesCount, repeatCount, completionStatus, isGameCompleted }) => {
-			const { completionManager, progressCounter } = createCompletionManager()
+			const { completionManager, progressCounter } =
+				createCompletionManager(tilesPropsWithMatch)
 			for (let i = 0; i < repeatCount; i++) {
 				progressCounter.processMove(removedTilesCount)
 			}
@@ -120,8 +217,20 @@ describe("completion manager", () => {
 		}
 	)
 
-	it("check shuffle needed", () => {
-		const { completionManager } = createCompletionManager()
+	it("check shuffle isn't needed if there are matches", () => {
+		const { completionManager } = createCompletionManager(tilesPropsWithMatch)
+		expect(completionManager.isShuffleNeeded()).toBe(false)
+	})
+
+	it("check shuffle needed if there are no matches", () => {
+		const { completionManager } = createCompletionManager(tilesPropsWithNoMatch)
+		expect(completionManager.isShuffleNeeded()).toBe(true)
+	})
+
+	it("check shuffle isn't needed if special tile", () => {
+		const { completionManager } = createCompletionManager(
+			tilesPropsWithSpecialTile
+		)
 		expect(completionManager.isShuffleNeeded()).toBe(false)
 	})
 })
