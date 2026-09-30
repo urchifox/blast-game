@@ -99,4 +99,32 @@ describe("field", () => {
 		expect(tile1.getPosition()).toEqual(tile2Position)
 		expect(tile2.getPosition()).toEqual(tile1Position)
 	})
+
+	it("shuffle dont change content but change positions of tiles", () => {
+		const { field } = createField({
+			columns: 3,
+			rows: 3,
+			tilesProps: new Set(tilesProps),
+			randomizationFunction: () => 0.5,
+		})
+		const tilesBeforeShuffle = field.getTiles()
+
+		field.shuffle()
+
+		const tilesAfterShuffle = field.getTiles()
+		const isContentEqual =
+			tilesBeforeShuffle.length === tilesAfterShuffle.length &&
+			tilesBeforeShuffle.every((item) => tilesAfterShuffle.includes(item))
+		const isPositionsEqual = tilesAfterShuffle.every((tile) => {
+			const tileId = tile.getId()
+			const tileProps = tilesProps.find((props) => props.id === tileId)
+			const { column: newColumn, row: newRow } = tile.getPosition()
+			const { column: initialColumn, row: initialRow } = (
+				tileProps as TileProps
+			).position
+			return newColumn === initialColumn && newRow === initialRow
+		})
+		expect(isContentEqual).toBe(true)
+		expect(isPositionsEqual).toBe(false)
+	})
 })
