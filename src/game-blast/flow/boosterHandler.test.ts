@@ -1,6 +1,13 @@
+import { BoosterUseHandler } from "../domain/boosterUseHandler"
+import { GameRules } from "../domain/gameRules"
+import { createField } from "../domain/testHelpers"
 import { Tile, TileProps } from "../domain/tile"
+import { BoosterName } from "../domain/types"
 import { ActResult } from "./actionManager"
-import { createBoosterHandler } from "./testHelpers"
+import {
+	createActionManagerStubbed,
+	createBoosterHandlerStubbed,
+} from "./testHelpers"
 
 const tilesProps = [
 	{
@@ -49,6 +56,30 @@ const tilesProps = [
 		position: { row: 2, column: 2 },
 	},
 ] satisfies Array<TileProps>
+
+function createSUT(name: BoosterName) {
+	const { fieldQueries } = createField({
+		columns: 3,
+		rows: 3,
+		tilesProps: new Set(tilesProps),
+	})
+
+	const actionManager = createActionManagerStubbed()
+	const gameRules = new GameRules()
+	const boosterUseHandler = new BoosterUseHandler({
+		gameRules,
+		fieldQueries,
+	})
+
+	const boosterHandler = createBoosterHandlerStubbed({
+		boosterUseHandler,
+		gameRules,
+		actionManager,
+		name,
+	})
+
+	return { boosterHandler, fieldQueries }
+}
 
 describe("booster handling", () => {
 	it.each([
@@ -112,12 +143,7 @@ describe("booster handling", () => {
 	] as const)(
 		"activation of booster $name returns $expectedCanBeActivatedAfterUse after $useCount uses with $tilesPositions.length tiles",
 		({ name, useCount, expectedCanBeActivatedAfterUse, tilesPositions }) => {
-			const { boosterHandler, fieldQueries } = createBoosterHandler({
-				columns: 3,
-				rows: 3,
-				tilesProps: new Set(tilesProps),
-				name: name,
-			})
+			const { boosterHandler, fieldQueries } = createSUT(name)
 
 			for (let i = 0; i < useCount; i++) {
 				const isActivated = boosterHandler.tryActivate()
@@ -174,12 +200,7 @@ describe("booster handling", () => {
 	] as const)(
 		"attemp of $name use with $tilesPositions.length tiles returns action result with expected positions",
 		({ name, tilesPositions, expectedResult }) => {
-			const { boosterHandler, fieldQueries } = createBoosterHandler({
-				columns: 3,
-				rows: 3,
-				tilesProps: new Set(tilesProps),
-				name: name,
-			})
+			const { boosterHandler, fieldQueries } = createSUT(name)
 
 			boosterHandler.tryActivate()
 			const tiles = tilesPositions.map((position) =>
@@ -222,12 +243,7 @@ describe("booster handling", () => {
 	] as const)(
 		"attempt of $name use without activation returns null",
 		({ name, tilesPositions }) => {
-			const { boosterHandler, fieldQueries } = createBoosterHandler({
-				columns: 3,
-				rows: 3,
-				tilesProps: new Set(tilesProps),
-				name: name,
-			})
+			const { boosterHandler, fieldQueries } = createSUT(name)
 
 			const tiles = tilesPositions.map((position) =>
 				fieldQueries.getTileByPosition(position)
@@ -253,12 +269,7 @@ describe("booster handling", () => {
 	] as const)(
 		"attemp of $name second use without activation returns null",
 		({ name, tilesPositions }) => {
-			const { boosterHandler, fieldQueries } = createBoosterHandler({
-				columns: 3,
-				rows: 3,
-				tilesProps: new Set(tilesProps),
-				name: name,
-			})
+			const { boosterHandler, fieldQueries } = createSUT(name)
 
 			boosterHandler.tryActivate()
 			const tiles = tilesPositions.map((position) =>
@@ -287,12 +298,7 @@ describe("booster handling", () => {
 	] as const)(
 		"attemp of $name use with $tilesPositions.length tiles returns null",
 		({ name, tilesPositions }) => {
-			const { boosterHandler, fieldQueries } = createBoosterHandler({
-				columns: 3,
-				rows: 3,
-				tilesProps: new Set(tilesProps),
-				name: name,
-			})
+			const { boosterHandler, fieldQueries } = createSUT(name)
 
 			boosterHandler.tryActivate()
 			const tiles = tilesPositions.map((position) =>

@@ -1,8 +1,7 @@
 import { BoosterCounter } from "../domain/boosterCounter"
 import { BoosterUseHandler } from "../domain/boosterUseHandler"
 import { GameRules } from "../domain/gameRules"
-import { createField } from "../domain/testHelpers"
-import { Tile, TileProps } from "../domain/tile"
+import { Tile } from "../domain/tile"
 import { BoosterName } from "../domain/types"
 import { BoosterUIContract, PresenterContract } from "../types"
 import { ActionManager } from "./actionManager"
@@ -38,38 +37,33 @@ export function createPresenterStub(): PresenterContract {
 	}
 }
 
-export function createBoosterHandler({
-	columns,
-	rows,
-	tilesProps,
+export function createActionManagerStubbed(): ActionManager {
+	return new ActionManager({
+		presenter: createPresenterStub(),
+	})
+}
+
+export function createBoosterHandlerStubbed({
+	boosterUseHandler,
+	gameRules,
+	actionManager,
 	name,
 }: {
-	columns: number
-	rows: number
-	tilesProps: Set<TileProps>
+	boosterUseHandler: BoosterUseHandler
+	gameRules: GameRules
+	actionManager: ActionManager
 	name: BoosterName
 }) {
-	const gameRules = new GameRules()
-	const { grid, field, fieldQueries } = createField({
-		columns,
-		rows,
-		tilesProps,
-	})
+	const boosterUI = createBoosterUIStub()
 
-	const boosterUseHandler = new BoosterUseHandler({
-		gameRules,
-		fieldQueries,
-	})
-	const actionManager = new ActionManager({
-		presenter: createPresenterStub(),
+	const boosterCounter = new BoosterCounter({
+		startValue: gameRules.BOOSTER_INITIAL_VALUE[name],
+		endValue: 0,
 	})
 
 	const booster = new Booster({
-		boosterCounter: new BoosterCounter({
-			startValue: gameRules.BOOSTER_INITIAL_VALUE[name],
-			endValue: 0,
-		}),
-		boosterUI: createBoosterUIStub(),
+		boosterCounter: boosterCounter,
+		boosterUI: boosterUI,
 	})
 
 	const boosterHandler = new BoosterHandler({
@@ -79,10 +73,5 @@ export function createBoosterHandler({
 		actionManager,
 	})
 
-	return {
-		grid,
-		field,
-		fieldQueries,
-		boosterHandler,
-	}
+	return boosterHandler
 }
