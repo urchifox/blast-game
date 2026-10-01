@@ -1,5 +1,7 @@
 import { BoosterCounter } from "../domain/boosterCounter"
 import { BoosterUseHandler } from "../domain/boosterUseHandler"
+import { BOOSTER_NAMES } from "../domain/config"
+import { FieldQueries } from "../domain/fieldQueries"
 import { GameRules } from "../domain/gameRules"
 import { Tile } from "../domain/tile"
 import { BoosterName } from "../domain/types"
@@ -7,6 +9,7 @@ import { BoosterUIContract, PresenterContract } from "../types"
 import { ActionManager } from "./actionManager"
 import { Booster } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
+import { BoosterManager } from "./boosterManager"
 
 export function createBoosterUIStub(): BoosterUIContract {
 	return {
@@ -74,4 +77,33 @@ export function createBoosterHandlerStubbed({
 	})
 
 	return boosterHandler
+}
+
+export function createBoosterManagerStubbed(props: {
+	gameRules: GameRules
+	fieldQueries: FieldQueries
+	actionManager: ActionManager
+}) {
+	const boosterUseHandler = new BoosterUseHandler({
+		gameRules: props.gameRules,
+		fieldQueries: props.fieldQueries,
+	})
+
+	const boostersHandlersMap = BOOSTER_NAMES.reduce(
+		(acc, name) => {
+			acc[name] = createBoosterHandlerStubbed({
+				...props,
+				boosterUseHandler,
+				name,
+			})
+			return acc
+		},
+		{} as Record<BoosterName, BoosterHandler>
+	)
+
+	const boosterManager = new BoosterManager({
+		boostersHandlersMap: boostersHandlersMap,
+	})
+
+	return boosterManager
 }
