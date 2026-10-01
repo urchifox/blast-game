@@ -29,7 +29,7 @@ export class BoosterHandler {
 		this.actionManager = props.actionManager
 	}
 
-	use(tiles: Array<Tile>) {
+	private use(tiles: Array<Tile>) {
 		const commands = this.boosterUseHandler.use({
 			boosterName: this.name,
 			tiles: tiles,
