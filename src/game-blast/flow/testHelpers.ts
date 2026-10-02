@@ -1,11 +1,14 @@
 import { BoosterCounter } from "../domain/boosterCounter"
 import { BoosterUseHandler } from "../domain/boosterUseHandler"
 import { BOOSTER_NAMES } from "../domain/config"
+import { Field } from "../domain/field"
 import { FieldQueries } from "../domain/fieldQueries"
 import { GameRules } from "../domain/gameRules"
+import { Grid } from "../domain/grid"
 import { Tile } from "../domain/tile"
 import { BoosterName } from "../domain/types"
 import {
+	AnimationsManagerContract,
 	BoosterUIContract,
 	LayoutUIContract,
 	ModalUIContract,
@@ -17,6 +20,7 @@ import { ActionManager } from "./actionManager"
 import { Booster } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { BoosterManager } from "./boosterManager"
+import { Presenter } from "./presenter"
 
 export function createBoosterUIStub(): BoosterUIContract {
 	return {
@@ -85,6 +89,33 @@ export function createPresenterStub(): PresenterContract {
 		},
 		renderTile: async () => {},
 		removeTilesFromCenter: async () => {},
+	}
+}
+
+export function createPresenterStubbed({
+	field,
+	fieldQueries,
+	grid,
+}: {
+	field: Field
+	fieldQueries: FieldQueries
+	grid: Grid
+}): PresenterContract {
+	return new Presenter({
+		layoutUI: createLayoutUIStub(),
+		field: field,
+		fieldQueries: fieldQueries,
+		grid: grid,
+		renderer: createRendererStub(),
+		animationsManager: createAnimationsManagerStub(),
+	})
+}
+
+export function createAnimationsManagerStub(): AnimationsManagerContract {
+	return {
+		clear: () => {},
+		setAnimation: async () => {},
+		waitForTileAnimations: async () => {},
 	}
 }
 
