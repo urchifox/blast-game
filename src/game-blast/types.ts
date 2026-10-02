@@ -66,7 +66,7 @@ export type PresenterContract = {
 	): Promise<void>
 }
 
-export type OnTileClickCallback = (id: string) => void
+export type OnTileClickCallback = (id: string) => Promise<void>
 
 export type RendererContract = {
 	init(): Promise<void>

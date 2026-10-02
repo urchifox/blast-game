@@ -98,7 +98,7 @@ export class Game {
 
 	// #endregion
 
-	private onTileClick(id: string) {
+	private async onTileClick(id: string) {
 		if (this.completionManager.isGameCompleted()) {
 			return
 		}
@@ -115,7 +115,7 @@ export class Game {
 		if (actResult === null) {
 			return
 		}
-		this.processRemovingTiles(actResult.removedTiles)
+		await this.processRemovingTiles(actResult.removedTiles)
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {
