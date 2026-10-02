@@ -7,9 +7,11 @@ import { Tile } from "../domain/tile"
 import { BoosterName } from "../domain/types"
 import {
 	BoosterUIContract,
+	LayoutUIContract,
 	ModalUIContract,
 	PresenterContract,
 	ProgressUIContract,
+	RendererContract,
 } from "../types"
 import { ActionManager } from "./actionManager"
 import { Booster } from "./booster"
@@ -20,6 +22,47 @@ export function createBoosterUIStub(): BoosterUIContract {
 	return {
 		updateBoosterCounter() {},
 		toggleBoosterButtonActive() {},
+	}
+}
+
+export function createRendererStub(): RendererContract {
+	return {
+		init: async () => {},
+		destroy: () => {},
+		resize: () => {},
+		clearTiles: async () => {},
+		setOnTileClick: () => {},
+		updateFieldOffsets: () => {},
+		renderTiles: async () => {},
+		removeTile: async () => {},
+		fallTilesToCurrentPositions: async () => {},
+		shuffleTiles: async () => {},
+		swapTiles: async () => {},
+		selectTile: async () => {},
+		unselectTile: async () => {},
+	}
+}
+
+export function createLayoutUIStub(): LayoutUIContract {
+	return {
+		getSnapshot: () => ({
+			gridWidth: 0,
+			gridHeight: 0,
+			tileWidth: 0,
+			tileHeight: 0,
+			tileGapX: 0,
+			tileGapY: 0,
+		}),
+		updateSizes: () => ({
+			gridWidth: 0,
+			gridHeight: 0,
+			tileWidth: 0,
+			tileHeight: 0,
+			tileGapX: 0,
+			tileGapY: 0,
+		}),
+		getGameContainerOffset: () => ({ offsetX: 0, offsetY: 0 }),
+		setGameContainerSize: () => {},
 	}
 }
 
