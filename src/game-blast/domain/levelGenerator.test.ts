@@ -1,10 +1,14 @@
 import { GameRules } from "./gameRules"
 import { LevelGenerator } from "./levelGenerator"
+import {
+	createLevelGeneratorStubbed,
+	createRandomizationFunctionStub,
+} from "./testHelpers"
 
 describe("level generator", () => {
 	it.each([
 		{
-			randomizationFunction: () => 0,
+			randomizationFunction: createRandomizationFunctionStub(0),
 			expectedColumns: 9,
 			expectedRows: 9,
 			expectedGoalScore: 1000,
@@ -12,7 +16,9 @@ describe("level generator", () => {
 			expectedTilesNumber: 81,
 		},
 		{
-			randomizationFunction: () => 1 - Number.EPSILON,
+			randomizationFunction: createRandomizationFunctionStub(
+				1 - Number.EPSILON
+			),
 			expectedColumns: 9,
 			expectedRows: 9,
 			expectedGoalScore: 5000,

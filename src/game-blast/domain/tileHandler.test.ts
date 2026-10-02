@@ -1,6 +1,6 @@
 import { Command, CommandName } from "./command"
 import { GameRules } from "./gameRules"
-import { createField } from "./testHelpers"
+import { createField, createRandomizationFunctionStub } from "./testHelpers"
 import { Tile, TileProps } from "./tile"
 import { TileHandler } from "./tileHandler"
 
@@ -13,7 +13,7 @@ function createTileHandler() {
 	const tileHandler = new TileHandler({
 		gameRules: new GameRules(),
 		fieldQueries: fieldQueries,
-		randomizationFunction: () => 0,
+		randomizationFunction: createRandomizationFunctionStub(),
 	})
 	return {
 		tileHandler,

@@ -1,4 +1,4 @@
-import { createField } from "./testHelpers"
+import { createField, createRandomizationFunctionStub } from "./testHelpers"
 import { TileProps } from "./tile"
 
 const tilesProps = [
@@ -105,7 +105,7 @@ describe("field", () => {
 			columns: 3,
 			rows: 3,
 			tilesProps: new Set(tilesProps),
-			randomizationFunction: () => 0.5,
+			randomizationFunction: createRandomizationFunctionStub(0.5),
 		})
 		const tilesBeforeShuffle = field.getTiles()
 
