@@ -63,7 +63,7 @@ function createSUT() {
 		tilesProps: new Set(tilesProps),
 	})
 
-	const actionManager = createActionManagerStubbed()
+	const actionManager = createActionManagerStubbed({})
 	const gameRules = new GameRules()
 
 	const boosterManager = createBoosterManagerStubbed({

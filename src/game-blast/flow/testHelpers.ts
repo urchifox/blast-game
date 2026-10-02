@@ -45,9 +45,13 @@ export function createPresenterStub(): PresenterContract {
 	}
 }
 
-export function createActionManagerStubbed(): ActionManager {
+export function createActionManagerStubbed({
+	presenter = createPresenterStub(),
+}: {
+	presenter?: PresenterContract
+}): ActionManager {
 	return new ActionManager({
-		presenter: createPresenterStub(),
+		presenter: presenter,
 	})
 }
 

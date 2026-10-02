@@ -64,7 +64,7 @@ function createSUT(name: BoosterName) {
 		tilesProps: new Set(tilesProps),
 	})
 
-	const actionManager = createActionManagerStubbed()
+	const actionManager = createActionManagerStubbed({})
 	const gameRules = new GameRules()
 	const boosterUseHandler = new BoosterUseHandler({
 		gameRules,
