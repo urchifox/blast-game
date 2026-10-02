@@ -5,7 +5,12 @@ import { FieldQueries } from "../domain/fieldQueries"
 import { GameRules } from "../domain/gameRules"
 import { Tile } from "../domain/tile"
 import { BoosterName } from "../domain/types"
-import { BoosterUIContract, PresenterContract } from "../types"
+import {
+	BoosterUIContract,
+	ModalUIContract,
+	PresenterContract,
+	ProgressUIContract,
+} from "../types"
 import { ActionManager } from "./actionManager"
 import { Booster } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
@@ -106,4 +111,17 @@ export function createBoosterManagerStubbed(props: {
 	})
 
 	return boosterManager
+}
+
+export function createProgressUIStub(): ProgressUIContract {
+	return {
+		updateMovesCounter() {},
+		updateScoreCounter() {},
+	}
+}
+
+export function createModalUIStub(): ModalUIContract {
+	return {
+		open() {},
+	}
 }
