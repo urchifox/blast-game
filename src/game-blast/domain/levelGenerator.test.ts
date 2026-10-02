@@ -1,5 +1,3 @@
-import { GameRules } from "./gameRules"
-import { LevelGenerator } from "./levelGenerator"
 import {
 	createLevelGeneratorStubbed,
 	createRandomizationFunctionStub,
@@ -35,10 +33,8 @@ describe("level generator", () => {
 			expectedMovesLimit,
 			expectedTilesNumber,
 		}) => {
-			const levelGenerator = new LevelGenerator({
-				gameRules: new GameRules(),
+			const levelGenerator = createLevelGeneratorStubbed({
 				randomizationFunction,
-				createId: () => "1",
 			})
 			const levelData = levelGenerator.generateLevelData()
 			const { columns, rows, goalScore, movesLimit, tilesProps } = levelData

@@ -1,7 +1,9 @@
 import { IdGenerator, RandomizationFunction } from "../../helpers/random"
 import { Field } from "./field"
 import { FieldQueries } from "./fieldQueries"
+import { GameRules } from "./gameRules"
 import { Grid } from "./grid"
+import { LevelGenerator } from "./levelGenerator"
 import { TileProps } from "./tile"
 
 export function createField({
@@ -32,6 +34,21 @@ export function createField({
 	const fieldQueries = new FieldQueries({ field, grid })
 
 	return { grid, field, fieldQueries }
+}
+
+export function createLevelGeneratorStubbed({
+	randomizationFunction,
+	createId,
+}: {
+	randomizationFunction?: RandomizationFunction
+	createId?: IdGenerator
+}) {
+	return new LevelGenerator({
+		gameRules: new GameRules(),
+		randomizationFunction:
+			randomizationFunction ?? createRandomizationFunctionStub(),
+		createId: createId ?? createIdGeneratorStub(),
+	})
 }
 
 export function createRandomizationFunctionStub(
