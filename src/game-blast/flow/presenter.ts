@@ -3,12 +3,12 @@ import { Grid } from "../domain/grid"
 import { Tile, TileKind, TilePosition, TileProps } from "../domain/tile"
 import { wait } from "../../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./animationRules"
-import { AnimationsManager } from "./animationManager"
 import {
 	LayoutUIContract,
 	PresenterContract,
 	RendererContract,
 	OnTileClickCallback,
+	AnimationsManagerContract,
 } from "../types"
 import { FieldQueries } from "../domain/fieldQueries"
 
@@ -18,7 +18,7 @@ type PresenterProps = {
 	fieldQueries: FieldQueries
 	grid: Grid
 	renderer: RendererContract
-	animationsManager: AnimationsManager
+	animationsManager: AnimationsManagerContract
 }
 
 export class Presenter implements PresenterContract {

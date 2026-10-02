@@ -111,3 +111,9 @@ export type RendererContract = {
 		layoutSnapshot: LayoutSnapshot
 	}): Promise<void>
 }
+
+export type AnimationsManagerContract = {
+	setAnimation(props: { tile: Tile; promise: Promise<void> }): Promise<void>
+	clear(): void
+	waitForTileAnimations(tile: Tile): Promise<void>
+}

@@ -1,6 +1,7 @@
 import { Tile } from "../domain/tile"
+import { AnimationsManagerContract } from "../types"
 
-export class AnimationsManager {
+export class AnimationsManager implements AnimationsManagerContract {
 	readonly animations = new Map<Tile, Array<Promise<void>>>()
 
 	clear() {
