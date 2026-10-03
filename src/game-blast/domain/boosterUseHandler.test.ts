@@ -1,14 +1,13 @@
 import { BoosterUseHandler } from "./boosterUseHandler"
 import { Command, CommandName } from "./command"
 import { GameRules } from "./gameRules"
-import { createField } from "./testHelpers"
+import { createFieldComponentsStubbed } from "./testHelpers"
 import { Tile, TileProps } from "./tile"
 import { BoosterName } from "./types"
 
 function createBoosterUseHandler() {
-	const { fieldQueries } = createField({
-		columns: 3,
-		rows: 3,
+	const { fieldQueries } = createFieldComponentsStubbed({
+		gridSize: { columns: 3, rows: 3 },
 		tilesProps: new Set(tilesProps),
 	})
 	const boosterUseHandler = new BoosterUseHandler({

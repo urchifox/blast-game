@@ -1,4 +1,7 @@
-import { createField, createRandomizationFunctionStub } from "./testHelpers"
+import {
+	createFieldComponentsStubbed,
+	createRandomizationFunctionStub,
+} from "./testHelpers"
 import { TileProps } from "./tile"
 
 const tilesProps = [
@@ -51,9 +54,8 @@ const tilesProps = [
 
 describe("field", () => {
 	it("fills positions after removing", () => {
-		const { field } = createField({
-			columns: 3,
-			rows: 3,
+		const { field } = createFieldComponentsStubbed({
+			gridSize: { columns: 3, rows: 3 },
 			tilesProps: new Set(tilesProps),
 		})
 		const positionsToDelete = [
@@ -84,9 +86,8 @@ describe("field", () => {
 	})
 
 	it("swaps tiles", () => {
-		const { field } = createField({
-			columns: 3,
-			rows: 3,
+		const { field } = createFieldComponentsStubbed({
+			gridSize: { columns: 3, rows: 3 },
 			tilesProps: new Set(tilesProps),
 		})
 		const tile1 = field.getTiles()[0]
@@ -101,9 +102,8 @@ describe("field", () => {
 	})
 
 	it("shuffle dont change content but change positions of tiles", () => {
-		const { field } = createField({
-			columns: 3,
-			rows: 3,
+		const { field } = createFieldComponentsStubbed({
+			gridSize: { columns: 3, rows: 3 },
 			tilesProps: new Set(tilesProps),
 			randomizationFunction: createRandomizationFunctionStub(0.5),
 		})

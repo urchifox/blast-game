@@ -2,14 +2,13 @@ import { Counter } from "../../helpers/counter"
 import { CompletionManager } from "./completionManager"
 import { GameRules } from "./gameRules"
 import { ProgressCounter } from "./progressCounter"
-import { createField } from "./testHelpers"
+import { createFieldComponentsStubbed } from "./testHelpers"
 import { TileProps } from "./tile"
 import { GameCompletionStatus } from "./types"
 
 function createCompletionManager(tileProps: Array<TileProps>) {
-	const { fieldQueries } = createField({
-		columns: 3,
-		rows: 3,
+	const { fieldQueries } = createFieldComponentsStubbed({
+		gridSize: { columns: 3, rows: 3 },
 		tilesProps: new Set(tileProps),
 	})
 

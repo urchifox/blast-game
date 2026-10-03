@@ -1,6 +1,6 @@
 import { BoosterUseHandler } from "../domain/boosterUseHandler"
 import { GameRules } from "../domain/gameRules"
-import { createField } from "../domain/testHelpers"
+import { createFieldComponentsStubbed } from "../domain/testHelpers"
 import { Tile, TileProps } from "../domain/tile"
 import { BoosterName } from "../domain/types"
 import { ActResult } from "./actionManager"
@@ -58,9 +58,8 @@ const tilesProps = [
 ] satisfies Array<TileProps>
 
 function createSUT(name: BoosterName) {
-	const { fieldQueries } = createField({
-		columns: 3,
-		rows: 3,
+	const { fieldQueries } = createFieldComponentsStubbed({
+		gridSize: { columns: 3, rows: 3 },
 		tilesProps: new Set(tilesProps),
 	})
 

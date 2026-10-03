@@ -1,4 +1,4 @@
-import { createField } from "./testHelpers"
+import { createFieldComponentsStubbed } from "./testHelpers"
 import { Tile, TileProps } from "./tile"
 
 const tilesProps = [
@@ -50,9 +50,8 @@ const tilesProps = [
 ] satisfies Array<TileProps>
 
 function createFieldQueries() {
-	return createField({
-		columns: 3,
-		rows: 3,
+	return createFieldComponentsStubbed({
+		gridSize: { columns: 3, rows: 3 },
 		tilesProps: new Set(tilesProps),
 	})
 }

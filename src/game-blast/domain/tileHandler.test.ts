@@ -1,13 +1,15 @@
 import { Command, CommandName } from "./command"
 import { GameRules } from "./gameRules"
-import { createField, createRandomizationFunctionStub } from "./testHelpers"
+import {
+	createFieldComponentsStubbed,
+	createRandomizationFunctionStub,
+} from "./testHelpers"
 import { Tile, TileProps } from "./tile"
 import { TileHandler } from "./tileHandler"
 
 function createTileHandler() {
-	const { fieldQueries } = createField({
-		columns: 7,
-		rows: 7,
+	const { fieldQueries } = createFieldComponentsStubbed({
+		gridSize: { columns: 7, rows: 7 },
 		tilesProps: new Set(tilesProps),
 	})
 	const tileHandler = new TileHandler({

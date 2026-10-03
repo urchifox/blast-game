@@ -6,30 +6,31 @@ import { Grid } from "./grid"
 import { LevelGenerator } from "./levelGenerator"
 import { TileProps } from "./tile"
 
-export function createField({
-	columns,
-	rows,
+export function createFieldComponentsStubbed({
+	gridSize,
 	tilesProps,
-	randomizationFunction,
+	randomizationFunction = createRandomizationFunctionStub(),
+	createId = createIdGeneratorStub(),
 }: {
-	columns: number
-	rows: number
-	tilesProps: Set<TileProps>
-	randomizationFunction?: () => number
-}) {
+	gridSize?: { columns: number; rows: number }
+	tilesProps?: Set<TileProps>
+	randomizationFunction?: RandomizationFunction
+	createId?: IdGenerator
+} = {}) {
 	const grid = new Grid()
-	grid.createGrid({ columns, rows })
+	if (gridSize !== undefined) {
+		grid.createGrid(gridSize)
+	}
 	const getGridSnapshot = grid.getSnapshot.bind(grid)
 
-	let nextId = 1
-	const createId = () => String(nextId++)
 	const field = new Field({
 		getGridSnapshot,
-		randomizationFunction:
-			randomizationFunction ?? createRandomizationFunctionStub(),
+		randomizationFunction,
 		createId,
 	})
-	field.createInitialTiles(tilesProps)
+	if (tilesProps !== undefined) {
+		field.createInitialTiles(tilesProps)
+	}
 
 	const fieldQueries = new FieldQueries({ field, grid })
 
