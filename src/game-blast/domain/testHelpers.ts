@@ -1,7 +1,6 @@
 import { IdGenerator, RandomizationFunction } from "../../helpers/random"
 import { fieldComponentsFactory } from "./fieldComponentsFactory"
 import { GameRules } from "./gameRules"
-import { LevelData } from "../types"
 import { LevelGenerator } from "./levelGenerator"
 import { TileProps } from "./tile"
 
@@ -30,16 +29,6 @@ export function createFieldComponentsStubbed({
 	}
 
 	return { grid, field, fieldQueries }
-}
-
-export function createLevelGeneratorStub({
-	levelData,
-}: {
-	levelData: LevelData
-}) {
-	return {
-		generateLevelData: () => levelData,
-	}
 }
 
 export function createLevelGeneratorStubbed({
