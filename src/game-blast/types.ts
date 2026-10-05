@@ -117,3 +117,15 @@ export type AnimationsManagerContract = {
 	clear(): void
 	waitForTileAnimations(tile: Tile): Promise<void>
 }
+
+export type LevelGeneratorContract = {
+	generateLevelData(): LevelData
+}
+
+export type LevelData = {
+	tilesProps: Set<TileProps>
+	columns: number
+	rows: number
+	goalScore: number
+	movesLimit: number
+}

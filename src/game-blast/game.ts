@@ -2,16 +2,20 @@ import { TilesManager } from "./flow/tilesManager"
 import { BoosterManager } from "./flow/boosterManager"
 import { CompletionManager } from "./domain/completionManager"
 import { ProgressManager } from "./flow/progressManager"
-import { LevelData, LevelGenerator } from "./domain/levelGenerator"
 import { BoosterName, GameCompletionStatus } from "./domain/types"
 import { FieldQueries } from "./domain/fieldQueries"
-import { PresenterContract, ModalUIContract } from "./types"
+import {
+	PresenterContract,
+	ModalUIContract,
+	LevelGeneratorContract,
+	LevelData,
+} from "./types"
 import { Tile } from "./domain/tile"
 
 export type GameProps = {
 	fieldQueries: FieldQueries
 	presenter: PresenterContract
-	levelGenerator: LevelGenerator
+	levelGenerator: LevelGeneratorContract
 	progressManager: ProgressManager
 	tilesManager: TilesManager
 	boosterManager: BoosterManager

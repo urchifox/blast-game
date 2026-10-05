@@ -4,6 +4,7 @@ import {
 	pickRandomItem,
 	RandomizationFunction,
 } from "../../helpers/random"
+import { LevelData, LevelGeneratorContract } from "../types"
 import { TILES_KINDS_NORMAL } from "./config"
 import { GameRules } from "./gameRules"
 import { TileProps } from "./tile"
@@ -14,15 +15,7 @@ export type LevelGeneratorProps = {
 	createId: IdGenerator
 }
 
-export type LevelData = {
-	tilesProps: Set<TileProps>
-	columns: number
-	rows: number
-	goalScore: number
-	movesLimit: number
-}
-
-export class LevelGenerator {
+export class LevelGenerator implements LevelGeneratorContract {
 	private readonly gameRules: LevelGeneratorProps["gameRules"]
 	private readonly randomizationFunction: LevelGeneratorProps["randomizationFunction"]
 	private readonly createId: LevelGeneratorProps["createId"]
