@@ -8,7 +8,6 @@ import { Grid } from "../domain/grid"
 import { Tile } from "../domain/tile"
 import { BoosterName } from "../domain/types"
 import {
-	AnimationsManagerContract,
 	BoosterUIContract,
 	LayoutUIContract,
 	ModalUIContract,
@@ -21,6 +20,7 @@ import { Booster } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { BoosterManager } from "./boosterManager"
 import { Presenter } from "./presenter"
+import { AnimationsManager } from "./animationManager"
 
 export function createBoosterUIStub(): BoosterUIContract {
 	return {
@@ -101,22 +101,18 @@ export function createPresenterStubbed({
 	fieldQueries: FieldQueries
 	grid: Grid
 }): PresenterContract {
-	return new Presenter({
-		layoutUI: createLayoutUIStub(),
-		field: field,
-		fieldQueries: fieldQueries,
-		grid: grid,
-		renderer: createRendererStub(),
-		animationsManager: createAnimationsManagerStub(),
-	})
-}
+	const animationsManager = new AnimationsManager()
+	const renderer = createRendererStub()
+	const layoutUI = createLayoutUIStub()
 
-export function createAnimationsManagerStub(): AnimationsManagerContract {
-	return {
-		clear: () => {},
-		setAnimation: async () => {},
-		waitForTileAnimations: async () => {},
-	}
+	return new Presenter({
+		layoutUI,
+		field,
+		fieldQueries,
+		grid,
+		renderer,
+		animationsManager,
+	})
 }
 
 export function createActionManagerStubbed({
