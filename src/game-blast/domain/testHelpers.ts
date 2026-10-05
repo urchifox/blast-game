@@ -1,8 +1,6 @@
 import { IdGenerator, RandomizationFunction } from "../../helpers/random"
-import { Field } from "./field"
-import { FieldQueries } from "./fieldQueries"
+import { fieldComponentsFactory } from "./fieldComponentsFactory"
 import { GameRules } from "./gameRules"
-import { Grid } from "./grid"
 import { LevelGenerator } from "./levelGenerator"
 import { TileProps } from "./tile"
 
@@ -17,22 +15,18 @@ export function createFieldComponentsStubbed({
 	randomizationFunction?: RandomizationFunction
 	createId?: IdGenerator
 } = {}) {
-	const grid = new Grid()
-	if (gridSize !== undefined) {
-		grid.createGrid(gridSize)
-	}
-	const getGridSnapshot = grid.getSnapshot.bind(grid)
-
-	const field = new Field({
-		getGridSnapshot,
+	const { grid, field, fieldQueries } = fieldComponentsFactory({
 		randomizationFunction,
 		createId,
 	})
+
+	if (gridSize !== undefined) {
+		grid.createGrid(gridSize)
+	}
+
 	if (tilesProps !== undefined) {
 		field.createInitialTiles(tilesProps)
 	}
-
-	const fieldQueries = new FieldQueries({ field, grid })
 
 	return { grid, field, fieldQueries }
 }
