@@ -51,6 +51,14 @@ export class BoosterManager {
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {
+		if (this.activeBoosterName !== null) {
+			this.boostersHandlersMap[this.activeBoosterName].deactivate()
+		}
+
+		if (this.activeBoosterName === boosterName) {
+			return
+		}
+
 		const isActivated = this.boostersHandlersMap[boosterName].tryActivate()
 		this.activeBoosterName = isActivated ? boosterName : null
 	}

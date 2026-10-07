@@ -71,4 +71,8 @@ export class BoosterHandler {
 	tryActivate() {
 		return this.booster.tryActivate()
 	}
+
+	deactivate() {
+		this.booster.deactivate()
+	}
 }

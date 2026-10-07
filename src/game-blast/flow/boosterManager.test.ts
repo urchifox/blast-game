@@ -71,7 +71,7 @@ function createSUT() {
 		actionManager,
 	})
 
-	return { boosterManager, fieldQueries }
+	return { boosterManager, fieldQueries, actionManager }
 }
 
 describe("booster manager", () => {
@@ -88,13 +88,7 @@ describe("booster manager", () => {
 	it.each([
 		{
 			name: "bomb",
-			tilesPositions: [
-				{ column: 0, row: 0 },
-				{
-					column: 1,
-					row: 1,
-				},
-			],
+			tilesPositions: [{ column: 0, row: 0 }],
 			expectedResult: {
 				addedPositions: new Set([]),
 				removedPositions: new Set(tilesProps.map((props) => props.position)),
@@ -107,10 +101,6 @@ describe("booster manager", () => {
 			tilesPositions: [
 				{ column: 0, row: 0 },
 				{ column: 0, row: 1 },
-				{
-					column: 1,
-					row: 1,
-				},
 			],
 			expectedResult: {
 				addedPositions: new Set([]),
@@ -129,14 +119,14 @@ describe("booster manager", () => {
 			},
 		},
 	] as const)(
-		"correctly uses booster $name after activation",
+		"resturs correct action result when uses booster $name after activation",
 		({ name, tilesPositions, expectedResult }) => {
 			const { boosterManager, fieldQueries } = createSUT()
 			const tiles = tilesPositions.map(
 				(position) => fieldQueries.getTileByPosition(position) as Tile
 			)
 			const expectedIntermediateResults = Array.from(
-				{ length: tiles.length - 2 },
+				{ length: tiles.length - 1 },
 				() => ({
 					isUsed: true,
 					actResult: null,
@@ -145,7 +135,6 @@ describe("booster manager", () => {
 
 			boosterManager.onBoosterButtonClick(name)
 			const results = tiles.map((tile) => boosterManager.maybeUseBooster(tile))
-			const extraResult = results.pop() as BoosterHandlerResult
 			const successfulResult = results.pop() as BoosterHandlerResult
 			const intermediateResults = results
 
@@ -170,54 +159,163 @@ describe("booster manager", () => {
 				expectedResult.selectedPositions
 			)
 			expect(new Set(swappedPositions)).toEqual(expectedResult.swappedPositions)
-			expect(extraResult.isUsed).toBe(false)
-			expect(extraResult.actResult).toBeNull()
 		}
 	)
 
 	it.each([
 		{
 			name: "bomb",
-			tilesPositionsForFirstTry: [],
-			tilesPositionsForSecondTry: [{ column: 0, row: 0 }],
+			tilesPositions: [
+				{ column: 0, row: 0 },
+				{ column: 0, row: 1 },
+			],
 		},
 		{
 			name: "teleport",
-			tilesPositionsForFirstTry: [{ column: 0, row: 0 }],
-			tilesPositionsForSecondTry: [
+			tilesPositions: [
+				{ column: 0, row: 0 },
+				{ column: 0, row: 1 },
+				{ column: 1, row: 1 },
+			],
+		},
+	] as const)(
+		"deactivates booster after successful use",
+		({ name, tilesPositions }) => {
+			const { boosterManager, fieldQueries } = createSUT()
+			const tiles = tilesPositions.map(
+				(position) => fieldQueries.getTileByPosition(position) as Tile
+			)
+
+			boosterManager.onBoosterButtonClick(name)
+			const results = tiles.map((tile) => boosterManager.maybeUseBooster(tile))
+			const extraResult = results.pop() as BoosterHandlerResult
+
+			expect(extraResult).toEqual({ isUsed: false, actResult: null })
+		}
+	)
+
+	it.each([
+		{
+			names: ["bomb", "teleport"],
+			tilesPositions: [
+				{ column: 0, row: 0 },
+				{ column: 0, row: 1 },
+			],
+			expectedActions: ["select", "swap"],
+		},
+		{
+			names: ["teleport", "bomb"],
+			tilesPositions: [{ column: 0, row: 0 }],
+			expectedActions: ["remove"],
+		},
+	] as const)(
+		"sequential activation activates only last booster",
+		({ names, tilesPositions, expectedActions }) => {
+			const { boosterManager, fieldQueries, actionManager } = createSUT()
+			const tiles = tilesPositions.map(
+				(position) => fieldQueries.getTileByPosition(position) as Tile
+			)
+			const doActionsSpy = vi.spyOn(actionManager, "doActions")
+
+			names.forEach((name) => boosterManager.onBoosterButtonClick(name))
+			tiles.forEach((tile) => boosterManager.maybeUseBooster(tile))
+
+			const actualActions = doActionsSpy.mock.calls.map(
+				(call) => call[0][0].name
+			)
+			expect(actualActions).toEqual(expectedActions)
+		}
+	)
+
+	it.each([
+		{
+			name: "bomb",
+			useCount: 3,
+			tilesPositions: [{ column: 0, row: 0 }],
+		},
+		{
+			name: "teleport",
+			useCount: 5,
+			tilesPositions: [
 				{ column: 0, row: 0 },
 				{ column: 0, row: 1 },
 			],
 		},
 	] as const)(
-		"reset activated booster after clearing",
-		({ name, tilesPositionsForFirstTry, tilesPositionsForSecondTry }) => {
+		"recharges booster $name after clear",
+		({ name, tilesPositions, useCount }) => {
 			const { boosterManager, fieldQueries } = createSUT()
-			const tilesForFirstTry = tilesPositionsForFirstTry.map(
-				(position) => fieldQueries.getTileByPosition(position) as Tile
-			)
-			const tilesForSecondTry = tilesPositionsForSecondTry.map(
-				(position) => fieldQueries.getTileByPosition(position) as Tile
-			)
-			const expectedIntermediateResults = Array.from(
-				{ length: tilesForFirstTry.length },
-				() => ({
-					isUsed: false,
-					actResult: null,
-				})
-			)
+			const collectBoosterResults = () => {
+				const results = []
+				for (let i = 0; i < useCount; i++) {
+					results.push(tryUseBooster() as BoosterHandlerResult)
+				}
+				return results
+			}
+			const tryUseBooster = () => {
+				boosterManager.onBoosterButtonClick(name)
+				const tiles = tilesPositions.map(
+					(position) => fieldQueries.getTileByPosition(position) as Tile
+				)
+				const results = tiles.map((tile) =>
+					boosterManager.maybeUseBooster(tile)
+				)
+				return results.pop()
+			}
 
-			boosterManager.onBoosterButtonClick(name)
-			tilesForFirstTry.forEach((tile) => boosterManager.maybeUseBooster(tile))
+			const successfulResultsBeforeClean = collectBoosterResults()
+			const unsuccessfulResultBeforeClean = tryUseBooster()
 			boosterManager.clear()
-			const secondTryResults = tilesForSecondTry.map((tile) =>
-				boosterManager.maybeUseBooster(tile)
-			)
-			const lastResult = secondTryResults.pop() as BoosterHandlerResult
+			const successfulResultsAfterClean = collectBoosterResults()
+			const unsuccessfulResultAfterClean = tryUseBooster()
 
-			expect(secondTryResults).toEqual(expectedIntermediateResults)
-			expect(lastResult.isUsed).toBe(false)
-			expect(lastResult.actResult).toBeNull()
+			const expectedSuccessfulResults = Array.from({ length: useCount }, () =>
+				expect.toSatisfy((result) => result.actResult !== null && result.isUsed)
+			)
+			const expectedUnsuccessfulResult = {
+				isUsed: false,
+				actResult: null,
+			}
+			expect(successfulResultsBeforeClean).toEqual(expectedSuccessfulResults)
+			expect(unsuccessfulResultBeforeClean).toEqual(expectedUnsuccessfulResult)
+			expect(successfulResultsAfterClean).toEqual(expectedSuccessfulResults)
+			expect(unsuccessfulResultAfterClean).toEqual(expectedUnsuccessfulResult)
 		}
 	)
+
+	it("deactivates the activated booster after clear", () => {
+		const { boosterManager, fieldQueries } = createSUT()
+		const tile1 = fieldQueries.getTileByPosition({ column: 0, row: 0 }) as Tile
+		const tile2 = fieldQueries.getTileByPosition({ column: 1, row: 0 }) as Tile
+
+		boosterManager.onBoosterButtonClick("teleport")
+		boosterManager.maybeUseBooster(tile1)
+		boosterManager.clear()
+		const result = boosterManager.maybeUseBooster(tile2)
+
+		expect(result).toEqual({ isUsed: false, actResult: null })
+	})
+
+	it("forgets selected tiles for the activated booster after clear", () => {
+		const { boosterManager, fieldQueries } = createSUT()
+		const tile1 = fieldQueries.getTileByPosition({ column: 0, row: 0 }) as Tile
+		const tile2 = fieldQueries.getTileByPosition({ column: 0, row: 1 }) as Tile
+		const tile3 = fieldQueries.getTileByPosition({ column: 1, row: 1 }) as Tile
+
+		boosterManager.onBoosterButtonClick("teleport")
+		boosterManager.maybeUseBooster(tile1)
+		boosterManager.clear()
+		boosterManager.onBoosterButtonClick("teleport")
+		const result2 = boosterManager.maybeUseBooster(tile2)
+		const result3 = boosterManager.maybeUseBooster(tile3)
+		const swappedPositions = [...(result3.actResult?.swappedTiles ?? [])]
+			.flat()
+			.map((tile) => tile.getPosition())
+
+		expect(result2).toEqual({ isUsed: true, actResult: null })
+		expect(result3.isUsed).toBe(true)
+		expect(new Set(swappedPositions)).toEqual(
+			new Set([tile2.getPosition(), tile3.getPosition()])
+		)
+	})
 })

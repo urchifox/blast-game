@@ -30,7 +30,7 @@ export class Booster {
 	spend() {
 		this.boosterCounter.spend()
 		this.renderCounter()
-		this.setIsActivated(false)
+		this.deactivate()
 	}
 
 	private renderCounter() {
@@ -39,7 +39,7 @@ export class Booster {
 
 	clear() {
 		this.boosterCounter.reset()
-		this.setIsActivated(false)
+		this.deactivate()
 	}
 
 	tryActivate() {
@@ -47,6 +47,10 @@ export class Booster {
 			this.setIsActivated(true)
 		}
 		return this.isActivated()
+	}
+
+	deactivate() {
+		this.setIsActivated(false)
 	}
 
 	isActivated() {

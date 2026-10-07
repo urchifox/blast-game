@@ -130,14 +130,14 @@ export function createBoosterHandlerStubbed({
 	gameRules,
 	actionManager,
 	name,
+	boosterUI,
 }: {
 	boosterUseHandler: BoosterUseHandler
 	gameRules: GameRules
 	actionManager: ActionManager
 	name: BoosterName
+	boosterUI: BoosterUIContract
 }) {
-	const boosterUI = createBoosterUIStub()
-
 	const boosterCounter = new BoosterCounter({
 		startValue: gameRules.BOOSTER_INITIAL_VALUE[name],
 		endValue: 0,
@@ -170,10 +170,12 @@ export function createBoosterManagerStubbed(props: {
 
 	const boostersHandlersMap = BOOSTER_NAMES.reduce(
 		(acc, name) => {
+			const boosterUI = createBoosterUIStub()
 			acc[name] = createBoosterHandlerStubbed({
 				...props,
 				boosterUseHandler,
 				name,
+				boosterUI,
 			})
 			return acc
 		},

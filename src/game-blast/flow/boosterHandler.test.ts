@@ -7,6 +7,7 @@ import { ActResult } from "./actionManager"
 import {
 	createActionManagerStubbed,
 	createBoosterHandlerStubbed,
+	createBoosterUIStub,
 } from "./testHelpers"
 
 const tilesProps = [
@@ -69,97 +70,53 @@ function createSUT(name: BoosterName) {
 		gameRules,
 		fieldQueries,
 	})
+	const boosterUI = createBoosterUIStub()
 
 	const boosterHandler = createBoosterHandlerStubbed({
 		boosterUseHandler,
 		gameRules,
 		actionManager,
 		name,
+		boosterUI,
 	})
 
-	return { boosterHandler, fieldQueries }
+	return { boosterHandler, fieldQueries, boosterUI }
 }
 
 describe("booster handling", () => {
 	it.each([
 		{
 			name: "bomb",
-			useCount: 0,
-			expectedCanBeActivatedAfterUse: true,
-			tilesPositions: [{ column: 0, row: 0 }],
-		},
-		{
-			name: "bomb",
-			useCount: 2,
-			expectedCanBeActivatedAfterUse: true,
-			tilesPositions: [{ column: 0, row: 0 }],
-		},
-		{
-			name: "bomb",
-			useCount: 3,
-			expectedCanBeActivatedAfterUse: true,
-			tilesPositions: [],
-		},
-		{
-			name: "bomb",
-			useCount: 3,
-			expectedCanBeActivatedAfterUse: false,
 			tilesPositions: [{ column: 0, row: 0 }],
 		},
 		{
 			name: "teleport",
-			useCount: 0,
-			expectedCanBeActivatedAfterUse: true,
-			tilesPositions: [
-				{ column: 0, row: 0 },
-				{ column: 0, row: 1 },
-			],
-		},
-		{
-			name: "teleport",
-			useCount: 2,
-			expectedCanBeActivatedAfterUse: true,
-			tilesPositions: [
-				{ column: 0, row: 0 },
-				{ column: 0, row: 1 },
-			],
-		},
-		{
-			name: "teleport",
-			useCount: 5,
-			expectedCanBeActivatedAfterUse: true,
-			tilesPositions: [{ column: 0, row: 0 }],
-		},
-		{
-			name: "teleport",
-			useCount: 5,
-			expectedCanBeActivatedAfterUse: false,
 			tilesPositions: [
 				{ column: 0, row: 0 },
 				{ column: 0, row: 1 },
 			],
 		},
 	] as const)(
-		"activation of booster $name returns $expectedCanBeActivatedAfterUse after $useCount uses with $tilesPositions.length tiles",
-		({ name, useCount, expectedCanBeActivatedAfterUse, tilesPositions }) => {
-			const { boosterHandler, fieldQueries } = createSUT(name)
+		"updates counter and button state after use $name booster",
+		({ name, tilesPositions }) => {
+			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
+			const tiles = tilesPositions.map((position) =>
+				fieldQueries.getTileByPosition(position)
+			) as Array<Tile>
+			const updateBoosterCounterSpy = vi.spyOn(
+				boosterUI,
+				"updateBoosterCounter"
+			)
+			const toggleBoosterButtonActiveSpy = vi.spyOn(
+				boosterUI,
+				"toggleBoosterButtonActive"
+			)
 
-			for (let i = 0; i < useCount; i++) {
-				const isActivated = boosterHandler.tryActivate()
-				if (!isActivated) {
-					break
-				}
-				const tiles = tilesPositions.map((position) =>
-					fieldQueries.getTileByPosition(position)
-				) as Array<Tile>
-				boosterHandler.maybeUse(tiles)
-			}
-			const canBeActivatedAfterUse = boosterHandler.tryActivate()
-			boosterHandler.reset()
-			const canBeActivatedAfterReset = boosterHandler.tryActivate()
+			boosterHandler.tryActivate()
+			boosterHandler.maybeUse(tiles)
 
-			expect(canBeActivatedAfterUse).toBe(expectedCanBeActivatedAfterUse)
-			expect(canBeActivatedAfterReset).toBe(true)
+			expect(updateBoosterCounterSpy).toHaveBeenCalledOnce()
+			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(2)
 		}
 	)
 
@@ -197,14 +154,14 @@ describe("booster handling", () => {
 			},
 		},
 	] as const)(
-		"attemp of $name use with $tilesPositions.length tiles returns action result with expected positions",
+		"returns expected action result when uses $name booster",
 		({ name, tilesPositions, expectedResult }) => {
 			const { boosterHandler, fieldQueries } = createSUT(name)
-
-			boosterHandler.tryActivate()
 			const tiles = tilesPositions.map((position) =>
 				fieldQueries.getTileByPosition(position)
 			) as Array<Tile>
+
+			boosterHandler.tryActivate()
 			const result = boosterHandler.maybeUse(tiles) as ActResult
 			const { addedTiles, removedTiles, selectedTiles, swappedTiles } = result
 			const addedPositions = [...addedTiles].map((tile) => tile.getPosition())
@@ -230,26 +187,86 @@ describe("booster handling", () => {
 	it.each([
 		{
 			name: "bomb",
+			expectedUseCount: 3,
 			tilesPositions: [{ column: 0, row: 0 }],
 		},
 		{
 			name: "teleport",
+			expectedUseCount: 5,
 			tilesPositions: [
 				{ column: 0, row: 0 },
 				{ column: 0, row: 1 },
 			],
 		},
 	] as const)(
-		"attempt of $name use without activation returns null",
-		({ name, tilesPositions }) => {
-			const { boosterHandler, fieldQueries } = createSUT(name)
+		"booster $name can be used $expectedUseCount times, after that doesn't activate",
+		({ name, expectedUseCount, tilesPositions }) => {
+			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
+			const updateBoosterCounterSpy = vi.spyOn(
+				boosterUI,
+				"updateBoosterCounter"
+			)
+			const toggleBoosterButtonActiveSpy = vi.spyOn(
+				boosterUI,
+				"toggleBoosterButtonActive"
+			)
 
-			const tiles = tilesPositions.map((position) =>
-				fieldQueries.getTileByPosition(position)
-			) as Array<Tile>
-			const result = boosterHandler.maybeUse(tiles)
+			let canBeActivated = true
+			let useCount = 0
+			while (canBeActivated) {
+				canBeActivated = boosterHandler.tryActivate()
+				const tiles = tilesPositions.map((position) =>
+					fieldQueries.getTileByPosition(position)
+				) as Array<Tile>
+				const result = boosterHandler.maybeUse(tiles)
+				if (result !== null) {
+					useCount++
+				}
+			}
 
-			expect(result).toBeNull()
+			expect(useCount).toBe(expectedUseCount)
+			expect(updateBoosterCounterSpy).toHaveBeenCalledTimes(expectedUseCount)
+			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(
+				expectedUseCount * 2
+			)
+		}
+	)
+
+	it.each([
+		{
+			name: "bomb",
+			useCount: 3,
+			tilesPositions: [{ column: 0, row: 0 }],
+		},
+		{
+			name: "teleport",
+			useCount: 5,
+			tilesPositions: [
+				{ column: 0, row: 0 },
+				{ column: 0, row: 1 },
+			],
+		},
+	] as const)(
+		"restores counter after reset of booster $name",
+		({ name, tilesPositions, useCount }) => {
+			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
+			const updateBoosterCounterSpy = vi.spyOn(
+				boosterUI,
+				"updateBoosterCounter"
+			)
+
+			let canBeActivated = true
+			while (canBeActivated) {
+				canBeActivated = boosterHandler.tryActivate()
+				const tiles = tilesPositions.map((position) =>
+					fieldQueries.getTileByPosition(position)
+				) as Array<Tile>
+				boosterHandler.maybeUse(tiles)
+			}
+			boosterHandler.reset()
+
+			expect(boosterHandler.tryActivate()).toBe(true)
+			expect(updateBoosterCounterSpy).lastCalledWith(useCount)
 		}
 	)
 
@@ -266,9 +283,17 @@ describe("booster handling", () => {
 			],
 		},
 	] as const)(
-		"attemp of $name second use without activation returns null",
+		"dont use booster $name second time without activation",
 		({ name, tilesPositions }) => {
-			const { boosterHandler, fieldQueries } = createSUT(name)
+			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
+			const updateBoosterCounterSpy = vi.spyOn(
+				boosterUI,
+				"updateBoosterCounter"
+			)
+			const toggleBoosterButtonActiveSpy = vi.spyOn(
+				boosterUI,
+				"toggleBoosterButtonActive"
+			)
 
 			boosterHandler.tryActivate()
 			const tiles = tilesPositions.map((position) =>
@@ -278,6 +303,10 @@ describe("booster handling", () => {
 			const result = boosterHandler.maybeUse(tiles)
 
 			expect(result).toBeNull()
+			expect(updateBoosterCounterSpy).toHaveBeenCalledOnce()
+			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(2)
+			expect(toggleBoosterButtonActiveSpy.mock.calls[0][0]).toBe(true)
+			expect(toggleBoosterButtonActiveSpy.mock.calls[1][0]).toBe(false)
 		}
 	)
 
@@ -295,9 +324,17 @@ describe("booster handling", () => {
 			tilesPositions: [{ column: 0, row: 1 }],
 		},
 	] as const)(
-		"attemp of $name use with $tilesPositions.length tiles returns null",
+		"dont use booster $name with wrong tiles number",
 		({ name, tilesPositions }) => {
-			const { boosterHandler, fieldQueries } = createSUT(name)
+			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
+			const updateBoosterCounterSpy = vi.spyOn(
+				boosterUI,
+				"updateBoosterCounter"
+			)
+			const toggleBoosterButtonActiveSpy = vi.spyOn(
+				boosterUI,
+				"toggleBoosterButtonActive"
+			)
 
 			boosterHandler.tryActivate()
 			const tiles = tilesPositions.map((position) =>
@@ -306,6 +343,9 @@ describe("booster handling", () => {
 			const result = boosterHandler.maybeUse(tiles)
 
 			expect(result).toBeNull()
+			expect(updateBoosterCounterSpy).not.toHaveBeenCalled()
+			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledOnce()
+			expect(toggleBoosterButtonActiveSpy.mock.calls[0][0]).toBe(true)
 		}
 	)
 })
