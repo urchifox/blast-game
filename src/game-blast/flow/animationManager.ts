@@ -13,7 +13,9 @@ export class AnimationsManager implements AnimationsManagerContract {
 		promises.push(promise)
 		this.animations.set(tile, promises)
 
-		promise.finally(() => this.onPromiseResolve({ tile, promise }))
+		promise
+			.finally(() => this.onPromiseResolve({ tile, promise }))
+			.catch(() => {})
 
 		return promise
 	}

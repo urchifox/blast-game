@@ -155,6 +155,7 @@ export class Presenter implements PresenterContract {
 						promise: promise(),
 					})
 					.finally(() => tile.unlock())
+					.catch(() => {})
 			})
 		}
 
@@ -209,6 +210,7 @@ export class Presenter implements PresenterContract {
 						promise: promiseAnimation,
 					})
 					.finally(() => tile.unlock())
+					.catch(() => {})
 			)
 		)
 	}
@@ -324,6 +326,7 @@ export class Presenter implements PresenterContract {
 						promise: fallAnimationPromise,
 					})
 					.finally(() => tile.unlock())
+					.catch(() => {})
 			)
 		)
 
@@ -341,6 +344,7 @@ export class Presenter implements PresenterContract {
 						promise: renderAnimationPromise,
 					})
 					.finally(() => tile.unlock())
+					.catch(() => {})
 			)
 		)
 	}
@@ -372,6 +376,7 @@ export class Presenter implements PresenterContract {
 						promise: shuffleFieldPromise,
 					})
 					.finally(() => tile.unlock())
+					.catch(() => {})
 			)
 		)
 	}

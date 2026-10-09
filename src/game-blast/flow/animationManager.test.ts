@@ -9,12 +9,14 @@ function createTile(): Tile {
 	})
 }
 
-function createDeferred(): { promise: Promise<void>; resolve: () => void } {
+function createAnimation() {
 	let resolvePromise: () => void = () => undefined
-	const promise = new Promise<void>((resolve) => {
+	let rejectePromise: () => void = () => undefined
+	const promise = new Promise<void>((resolve, reject) => {
 		resolvePromise = resolve
+		rejectePromise = reject
 	})
-	return { promise, resolve: resolvePromise }
+	return { promise, resolve: resolvePromise, reject: rejectePromise }
 }
 
 function flushMicrotasks(): Promise<void> {
@@ -37,7 +39,7 @@ describe("animation manager", () => {
 	it("resolves when the tile's pending animation settles", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const animation = createDeferred()
+		const animation = createAnimation()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
 		let didSettle = false
@@ -53,10 +55,29 @@ describe("animation manager", () => {
 		expect(didSettle).toBe(true)
 	})
 
+	it("resolves when the tile's pending animation rejects", async () => {
+		const animationsManager = new AnimationsManager()
+		const tile = createTile()
+		const animation = createAnimation()
+		animationsManager.setAnimation({ tile, promise: animation.promise })
+
+		let didSettle = false
+		const wait = animationsManager.waitForTileAnimations(tile).then(() => {
+			didSettle = true
+		})
+
+		await flushMicrotasks()
+		expect(didSettle).toBe(false)
+
+		animation.reject()
+		await wait
+		expect(didSettle).toBe(true)
+	})
+
 	it("does not see an animation that has already settled", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const animation = createDeferred()
+		const animation = createAnimation()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
 		animation.resolve()
@@ -70,7 +91,7 @@ describe("animation manager", () => {
 	it("resolves the next wait immediately after clear", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const animation = createDeferred()
+		const animation = createAnimation()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
 		animationsManager.clear()
@@ -83,8 +104,8 @@ describe("animation manager", () => {
 	it("keeps an animation registered after clear when the cleared one settles", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const cleared = createDeferred()
-		const registered = createDeferred()
+		const cleared = createAnimation()
+		const registered = createAnimation()
 
 		animationsManager.setAnimation({ tile, promise: cleared.promise })
 		animationsManager.clear()
