@@ -108,6 +108,14 @@ export class Presenter implements PresenterContract {
 		})
 	}
 
+	unselectTile(tile: Tile) {
+		this.renderer.unselectTile({
+			tileSnapshot: tile.getSnapshot(),
+			gridSnapshot: this.grid.getSnapshot(),
+			layoutSnapshot: this.layoutUI.getSnapshot(),
+		})
+	}
+
 	addTile({ kind, position }: { kind: TileKind; position: TilePosition }) {
 		return this.field.addTile({ kind, position })
 	}

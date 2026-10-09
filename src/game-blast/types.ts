@@ -56,6 +56,7 @@ export type PresenterContract = {
 
 	waitForTileAnimations(tile: Tile): Promise<void>
 	selectTile(tile: Tile): void
+	unselectTile(tile: Tile): void
 	swapTiles(tile1: Tile, tile2: Tile): Promise<void>
 	addTile(props: { kind: TileKind; position: TilePosition }): Tile
 	renderTile(tile: Tile): Promise<void>

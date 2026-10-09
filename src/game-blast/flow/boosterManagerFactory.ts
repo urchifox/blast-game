@@ -50,5 +50,6 @@ export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
 
 	return new BoosterManager({
 		boostersHandlersMap: boostersHandlersMap,
+		actionManager: actionManager,
 	})
 }

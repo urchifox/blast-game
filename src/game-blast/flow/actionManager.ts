@@ -13,6 +13,7 @@ export enum ActionName {
 	ADD = "add",
 	REMOVE = "remove",
 	SELECT = "select",
+	UNSELECT = "unselect",
 	SWAP = "swap",
 }
 
@@ -26,6 +27,7 @@ export type ActionPayloadMap = {
 		tiles: Set<Tile>
 	}
 	[ActionName.SELECT]: Tile
+	[ActionName.UNSELECT]: Tile
 	[ActionName.SWAP]: [Tile, Tile]
 }
 
@@ -33,6 +35,7 @@ export type ActionResultMap = {
 	[ActionName.ADD]: { addedTile: Tile }
 	[ActionName.REMOVE]: { removedTiles: Set<Tile> }
 	[ActionName.SELECT]: { selectedTile: Tile }
+	[ActionName.UNSELECT]: { unselectedTile: Tile }
 	[ActionName.SWAP]: { swappedTiles: [Tile, Tile] }
 }
 
@@ -42,6 +45,7 @@ export type ActResult = {
 	addedTiles: Set<Tile>
 	removedTiles: Set<Tile>
 	selectedTiles: Set<Tile>
+	unselectedTiles: Set<Tile>
 	swappedTiles: Set<[Tile, Tile]>
 }
 
@@ -113,6 +117,7 @@ export class ActionManager {
 			addedTiles: new Set(),
 			removedTiles: new Set(),
 			selectedTiles: new Set(),
+			unselectedTiles: new Set(),
 			swappedTiles: new Set(),
 		}
 		for (const result of results) {
@@ -124,6 +129,9 @@ export class ActionManager {
 			}
 			if ("selectedTile" in result) {
 				actResult.selectedTiles.add(result.selectedTile)
+			}
+			if ("unselectedTile" in result) {
+				actResult.unselectedTiles.add(result.unselectedTile)
 			}
 			if ("swappedTiles" in result) {
 				actResult.swappedTiles.add(result.swappedTiles)
@@ -143,6 +151,9 @@ export class ActionManager {
 			}
 			case ActionName.SELECT: {
 				return this.select(payload)
+			}
+			case ActionName.UNSELECT: {
+				return this.unselect(payload)
 			}
 			case ActionName.SWAP: {
 				return this.swap(payload)
@@ -173,6 +184,13 @@ export class ActionManager {
 	): ActionResultMap[ActionName.SELECT] {
 		this.presenter.selectTile(payload)
 		return { selectedTile: payload }
+	}
+
+	private unselect(
+		payload: ActionPayloadMap[ActionName.UNSELECT]
+	): ActionResultMap[ActionName.UNSELECT] {
+		this.presenter.unselectTile(payload)
+		return { unselectedTile: payload }
 	}
 
 	private swap(

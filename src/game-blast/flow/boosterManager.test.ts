@@ -1,7 +1,7 @@
 import { GameRules } from "../domain/gameRules"
 import { createFieldComponentsStubbed } from "../domain/testHelpers"
 import { Tile, TileProps } from "../domain/tile"
-import { ActResult } from "./actionManager"
+import { ActionName, ActResult } from "./actionManager"
 import { BoosterHandlerResult } from "./boosterHandler"
 import {
 	createActionManagerStubbed,
@@ -226,6 +226,22 @@ describe("booster manager", () => {
 			expect(actualActions).toEqual(expectedActions)
 		}
 	)
+
+	it("unselects tiles after switching to another booster", () => {
+		const { boosterManager, fieldQueries, actionManager } = createSUT()
+		const doActionsSpy = vi.spyOn(actionManager, "doActions")
+		const doActionCalls = doActionsSpy.mock.calls
+		const tile = fieldQueries.getTileByPosition({ column: 0, row: 0 }) as Tile
+
+		boosterManager.onBoosterButtonClick("teleport")
+		boosterManager.maybeUseBooster(tile)
+		boosterManager.onBoosterButtonClick("bomb")
+
+		const action1Names = doActionCalls[0][0].map((action) => action.name)
+		const action2Names = doActionCalls[1][0].map((action) => action.name)
+		expect(action1Names).toEqual([ActionName.SELECT])
+		expect(action2Names).toEqual([ActionName.UNSELECT])
+	})
 
 	it.each([
 		{

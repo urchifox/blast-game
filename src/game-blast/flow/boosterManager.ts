@@ -1,12 +1,15 @@
 import { Tile } from "../domain/tile"
 import { BoosterHandler, BoosterHandlerResult } from "./boosterHandler"
 import { BoosterName } from "../domain/types"
+import { ActionManager, ActionName } from "./actionManager"
 
 export type BoosterManagerProps = {
+	actionManager: ActionManager
 	boostersHandlersMap: Record<BoosterName, BoosterHandler>
 }
 
 export class BoosterManager {
+	private actionManager: BoosterManagerProps["actionManager"]
 	private boostersHandlersMap: BoosterManagerProps["boostersHandlersMap"]
 	private boostersHandlers: Array<BoosterHandler>
 
@@ -14,6 +17,7 @@ export class BoosterManager {
 	private activeBoosterName: BoosterName | null = null
 
 	constructor(props: BoosterManagerProps) {
+		this.actionManager = props.actionManager
 		this.boostersHandlersMap = props.boostersHandlersMap
 		this.boostersHandlers = Object.values(this.boostersHandlersMap)
 	}
@@ -53,6 +57,15 @@ export class BoosterManager {
 	onBoosterButtonClick(boosterName: BoosterName) {
 		if (this.activeBoosterName !== null) {
 			this.boostersHandlersMap[this.activeBoosterName].deactivate()
+			this.selectedTiles.forEach((tile) => {
+				this.actionManager.doActions([
+					{
+						name: ActionName.UNSELECT,
+						payload: tile,
+					},
+				])
+			})
+			this.selectedTiles = []
 		}
 
 		if (this.activeBoosterName === boosterName) {

@@ -83,6 +83,7 @@ export function createPresenterStub(): PresenterContract {
 		processRemovedTiles: async () => {},
 		waitForTileAnimations: async () => {},
 		selectTile() {},
+		unselectTile() {},
 		swapTiles: async () => {},
 		addTile({ kind, position }) {
 			return new Tile({ kind, position, id: String(nextId++) })
@@ -184,6 +185,7 @@ export function createBoosterManagerStubbed(props: {
 
 	const boosterManager = new BoosterManager({
 		boostersHandlersMap: boostersHandlersMap,
+		actionManager: props.actionManager,
 	})
 
 	return boosterManager
