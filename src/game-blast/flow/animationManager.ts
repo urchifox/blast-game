@@ -25,8 +25,17 @@ export class AnimationsManager implements AnimationsManagerContract {
 		tile: Tile
 		promise: Promise<void>
 	}) {
-		const promises = this.animations.get(tile) ?? []
-		promises.splice(promises.indexOf(promise), 1)
+		const promises = this.animations.get(tile)
+		if (promises === undefined) {
+			return
+		}
+
+		const index = promises.indexOf(promise)
+		if (index === -1) {
+			return
+		}
+
+		promises.splice(index, 1)
 		if (promises.length === 0) {
 			this.animations.delete(tile)
 		} else {
