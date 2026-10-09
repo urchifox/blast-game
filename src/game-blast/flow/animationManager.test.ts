@@ -19,11 +19,10 @@ function createAnimation() {
 	return { promise, resolve: resolvePromise, reject: rejectePromise }
 }
 
-function flushMicrotasks(): Promise<void> {
-	return Promise.resolve()
-		.then(() => undefined)
-		.then(() => undefined)
-		.then(() => undefined)
+async function isPending(promise: Promise<unknown>): Promise<boolean> {
+	const pending = Symbol("pending")
+	const result = await Promise.race([promise, Promise.resolve(pending)])
+	return result === pending
 }
 
 describe("animation manager", () => {
@@ -42,17 +41,11 @@ describe("animation manager", () => {
 		const animation = createAnimation()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
-		let didSettle = false
-		const wait = animationsManager.waitForTileAnimations(tile).then(() => {
-			didSettle = true
-		})
-
-		await flushMicrotasks()
-		expect(didSettle).toBe(false)
+		const wait = animationsManager.waitForTileAnimations(tile)
+		expect(await isPending(wait)).toBe(true)
 
 		animation.resolve()
-		await wait
-		expect(didSettle).toBe(true)
+		await expect(wait).resolves.toBeUndefined()
 	})
 
 	it("resolves when the tile's pending animation rejects", async () => {
@@ -61,17 +54,11 @@ describe("animation manager", () => {
 		const animation = createAnimation()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
-		let didSettle = false
-		const wait = animationsManager.waitForTileAnimations(tile).then(() => {
-			didSettle = true
-		})
-
-		await flushMicrotasks()
-		expect(didSettle).toBe(false)
+		const wait = animationsManager.waitForTileAnimations(tile)
+		expect(await isPending(wait)).toBe(true)
 
 		animation.reject()
-		await wait
-		expect(didSettle).toBe(true)
+		await expect(wait).resolves.toBeUndefined()
 	})
 
 	it("does not see an animation that has already settled", async () => {
@@ -114,16 +101,10 @@ describe("animation manager", () => {
 		cleared.resolve()
 		await cleared.promise
 
-		let didSettle = false
-		const wait = animationsManager.waitForTileAnimations(tile).then(() => {
-			didSettle = true
-		})
-
-		await flushMicrotasks()
-		expect(didSettle).toBe(false)
+		const wait = animationsManager.waitForTileAnimations(tile)
+		expect(await isPending(wait)).toBe(true)
 
 		registered.resolve()
-		await wait
-		expect(didSettle).toBe(true)
+		await expect(wait).resolves.toBeUndefined()
 	})
 })
