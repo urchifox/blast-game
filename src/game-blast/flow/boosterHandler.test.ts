@@ -210,21 +210,22 @@ describe("booster handling", () => {
 				boosterUI,
 				"toggleBoosterButtonActive"
 			)
-
-			let canBeActivated = true
-			let useCount = 0
-			while (canBeActivated) {
-				canBeActivated = boosterHandler.tryActivate()
+			const tryUseBooster = () => {
+				const isActivated = boosterHandler.tryActivate()
 				const tiles = tilesPositions.map((position) =>
 					fieldQueries.getTileByPosition(position)
 				) as Array<Tile>
 				const result = boosterHandler.maybeUse(tiles)
-				if (result !== null) {
-					useCount++
-				}
+				return { isActivated, result }
 			}
 
-			expect(useCount).toBe(expectedUseCount)
+			for (let i = 0; i < expectedUseCount; i++) {
+				tryUseBooster()
+			}
+			const { isActivated, result } = tryUseBooster()
+
+			expect(isActivated).toBe(false)
+			expect(result).toBeNull()
 			expect(updateBoosterCounterSpy).toHaveBeenCalledTimes(expectedUseCount)
 			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(
 				expectedUseCount * 2
