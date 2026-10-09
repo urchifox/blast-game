@@ -77,6 +77,13 @@ describe("booster use handling", () => {
 			boosterName: "teleport" as BoosterName,
 			positions: [{ row: 0, column: 0 }],
 		},
+		{
+			boosterName: "teleport" as BoosterName,
+			positions: [
+				{ row: 0, column: 0 },
+				{ row: 0, column: 0 },
+			],
+		},
 	])(
 		"should return null if the tiles are not the required count",
 		({ boosterName, positions }) => {

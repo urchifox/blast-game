@@ -42,6 +42,17 @@ export class BoosterManager {
 			return { isUsed: false, actResult: null }
 		}
 
+		if (this.selectedTiles.includes(tile)) {
+			this.selectedTiles = this.selectedTiles.filter((t) => t !== tile)
+			this.actionManager.doActions([
+				{
+					name: ActionName.UNSELECT,
+					payload: tile,
+				},
+			])
+			return { isUsed: true, actResult: null }
+		}
+
 		const handler = this.boostersHandlersMap[boosterName]
 		const result = handler.maybeUse([tile, ...this.selectedTiles])
 		if (result === null) {

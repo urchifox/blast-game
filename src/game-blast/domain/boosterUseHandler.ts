@@ -27,7 +27,7 @@ export class BoosterUseHandler {
 	}): Array<Command> | null {
 		const tilesRequired =
 			this.gameRules.BOOSTER_TILES_COUNT_FOR_USE[boosterName]
-		if (tiles.length !== tilesRequired) {
+		if (new Set(tiles).size !== tilesRequired) {
 			return null
 		}
 

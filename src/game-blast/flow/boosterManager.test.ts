@@ -243,6 +243,23 @@ describe("booster manager", () => {
 		expect(action2Names).toEqual([ActionName.UNSELECT])
 	})
 
+	it("unselects tile after second click", () => {
+		const { boosterManager, fieldQueries, actionManager } = createSUT()
+		const doActionsSpy = vi.spyOn(actionManager, "doActions")
+		const doActionCalls = doActionsSpy.mock.calls
+		const tile = fieldQueries.getTileByPosition({ column: 0, row: 0 }) as Tile
+
+		boosterManager.onBoosterButtonClick("teleport")
+		boosterManager.maybeUseBooster(tile)
+		const secondResult = boosterManager.maybeUseBooster(tile)
+
+		const action1Names = doActionCalls[0][0].map((action) => action.name)
+		const action2Names = doActionCalls[1][0].map((action) => action.name)
+		expect(action1Names).toEqual([ActionName.SELECT])
+		expect(action2Names).toEqual([ActionName.UNSELECT])
+		expect(secondResult).toEqual({ isUsed: true, actResult: null })
+	})
+
 	it.each([
 		{
 			name: "bomb",
