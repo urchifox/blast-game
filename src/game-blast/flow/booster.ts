@@ -25,6 +25,7 @@ export class Booster {
 	reset() {
 		this.boosterCounter.reset()
 		this.renderCounter()
+		this.deactivate()
 	}
 
 	spend() {
@@ -38,8 +39,7 @@ export class Booster {
 	}
 
 	clear() {
-		this.boosterCounter.reset()
-		this.deactivate()
+		this.reset()
 	}
 
 	tryActivate() {

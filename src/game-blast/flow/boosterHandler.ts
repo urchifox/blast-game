@@ -43,7 +43,7 @@ export class BoosterHandler {
 	}
 
 	clear() {
-		this.reset()
+		this.booster.clear()
 	}
 
 	reset() {

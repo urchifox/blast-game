@@ -247,12 +247,16 @@ describe("booster handling", () => {
 			],
 		},
 	] as const)(
-		"restores counter after reset of booster $name",
+		"restores counter and deactivates after reset of booster $name",
 		({ name, tilesPositions, useCount }) => {
 			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
 			const updateBoosterCounterSpy = vi.spyOn(
 				boosterUI,
 				"updateBoosterCounter"
+			)
+			const toggleBoosterButtonActiveSpy = vi.spyOn(
+				boosterUI,
+				"toggleBoosterButtonActive"
 			)
 
 			let canBeActivated = true
@@ -265,8 +269,54 @@ describe("booster handling", () => {
 			}
 			boosterHandler.reset()
 
-			expect(boosterHandler.tryActivate()).toBe(true)
 			expect(updateBoosterCounterSpy).lastCalledWith(useCount)
+			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(useCount * 2)
+			expect(toggleBoosterButtonActiveSpy).toHaveBeenLastCalledWith(false)
+			expect(boosterHandler.tryActivate()).toBe(true)
+		}
+	)
+
+	it.each([
+		{
+			name: "bomb",
+			useCount: 3,
+			tilesPositions: [{ column: 0, row: 0 }],
+		},
+		{
+			name: "teleport",
+			useCount: 5,
+			tilesPositions: [
+				{ column: 0, row: 0 },
+				{ column: 0, row: 1 },
+			],
+		},
+	] as const)(
+		"restores counter and deactivates after clear of booster $name",
+		({ name, tilesPositions, useCount }) => {
+			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
+			const updateBoosterCounterSpy = vi.spyOn(
+				boosterUI,
+				"updateBoosterCounter"
+			)
+			const toggleBoosterButtonActiveSpy = vi.spyOn(
+				boosterUI,
+				"toggleBoosterButtonActive"
+			)
+
+			let canBeActivated = true
+			while (canBeActivated) {
+				canBeActivated = boosterHandler.tryActivate()
+				const tiles = tilesPositions.map((position) =>
+					fieldQueries.getTileByPosition(position)
+				) as Array<Tile>
+				boosterHandler.maybeUse(tiles)
+			}
+			boosterHandler.clear()
+
+			expect(updateBoosterCounterSpy).lastCalledWith(useCount)
+			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(useCount * 2)
+			expect(toggleBoosterButtonActiveSpy).toHaveBeenLastCalledWith(false)
+			expect(boosterHandler.tryActivate()).toBe(true)
 		}
 	)
 
