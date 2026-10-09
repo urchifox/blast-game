@@ -80,7 +80,7 @@ function createSUT(name: BoosterName) {
 		boosterUI,
 	})
 
-	return { boosterHandler, fieldQueries, boosterUI }
+	return { boosterHandler, fieldQueries, boosterUI, gameRules }
 }
 
 describe("booster handling", () => {
@@ -187,21 +187,21 @@ describe("booster handling", () => {
 	it.each([
 		{
 			name: "bomb",
-			expectedUseCount: 3,
 			tilesPositions: [{ column: 0, row: 0 }],
 		},
 		{
 			name: "teleport",
-			expectedUseCount: 5,
 			tilesPositions: [
 				{ column: 0, row: 0 },
 				{ column: 0, row: 1 },
 			],
 		},
 	] as const)(
-		"booster $name can be used $expectedUseCount times, after that doesn't activate",
-		({ name, expectedUseCount, tilesPositions }) => {
-			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
+		"booster $name can be used initial value times, after that doesn't activate",
+		({ name, tilesPositions }) => {
+			const { boosterHandler, fieldQueries, boosterUI, gameRules } =
+				createSUT(name)
+			const useCount = gameRules.BOOSTER_INITIAL_VALUE[name]
 			const updateBoosterCounterSpy = vi.spyOn(
 				boosterUI,
 				"updateBoosterCounter"
@@ -219,29 +219,25 @@ describe("booster handling", () => {
 				return { isActivated, result }
 			}
 
-			for (let i = 0; i < expectedUseCount; i++) {
+			for (let i = 0; i < useCount; i++) {
 				tryUseBooster()
 			}
 			const { isActivated, result } = tryUseBooster()
 
 			expect(isActivated).toBe(false)
 			expect(result).toBeNull()
-			expect(updateBoosterCounterSpy).toHaveBeenCalledTimes(expectedUseCount)
-			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(
-				expectedUseCount * 2
-			)
+			expect(updateBoosterCounterSpy).toHaveBeenCalledTimes(useCount)
+			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(useCount * 2)
 		}
 	)
 
 	it.each([
 		{
 			name: "bomb",
-			useCount: 3,
 			tilesPositions: [{ column: 0, row: 0 }],
 		},
 		{
 			name: "teleport",
-			useCount: 5,
 			tilesPositions: [
 				{ column: 0, row: 0 },
 				{ column: 0, row: 1 },
@@ -249,8 +245,10 @@ describe("booster handling", () => {
 		},
 	] as const)(
 		"restores counter and deactivates after reset of booster $name",
-		({ name, tilesPositions, useCount }) => {
-			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
+		({ name, tilesPositions }) => {
+			const { boosterHandler, fieldQueries, boosterUI, gameRules } =
+				createSUT(name)
+			const useCount = gameRules.BOOSTER_INITIAL_VALUE[name]
 			const updateBoosterCounterSpy = vi.spyOn(
 				boosterUI,
 				"updateBoosterCounter"
@@ -280,12 +278,10 @@ describe("booster handling", () => {
 	it.each([
 		{
 			name: "bomb",
-			useCount: 3,
 			tilesPositions: [{ column: 0, row: 0 }],
 		},
 		{
 			name: "teleport",
-			useCount: 5,
 			tilesPositions: [
 				{ column: 0, row: 0 },
 				{ column: 0, row: 1 },
@@ -293,8 +289,10 @@ describe("booster handling", () => {
 		},
 	] as const)(
 		"restores counter and deactivates after clear of booster $name",
-		({ name, tilesPositions, useCount }) => {
-			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
+		({ name, tilesPositions }) => {
+			const { boosterHandler, fieldQueries, boosterUI, gameRules } =
+				createSUT(name)
+			const useCount = gameRules.BOOSTER_INITIAL_VALUE[name]
 			const updateBoosterCounterSpy = vi.spyOn(
 				boosterUI,
 				"updateBoosterCounter"

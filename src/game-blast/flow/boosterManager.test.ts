@@ -71,7 +71,7 @@ function createSUT() {
 		actionManager,
 	})
 
-	return { boosterManager, fieldQueries, actionManager }
+	return { boosterManager, fieldQueries, actionManager, gameRules }
 }
 
 describe("booster manager", () => {
@@ -263,12 +263,10 @@ describe("booster manager", () => {
 	it.each([
 		{
 			name: "bomb",
-			useCount: 3,
 			tilesPositions: [{ column: 0, row: 0 }],
 		},
 		{
 			name: "teleport",
-			useCount: 5,
 			tilesPositions: [
 				{ column: 0, row: 0 },
 				{ column: 0, row: 1 },
@@ -276,8 +274,9 @@ describe("booster manager", () => {
 		},
 	] as const)(
 		"recharges booster $name after clear",
-		({ name, tilesPositions, useCount }) => {
-			const { boosterManager, fieldQueries } = createSUT()
+		({ name, tilesPositions }) => {
+			const { boosterManager, fieldQueries, gameRules } = createSUT()
+			const useCount = gameRules.BOOSTER_INITIAL_VALUE[name]
 			const collectBoosterResults = () => {
 				const results = []
 				for (let i = 0; i < useCount; i++) {
