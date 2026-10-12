@@ -306,7 +306,7 @@ describe("booster handling", () => {
 			}
 			boosterHandler.clear()
 
-			expect(updateBoosterCounterSpy).lastCalledWith(useCount)
+			expect(updateBoosterCounterSpy).toHaveBeenLastCalledWith(useCount)
 			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(useCount * 2)
 			expect(toggleBoosterButtonActiveSpy).toHaveBeenLastCalledWith(false)
 			expect(boosterHandler.tryActivate()).toBe(true)
