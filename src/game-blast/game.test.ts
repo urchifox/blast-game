@@ -180,11 +180,11 @@ async function clickTileByPosition({
 	await clickTilePromise
 }
 
-afterEach(() => {
-	vi.useRealTimers()
-})
-
 describe("Game", () => {
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	it("initializes with zero score, positive score goal and positive moves", async () => {
 		const { game, progressUI } = createSUT()
 		const updateScoreSpy = vi.spyOn(progressUI, "updateScoreCounter")

@@ -9,15 +9,15 @@ function createTile({
 	return new Tile({ kind: "blue", id, position })
 }
 
-beforeEach(() => {
-	vi.useFakeTimers()
-})
-
-afterEach(() => {
-	vi.useRealTimers()
-})
-
 describe("animation manager", () => {
+	beforeEach(() => {
+		vi.useFakeTimers()
+	})
+
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	it("resolves immediately when the tile has no pending animation", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
