@@ -244,6 +244,43 @@ describe("booster handling", () => {
 			],
 		},
 	] as const)(
+		"dont use booster $name after deactivation",
+		({ name, tilesPositions }) => {
+			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
+			const updateBoosterCounterSpy = vi.spyOn(
+				boosterUI,
+				"updateBoosterCounter"
+			)
+			const toggleBoosterButtonActiveSpy = vi.spyOn(
+				boosterUI,
+				"toggleBoosterButtonActive"
+			)
+			const tiles = tilesPositions.map((position) =>
+				fieldQueries.getTileByPosition(position)
+			) as Array<Tile>
+
+			boosterHandler.deactivate()
+			const result = boosterHandler.maybeUse(tiles)
+
+			expect(result).toBeNull()
+			expect(updateBoosterCounterSpy).not.toHaveBeenCalled()
+			expect(toggleBoosterButtonActiveSpy).not.toHaveBeenCalled()
+		}
+	)
+
+	it.each([
+		{
+			name: "bomb",
+			tilesPositions: [{ column: 0, row: 0 }],
+		},
+		{
+			name: "teleport",
+			tilesPositions: [
+				{ column: 0, row: 0 },
+				{ column: 0, row: 1 },
+			],
+		},
+	] as const)(
 		"restores counter and deactivates after clear of booster $name",
 		({ name, tilesPositions }) => {
 			const { boosterHandler, fieldQueries, boosterUI, gameRules } =
