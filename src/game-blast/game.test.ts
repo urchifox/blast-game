@@ -9,8 +9,9 @@ import {
 	createLevelGeneratorStubbed,
 	createRandomizationFunctionStub,
 	createTilesProps,
+	getTileByPosition,
 } from "./domain/testHelpers"
-import { Tile, TileKind, TilePosition, TileProps } from "./domain/tile"
+import { TileKind, TilePosition, TileProps } from "./domain/tile"
 import { ActionManager } from "./flow/actionManager"
 import { ProgressManager } from "./flow/progressManager"
 import {
@@ -174,7 +175,7 @@ async function clickTileByPosition({
 	tilePosition: TilePosition
 	onTileClickCallback: OnTileClickCallback
 }) {
-	const tile = fieldQueries.getTileByPosition(tilePosition) as Tile
+	const tile = getTileByPosition(fieldQueries, tilePosition)
 	const clickTilePromise = onTileClickCallback(tile.getId())
 	await vi.runAllTimersAsync()
 	await clickTilePromise
@@ -377,7 +378,7 @@ describe("Game", () => {
 		const { score: initialScore, goalScore } = updateScoreSpy.mock.calls[0][0]
 		const { movesLeft: initialMovesLeft } = updateMovesSpy.mock.calls[0][0]
 		const onTileClickCallback = presenterInitSpy.mock.calls[0][0]
-		const tile = fieldQueries.getTileByPosition({ row: 1, column: 0 }) as Tile
+		const tile = getTileByPosition(fieldQueries, { row: 1, column: 0 })
 		tile.lock()
 		const clickTilePromise = onTileClickCallback(tile.getId())
 		await vi.runAllTimersAsync()

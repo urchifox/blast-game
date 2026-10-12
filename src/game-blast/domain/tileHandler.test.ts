@@ -4,8 +4,9 @@ import {
 	createFieldComponentsStubbed,
 	createRandomizationFunctionStub,
 	createTilesProps,
+	getTileByPosition,
 } from "./testHelpers"
-import { Tile, TileKind } from "./tile"
+import { TileKind } from "./tile"
 import { TileHandler } from "./tileHandler"
 
 const COLUMNS = 7
@@ -94,9 +95,7 @@ describe("tile click handling", () => {
 		"no commands if there is no connection to clicked tile",
 		({ clickedPosition }) => {
 			const { tileHandler, fieldQueries } = createTileHandler()
-			const clickedTile = fieldQueries.getTileByPosition(
-				clickedPosition
-			) as Tile
+			const clickedTile = getTileByPosition(fieldQueries, clickedPosition)
 
 			const commands = tileHandler.onClick(clickedTile)
 
@@ -124,9 +123,7 @@ describe("tile click handling", () => {
 		"commands to remove tiles if 2 or 3 connections to clicked tile",
 		({ clickedPosition, positionsToRemove }) => {
 			const { tileHandler, fieldQueries } = createTileHandler()
-			const clickedTile = fieldQueries.getTileByPosition(
-				clickedPosition
-			) as Tile
+			const clickedTile = getTileByPosition(fieldQueries, clickedPosition)
 
 			const commands = tileHandler.onClick(clickedTile)
 			const commandRemove = commands?.[0] as Command<CommandName.REMOVE>
@@ -227,9 +224,7 @@ describe("tile click handling", () => {
 		"commands to remove tiles and add bonus if more than 4 connections to clicked tile",
 		({ clickedPosition, positionsToRemove, bonusTypes }) => {
 			const { tileHandler, fieldQueries } = createTileHandler()
-			const clickedTile = fieldQueries.getTileByPosition(
-				clickedPosition
-			) as Tile
+			const clickedTile = getTileByPosition(fieldQueries, clickedPosition)
 
 			const commands = tileHandler.onClick(clickedTile)
 			const commandRemove = commands?.[0] as Command<CommandName.REMOVE>
@@ -262,7 +257,7 @@ describe("tile remove handling", () => {
 		"commans nothing after normal tile removal",
 		({ clickedPosition }) => {
 			const { tileHandler, fieldQueries } = createTileHandler()
-			const tile = fieldQueries.getTileByPosition(clickedPosition) as Tile
+			const tile = getTileByPosition(fieldQueries, clickedPosition)
 
 			const commands = tileHandler.onRemove(tile)
 
@@ -317,7 +312,7 @@ describe("tile remove handling", () => {
 		"commans remove tiles after special tile removal",
 		({ clickedPosition, positionsToRemove }) => {
 			const { tileHandler, fieldQueries } = createTileHandler()
-			const tile = fieldQueries.getTileByPosition(clickedPosition) as Tile
+			const tile = getTileByPosition(fieldQueries, clickedPosition)
 
 			const commands = tileHandler.onRemove(tile)
 			const commandRemove = commands?.[0] as Command<CommandName.REMOVE>

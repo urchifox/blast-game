@@ -1,5 +1,9 @@
-import { createFieldComponentsStubbed, createTilesProps } from "./testHelpers"
-import { Tile, TileKind } from "./tile"
+import {
+	createFieldComponentsStubbed,
+	createTilesProps,
+	getTileByPosition,
+} from "./testHelpers"
+import { TileKind } from "./tile"
 
 const COLUMNS = 3
 const ROWS = 3
@@ -200,7 +204,7 @@ describe("field queries", () => {
 		"finds same kind neighbour tiles for provided tile",
 		({ tilePosition, expectedPositions }) => {
 			const { fieldQueries } = createFieldQueries()
-			const tile = fieldQueries.getTileByPosition(tilePosition) as Tile
+			const tile = getTileByPosition(fieldQueries, tilePosition)
 			const sameKindNeighbourTiles =
 				fieldQueries.getSameKindNeighbourTiles(tile).tiles
 			const sameKindNeighbourTilesPositions = [...sameKindNeighbourTiles].map(

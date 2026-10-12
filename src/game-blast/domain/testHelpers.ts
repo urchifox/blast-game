@@ -1,8 +1,15 @@
 import { IdGenerator, RandomizationFunction } from "../../helpers/random"
 import { fieldComponentsFactory } from "./fieldComponentsFactory"
+import { FieldQueries } from "./fieldQueries"
 import { GameRules } from "./gameRules"
 import { LevelGenerator } from "./levelGenerator"
-import { TileKind, TileProps } from "./tile"
+import {
+	stringifyTilePosition,
+	Tile,
+	TileKind,
+	TilePosition,
+	TileProps,
+} from "./tile"
 
 export function createFieldComponentsStubbed({
 	gridSize,
@@ -71,4 +78,23 @@ export function createTilesProps({
 		kind: kinds?.[index] ?? "blue",
 		position: { row: Math.floor(index / columns), column: index % columns },
 	}))
+}
+
+export function getTileByPosition(
+	fieldQueries: FieldQueries,
+	position: TilePosition
+): Tile {
+	const tile = fieldQueries.getTileByPosition(position)
+	if (tile === undefined) {
+		throw new Error(`No tile at ${stringifyTilePosition(position)}`)
+	}
+	return tile
+}
+
+export function getTileById(fieldQueries: FieldQueries, id: string): Tile {
+	const tile = fieldQueries.getTileById(id)
+	if (tile === undefined) {
+		throw new Error(`No tile with id ${id}`)
+	}
+	return tile
 }
