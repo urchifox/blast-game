@@ -117,6 +117,7 @@ describe("booster handling", () => {
 
 			expect(updateBoosterCounterSpy).toHaveBeenCalledOnce()
 			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(2)
+			expect(toggleBoosterButtonActiveSpy.mock.calls).toEqual([[true], [false]])
 		}
 	)
 
