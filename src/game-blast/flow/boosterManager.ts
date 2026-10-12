@@ -66,8 +66,9 @@ export class BoosterManager {
 	}
 
 	onBoosterButtonClick(boosterName: BoosterName) {
-		if (this.activeBoosterName !== null) {
-			this.boostersHandlersMap[this.activeBoosterName].deactivate()
+		const activeBoosterName = this.activeBoosterName
+		if (activeBoosterName !== null) {
+			this.boostersHandlersMap[activeBoosterName].deactivate()
 			this.selectedTiles.forEach((tile) => {
 				this.actionManager.doActions([
 					{
@@ -79,7 +80,8 @@ export class BoosterManager {
 			this.selectedTiles = []
 		}
 
-		if (this.activeBoosterName === boosterName) {
+		if (activeBoosterName === boosterName) {
+			this.activeBoosterName = null
 			return
 		}
 

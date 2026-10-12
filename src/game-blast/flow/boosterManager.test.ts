@@ -243,6 +243,25 @@ describe("booster manager", () => {
 		expect(action2Names).toEqual([ActionName.UNSELECT])
 	})
 
+	it("unselects tiles after second click on same booster", () => {
+		const { boosterManager, fieldQueries, actionManager } = createSUT()
+		const doActionsSpy = vi.spyOn(actionManager, "doActions")
+		const doActionCalls = doActionsSpy.mock.calls
+		const tile1 = fieldQueries.getTileByPosition({ column: 0, row: 0 }) as Tile
+		const tile2 = fieldQueries.getTileByPosition({ column: 0, row: 1 }) as Tile
+
+		boosterManager.onBoosterButtonClick("teleport")
+		boosterManager.maybeUseBooster(tile1)
+		boosterManager.onBoosterButtonClick("teleport")
+		const result2 = boosterManager.maybeUseBooster(tile2)
+
+		const action1Names = doActionCalls[0][0].map((action) => action.name)
+		const action2Names = doActionCalls[1][0].map((action) => action.name)
+		expect(action1Names).toEqual([ActionName.SELECT])
+		expect(action2Names).toEqual([ActionName.UNSELECT])
+		expect(result2).toEqual({ isUsed: false, actResult: null })
+	})
+
 	it("unselects tile after second click", () => {
 		const { boosterManager, fieldQueries, actionManager } = createSUT()
 		const doActionsSpy = vi.spyOn(actionManager, "doActions")
