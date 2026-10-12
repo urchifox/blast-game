@@ -24,8 +24,7 @@ import { tilesManagerFactory } from "./flow/tilesManagerFactory"
 import { Game } from "./game"
 import { LevelGeneratorContract, OnTileClickCallback } from "./types"
 
-const COLUMNS = 7
-const ROWS = 7
+const GRID_SIZE = { columns: 7, rows: 7 }
 const TILES_KINDS = [
 	"green",
 	"rockets-column",
@@ -84,8 +83,7 @@ const TILES_KINDS = [
 	"blue",
 ] satisfies Array<TileKind>
 const tilesProps = createTilesProps({
-	columns: COLUMNS,
-	rows: ROWS,
+	...GRID_SIZE,
 	kinds: TILES_KINDS,
 })
 

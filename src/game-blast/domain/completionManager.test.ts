@@ -6,8 +6,7 @@ import { createFieldComponentsStubbed, createTilesProps } from "./testHelpers"
 import { TileKind, TileProps } from "./tile"
 import { GameCompletionStatus } from "./types"
 
-const COLUMNS = 3
-const ROWS = 3
+const GRID_SIZE = { columns: 3, rows: 3 }
 const TILES_KINDS_WITH_MATCH = [
 	"red",
 	"red",
@@ -48,24 +47,21 @@ const TILES_KINDS_WITH_SPECIAL_TILE = [
 	"yellow",
 ] satisfies Array<TileKind>
 const tilesPropsWithMatch = createTilesProps({
-	columns: COLUMNS,
-	rows: ROWS,
+	...GRID_SIZE,
 	kinds: TILES_KINDS_WITH_MATCH,
 })
 const tilesPropsWithNoMatch = createTilesProps({
-	columns: COLUMNS,
-	rows: ROWS,
+	...GRID_SIZE,
 	kinds: TILES_KINDS_WITH_NO_MATCH,
 })
 const tilesPropsWithSpecialTile = createTilesProps({
-	columns: COLUMNS,
-	rows: ROWS,
+	...GRID_SIZE,
 	kinds: TILES_KINDS_WITH_SPECIAL_TILE,
 })
 
 function createCompletionManager(tileProps: Array<TileProps>) {
 	const { fieldQueries } = createFieldComponentsStubbed({
-		gridSize: { columns: COLUMNS, rows: ROWS },
+		gridSize: GRID_SIZE,
 		tilesProps: new Set(tileProps),
 	})
 

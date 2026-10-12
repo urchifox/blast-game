@@ -9,8 +9,7 @@ import {
 import { TileKind } from "./tile"
 import { TileHandler } from "./tileHandler"
 
-const COLUMNS = 7
-const ROWS = 7
+const GRID_SIZE = { columns: 7, rows: 7 }
 const TILES_KINDS = [
 	"green",
 	"rockets-column",
@@ -69,14 +68,13 @@ const TILES_KINDS = [
 	"blue",
 ] satisfies Array<TileKind>
 const tilesProps = createTilesProps({
-	columns: COLUMNS,
-	rows: ROWS,
+	...GRID_SIZE,
 	kinds: TILES_KINDS,
 })
 
 function createTileHandler() {
 	const { fieldQueries } = createFieldComponentsStubbed({
-		gridSize: { columns: COLUMNS, rows: ROWS },
+		gridSize: GRID_SIZE,
 		tilesProps: new Set(tilesProps),
 	})
 	const tileHandler = new TileHandler({

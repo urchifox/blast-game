@@ -13,8 +13,7 @@ import {
 	createBoosterUIStub,
 } from "./testHelpers"
 
-const COLUMNS = 3
-const ROWS = 3
+const GRID_SIZE = { columns: 3, rows: 3 }
 const TILES_KINDS = [
 	"red",
 	"red",
@@ -29,14 +28,13 @@ const TILES_KINDS = [
 	"yellow",
 ] satisfies Array<TileKind>
 const tilesProps = createTilesProps({
-	columns: COLUMNS,
-	rows: ROWS,
+	...GRID_SIZE,
 	kinds: TILES_KINDS,
 })
 
 function createSUT(name: BoosterName) {
 	const { fieldQueries } = createFieldComponentsStubbed({
-		gridSize: { columns: COLUMNS, rows: ROWS },
+		gridSize: GRID_SIZE,
 		tilesProps: new Set(tilesProps),
 	})
 
