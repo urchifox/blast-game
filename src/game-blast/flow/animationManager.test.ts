@@ -1,5 +1,6 @@
 import { Tile } from "../domain/tile"
 import { AnimationsManager } from "./animationManager"
+import { createDeferred } from "./testHelpers"
 
 function createTile(): Tile {
 	return new Tile({
@@ -7,16 +8,6 @@ function createTile(): Tile {
 		id: "tile-1",
 		position: { column: 0, row: 0 },
 	})
-}
-
-function createAnimation() {
-	let resolvePromise: () => void = () => undefined
-	let rejectePromise: () => void = () => undefined
-	const promise = new Promise<void>((resolve, reject) => {
-		resolvePromise = resolve
-		rejectePromise = reject
-	})
-	return { promise, resolve: resolvePromise, reject: rejectePromise }
 }
 
 async function isPending(promise: Promise<unknown>): Promise<boolean> {
@@ -38,7 +29,7 @@ describe("animation manager", () => {
 	it("returns the same animation promise that it received", () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const animation = createAnimation()
+		const animation = createDeferred()
 
 		const result = animationsManager.setAnimation({
 			tile,
@@ -51,7 +42,7 @@ describe("animation manager", () => {
 	it("resolves when the tile's pending animation settles", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const animation = createAnimation()
+		const animation = createDeferred()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
 		const wait = animationsManager.waitForTileAnimations(tile)
@@ -64,8 +55,8 @@ describe("animation manager", () => {
 	it("resolves after all tile animations settle", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const animation1 = createAnimation()
-		const animation2 = createAnimation()
+		const animation1 = createDeferred()
+		const animation2 = createDeferred()
 		animationsManager.setAnimation({ tile, promise: animation1.promise })
 		animationsManager.setAnimation({ tile, promise: animation2.promise })
 
@@ -83,12 +74,12 @@ describe("animation manager", () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
 
-		const animation1 = createAnimation()
+		const animation1 = createDeferred()
 		animationsManager.setAnimation({ tile, promise: animation1.promise })
 		const wait1 = animationsManager.waitForTileAnimations(tile)
 		expect(await isPending(wait1)).toBe(true)
 
-		const animation2 = createAnimation()
+		const animation2 = createDeferred()
 		animationsManager.setAnimation({ tile, promise: animation2.promise })
 
 		animation1.resolve()
@@ -103,7 +94,7 @@ describe("animation manager", () => {
 	it("resolves when the tile's pending animation rejects", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const animation = createAnimation()
+		const animation = createDeferred()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
 		const wait = animationsManager.waitForTileAnimations(tile)
@@ -116,7 +107,7 @@ describe("animation manager", () => {
 	it("resolves immediately if wait started after the animation settled", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const animation = createAnimation()
+		const animation = createDeferred()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
 		animation.resolve()
@@ -130,7 +121,7 @@ describe("animation manager", () => {
 	it("resolves the next wait immediately after clear", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const animation = createAnimation()
+		const animation = createDeferred()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
 		animationsManager.clear()
@@ -143,8 +134,8 @@ describe("animation manager", () => {
 	it("keeps an animation registered after clear when the cleared one settles", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
-		const cleared = createAnimation()
-		const registered = createAnimation()
+		const cleared = createDeferred()
+		const registered = createDeferred()
 
 		animationsManager.setAnimation({ tile, promise: cleared.promise })
 		animationsManager.clear()
@@ -172,8 +163,8 @@ describe("animation manager", () => {
 			id: "tile-2",
 			position: { column: 1, row: 1 },
 		})
-		const animation1 = createAnimation()
-		const animation2 = createAnimation()
+		const animation1 = createDeferred()
+		const animation2 = createDeferred()
 		animationsManager.setAnimation({ tile: tile1, promise: animation1.promise })
 		animationsManager.setAnimation({ tile: tile2, promise: animation2.promise })
 

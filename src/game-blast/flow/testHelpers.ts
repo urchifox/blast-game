@@ -8,6 +8,7 @@ import { Grid } from "../domain/grid"
 import { Tile } from "../domain/tile"
 import { BoosterName } from "../domain/types"
 import {
+	AnimationsManagerContract,
 	BoosterUIContract,
 	LayoutUIContract,
 	ModalUIContract,
@@ -97,15 +98,17 @@ export function createPresenterStubbed({
 	field,
 	fieldQueries,
 	grid,
+	renderer = createRendererStub(),
+	animationsManager = new AnimationsManager(),
+	layoutUI = createLayoutUIStub(),
 }: {
 	field: Field
 	fieldQueries: FieldQueries
 	grid: Grid
+	renderer?: RendererContract
+	animationsManager?: AnimationsManagerContract
+	layoutUI?: LayoutUIContract
 }): PresenterContract {
-	const animationsManager = new AnimationsManager()
-	const renderer = createRendererStub()
-	const layoutUI = createLayoutUIStub()
-
 	return new Presenter({
 		layoutUI,
 		field,
@@ -202,4 +205,20 @@ export function createModalUIStub(): ModalUIContract {
 	return {
 		open() {},
 	}
+}
+
+export type Deferred = {
+	promise: Promise<void>
+	resolve: () => void
+	reject: () => void
+}
+
+export function createDeferred(): Deferred {
+	let resolve: Deferred["resolve"] = () => undefined
+	let reject: Deferred["reject"] = () => undefined
+	const promise = new Promise<void>((res, rej) => {
+		resolve = res
+		reject = rej
+	})
+	return { promise, resolve, reject }
 }
