@@ -46,10 +46,6 @@ export class BoosterHandler {
 		this.booster.clear()
 	}
 
-	reset() {
-		this.booster.reset()
-	}
-
 	maybeUse(tiles: Array<Tile>) {
 		if (this.booster.isActivated()) {
 			const result = this.use(tiles)

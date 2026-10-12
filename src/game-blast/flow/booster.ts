@@ -22,12 +22,6 @@ export class Booster {
 		this.boosterUI = props.boosterUI
 	}
 
-	reset() {
-		this.boosterCounter.reset()
-		this.renderCounter()
-		this.deactivate()
-	}
-
 	spend() {
 		this.boosterCounter.spend()
 		this.renderCounter()
@@ -39,7 +33,9 @@ export class Booster {
 	}
 
 	clear() {
-		this.reset()
+		this.boosterCounter.reset()
+		this.renderCounter()
+		this.deactivate()
 	}
 
 	tryActivate() {

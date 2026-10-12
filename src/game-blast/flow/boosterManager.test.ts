@@ -347,6 +347,39 @@ describe("booster manager", () => {
 		expect(result).toEqual({ isUsed: false, actResult: null })
 	})
 
+	it.each([
+		{
+			name: "bomb",
+			tilesPositions: [{ column: 0, row: 0 }],
+		},
+		{
+			name: "teleport",
+			tilesPositions: [
+				{ column: 0, row: 0 },
+				{ column: 0, row: 1 },
+			],
+		},
+	] as const)("dont activate empty booster", ({ name, tilesPositions }) => {
+		const { boosterManager, fieldQueries, gameRules } = createSUT()
+		const useCount = gameRules.BOOSTER_INITIAL_VALUE[name]
+		const tryUseBooster = () => {
+			boosterManager.onBoosterButtonClick(name)
+			const tiles = tilesPositions.map(
+				(position) => fieldQueries.getTileByPosition(position) as Tile
+			)
+			const results = tiles.map((tile) => boosterManager.maybeUseBooster(tile))
+			return results.pop()
+		}
+
+		for (let i = 0; i < useCount; i++) {
+			tryUseBooster()
+		}
+		boosterManager.onBoosterButtonClick(name)
+		const result = tryUseBooster()
+
+		expect(result).toEqual({ isUsed: false, actResult: null })
+	})
+
 	it("forgets selected tiles for the activated booster after clear", () => {
 		const { boosterManager, fieldQueries } = createSUT()
 		const tile1 = fieldQueries.getTileByPosition({ column: 0, row: 0 }) as Tile

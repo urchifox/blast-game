@@ -30,12 +30,6 @@ export class BoosterManager {
 		this.activeBoosterName = null
 	}
 
-	reset() {
-		for (const handler of this.boostersHandlers) {
-			handler.reset()
-		}
-	}
-
 	maybeUseBooster(tile: Tile): BoosterHandlerResult {
 		const boosterName = this.activeBoosterName
 		if (boosterName === null) {

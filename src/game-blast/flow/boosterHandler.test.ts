@@ -244,50 +244,6 @@ describe("booster handling", () => {
 			],
 		},
 	] as const)(
-		"restores counter and deactivates after reset of booster $name",
-		({ name, tilesPositions }) => {
-			const { boosterHandler, fieldQueries, boosterUI, gameRules } =
-				createSUT(name)
-			const useCount = gameRules.BOOSTER_INITIAL_VALUE[name]
-			const updateBoosterCounterSpy = vi.spyOn(
-				boosterUI,
-				"updateBoosterCounter"
-			)
-			const toggleBoosterButtonActiveSpy = vi.spyOn(
-				boosterUI,
-				"toggleBoosterButtonActive"
-			)
-
-			let canBeActivated = true
-			while (canBeActivated) {
-				canBeActivated = boosterHandler.tryActivate()
-				const tiles = tilesPositions.map((position) =>
-					fieldQueries.getTileByPosition(position)
-				) as Array<Tile>
-				boosterHandler.maybeUse(tiles)
-			}
-			boosterHandler.reset()
-
-			expect(updateBoosterCounterSpy).lastCalledWith(useCount)
-			expect(toggleBoosterButtonActiveSpy).toHaveBeenCalledTimes(useCount * 2)
-			expect(toggleBoosterButtonActiveSpy).toHaveBeenLastCalledWith(false)
-			expect(boosterHandler.tryActivate()).toBe(true)
-		}
-	)
-
-	it.each([
-		{
-			name: "bomb",
-			tilesPositions: [{ column: 0, row: 0 }],
-		},
-		{
-			name: "teleport",
-			tilesPositions: [
-				{ column: 0, row: 0 },
-				{ column: 0, row: 1 },
-			],
-		},
-	] as const)(
 		"restores counter and deactivates after clear of booster $name",
 		({ name, tilesPositions }) => {
 			const { boosterHandler, fieldQueries, boosterUI, gameRules } =
