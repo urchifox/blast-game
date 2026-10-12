@@ -1,6 +1,9 @@
 import { GameRules } from "../domain/gameRules"
-import { createFieldComponentsStubbed } from "../domain/testHelpers"
-import { Tile, TileProps } from "../domain/tile"
+import {
+	createFieldComponentsStubbed,
+	createTilesProps,
+} from "../domain/testHelpers"
+import { Tile } from "../domain/tile"
 import { ActionName, ActResult } from "./actionManager"
 import { BoosterHandlerResult } from "./boosterHandler"
 import {
@@ -8,53 +11,23 @@ import {
 	createBoosterManagerStubbed,
 } from "./testHelpers"
 
-const tilesProps = [
-	{
-		id: "1",
-		kind: "red",
-		position: { row: 0, column: 0 },
-	},
-	{
-		id: "2",
-		kind: "red",
-		position: { row: 1, column: 0 },
-	},
-	{
-		id: "3",
-		kind: "yellow",
-		position: { row: 2, column: 0 },
-	},
-	{
-		id: "4",
-		kind: "red",
-		position: { row: 0, column: 1 },
-	},
-	{
-		id: "5",
-		kind: "yellow",
-		position: { row: 1, column: 1 },
-	},
-	{
-		id: "6",
-		kind: "blue",
-		position: { row: 2, column: 1 },
-	},
-	{
-		id: "7",
-		kind: "yellow",
-		position: { row: 0, column: 2 },
-	},
-	{
-		id: "8",
-		kind: "blue",
-		position: { row: 1, column: 2 },
-	},
-	{
-		id: "9",
-		kind: "yellow",
-		position: { row: 2, column: 2 },
-	},
-] satisfies Array<TileProps>
+const tilesProps = createTilesProps({
+	columns: 3,
+	rows: 3,
+	kinds: [
+		"red",
+		"red",
+		"yellow",
+
+		"red",
+		"yellow",
+		"blue",
+
+		"yellow",
+		"blue",
+		"yellow",
+	],
+})
 
 function createSUT() {
 	const { fieldQueries } = createFieldComponentsStubbed({

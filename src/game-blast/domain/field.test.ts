@@ -1,61 +1,21 @@
 import {
 	createFieldComponentsStubbed,
 	createRandomizationFunctionStub,
+	createTilesProps,
 } from "./testHelpers"
 import { TileProps } from "./tile"
 
-const tilesProps = [
-	{
-		id: "1",
-		kind: "blue",
-		position: { row: 0, column: 0 },
-	},
-	{
-		id: "2",
-		kind: "blue",
-		position: { row: 1, column: 0 },
-	},
-	{
-		id: "3",
-		kind: "blue",
-		position: { row: 2, column: 0 },
-	},
-	{
-		id: "4",
-		kind: "blue",
-		position: { row: 0, column: 1 },
-	},
-	{
-		id: "5",
-		kind: "blue",
-		position: { row: 1, column: 1 },
-	},
-	{
-		id: "6",
-		kind: "blue",
-		position: { row: 2, column: 1 },
-	},
-	{
-		id: "7",
-		kind: "blue",
-		position: { row: 0, column: 2 },
-	},
-	{
-		id: "8",
-		kind: "blue",
-		position: { row: 1, column: 2 },
-	},
-	{
-		id: "9",
-		kind: "blue",
-		position: { row: 2, column: 2 },
-	},
-] satisfies Array<TileProps>
+const COLUMNS = 3
+const ROWS = 3
+const tilesProps = createTilesProps({
+	columns: COLUMNS,
+	rows: ROWS,
+})
 
 describe("field", () => {
 	it("fills positions after removing", () => {
 		const { field } = createFieldComponentsStubbed({
-			gridSize: { columns: 3, rows: 3 },
+			gridSize: { columns: COLUMNS, rows: ROWS },
 			tilesProps: new Set(tilesProps),
 		})
 		const positionsToDelete = [
@@ -87,7 +47,7 @@ describe("field", () => {
 
 	it("swaps tiles", () => {
 		const { field } = createFieldComponentsStubbed({
-			gridSize: { columns: 3, rows: 3 },
+			gridSize: { columns: COLUMNS, rows: ROWS },
 			tilesProps: new Set(tilesProps),
 		})
 		const tile1 = field.getTiles()[0]
@@ -103,7 +63,7 @@ describe("field", () => {
 
 	it("shuffle dont change content but change positions of tiles", () => {
 		const { field } = createFieldComponentsStubbed({
-			gridSize: { columns: 3, rows: 3 },
+			gridSize: { columns: COLUMNS, rows: ROWS },
 			tilesProps: new Set(tilesProps),
 			randomizationFunction: createRandomizationFunctionStub(0.5),
 		})

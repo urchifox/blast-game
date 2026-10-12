@@ -2,7 +2,7 @@ import { IdGenerator, RandomizationFunction } from "../../helpers/random"
 import { fieldComponentsFactory } from "./fieldComponentsFactory"
 import { GameRules } from "./gameRules"
 import { LevelGenerator } from "./levelGenerator"
-import { TileProps } from "./tile"
+import { TileKind, TileProps } from "./tile"
 
 export function createFieldComponentsStubbed({
 	gridSize,
@@ -55,4 +55,20 @@ export function createRandomizationFunctionStub(
 export function createIdGeneratorStub(startId = 1): IdGenerator {
 	let nextId = startId
 	return () => String(nextId++)
+}
+
+export function createTilesProps({
+	columns,
+	rows,
+	kinds,
+}: {
+	columns: number
+	rows: number
+	kinds?: Array<TileKind>
+}): Array<TileProps> {
+	return Array.from({ length: columns * rows }, (_, index) => ({
+		id: String(index + 1),
+		kind: kinds?.[index] ?? "blue",
+		position: { row: Math.floor(index / columns), column: index % columns },
+	}))
 }

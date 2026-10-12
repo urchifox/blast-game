@@ -1,57 +1,30 @@
-import { createFieldComponentsStubbed } from "./testHelpers"
-import { Tile, TileProps } from "./tile"
+import { createFieldComponentsStubbed, createTilesProps } from "./testHelpers"
+import { Tile, TileKind } from "./tile"
 
-const tilesProps = [
-	{
-		id: "1",
-		kind: "red",
-		position: { row: 0, column: 0 },
-	},
-	{
-		id: "2",
-		kind: "red",
-		position: { row: 1, column: 0 },
-	},
-	{
-		id: "3",
-		kind: "yellow",
-		position: { row: 2, column: 0 },
-	},
-	{
-		id: "4",
-		kind: "red",
-		position: { row: 0, column: 1 },
-	},
-	{
-		id: "5",
-		kind: "yellow",
-		position: { row: 1, column: 1 },
-	},
-	{
-		id: "6",
-		kind: "blue",
-		position: { row: 2, column: 1 },
-	},
-	{
-		id: "7",
-		kind: "yellow",
-		position: { row: 0, column: 2 },
-	},
-	{
-		id: "8",
-		kind: "blue",
-		position: { row: 1, column: 2 },
-	},
-	{
-		id: "9",
-		kind: "yellow",
-		position: { row: 2, column: 2 },
-	},
-] satisfies Array<TileProps>
+const COLUMNS = 3
+const ROWS = 3
+const TILES_KINDS = [
+	"red",
+	"red",
+	"yellow",
+
+	"red",
+	"yellow",
+	"blue",
+
+	"yellow",
+	"blue",
+	"yellow",
+] satisfies Array<TileKind>
+const tilesProps = createTilesProps({
+	columns: COLUMNS,
+	rows: ROWS,
+	kinds: TILES_KINDS,
+})
 
 function createFieldQueries() {
 	return createFieldComponentsStubbed({
-		gridSize: { columns: 3, rows: 3 },
+		gridSize: { columns: COLUMNS, rows: ROWS },
 		tilesProps: new Set(tilesProps),
 	})
 }

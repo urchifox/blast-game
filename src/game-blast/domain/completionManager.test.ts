@@ -2,13 +2,70 @@ import { Counter } from "../../helpers/counter"
 import { CompletionManager } from "./completionManager"
 import { GameRules } from "./gameRules"
 import { ProgressCounter } from "./progressCounter"
-import { createFieldComponentsStubbed } from "./testHelpers"
-import { TileProps } from "./tile"
+import { createFieldComponentsStubbed, createTilesProps } from "./testHelpers"
+import { TileKind, TileProps } from "./tile"
 import { GameCompletionStatus } from "./types"
+
+const COLUMNS = 3
+const ROWS = 3
+const TILES_KINDS_WITH_MATCH = [
+	"red",
+	"red",
+	"yellow",
+
+	"red",
+	"yellow",
+	"blue",
+
+	"yellow",
+	"blue",
+	"yellow",
+] satisfies Array<TileKind>
+const TILES_KINDS_WITH_NO_MATCH = [
+	"red",
+	"yellow",
+	"red",
+
+	"blue",
+	"red",
+	"blue",
+
+	"yellow",
+	"blue",
+	"yellow",
+] satisfies Array<TileKind>
+const TILES_KINDS_WITH_SPECIAL_TILE = [
+	"red",
+	"yellow",
+	"red",
+
+	"blue",
+	"bomb",
+	"blue",
+
+	"yellow",
+	"blue",
+	"yellow",
+] satisfies Array<TileKind>
+const tilesPropsWithMatch = createTilesProps({
+	columns: COLUMNS,
+	rows: ROWS,
+	kinds: TILES_KINDS_WITH_MATCH,
+})
+const tilesPropsWithNoMatch = createTilesProps({
+	columns: COLUMNS,
+	rows: ROWS,
+	kinds: TILES_KINDS_WITH_NO_MATCH,
+})
+const tilesPropsWithSpecialTile = createTilesProps({
+	columns: COLUMNS,
+	rows: ROWS,
+	kinds: TILES_KINDS_WITH_SPECIAL_TILE,
+})
 
 function createCompletionManager(tileProps: Array<TileProps>) {
 	const { fieldQueries } = createFieldComponentsStubbed({
-		gridSize: { columns: 3, rows: 3 },
+		gridSize: { columns: COLUMNS, rows: ROWS },
 		tilesProps: new Set(tileProps),
 	})
 
@@ -26,150 +83,6 @@ function createCompletionManager(tileProps: Array<TileProps>) {
 
 	return { completionManager, progressCounter }
 }
-
-const tilesPropsWithMatch = [
-	{
-		kind: "red",
-		position: { row: 0, column: 0 },
-		id: "1",
-	},
-	{
-		kind: "red",
-		position: { row: 1, column: 0 },
-		id: "2",
-	},
-	{
-		kind: "yellow",
-		position: { row: 2, column: 0 },
-		id: "3",
-	},
-	{
-		kind: "red",
-		position: { row: 0, column: 1 },
-		id: "4",
-	},
-	{
-		kind: "yellow",
-		position: { row: 1, column: 1 },
-		id: "5",
-	},
-	{
-		kind: "blue",
-		position: { row: 2, column: 1 },
-		id: "6",
-	},
-	{
-		kind: "yellow",
-		position: { row: 0, column: 2 },
-		id: "7",
-	},
-	{
-		kind: "blue",
-		position: { row: 1, column: 2 },
-		id: "8",
-	},
-	{
-		kind: "yellow",
-		position: { row: 2, column: 2 },
-		id: "9",
-	},
-] satisfies Array<TileProps>
-
-const tilesPropsWithNoMatch = [
-	{
-		kind: "red",
-		position: { row: 0, column: 0 },
-		id: "1",
-	},
-	{
-		kind: "blue",
-		position: { row: 1, column: 0 },
-		id: "2",
-	},
-	{
-		kind: "yellow",
-		position: { row: 2, column: 0 },
-		id: "3",
-	},
-	{
-		kind: "yellow",
-		position: { row: 0, column: 1 },
-		id: "4",
-	},
-	{
-		kind: "red",
-		position: { row: 1, column: 1 },
-		id: "5",
-	},
-	{
-		kind: "blue",
-		position: { row: 2, column: 1 },
-		id: "6",
-	},
-	{
-		kind: "red",
-		position: { row: 0, column: 2 },
-		id: "7",
-	},
-	{
-		kind: "blue",
-		position: { row: 1, column: 2 },
-		id: "8",
-	},
-	{
-		kind: "yellow",
-		position: { row: 2, column: 2 },
-		id: "9",
-	},
-] satisfies Array<TileProps>
-
-const tilesPropsWithSpecialTile = [
-	{
-		kind: "red",
-		position: { row: 0, column: 0 },
-		id: "1",
-	},
-	{
-		kind: "blue",
-		position: { row: 1, column: 0 },
-		id: "2",
-	},
-	{
-		kind: "yellow",
-		position: { row: 2, column: 0 },
-		id: "3",
-	},
-	{
-		kind: "yellow",
-		position: { row: 0, column: 1 },
-		id: "4",
-	},
-	{
-		kind: "bomb",
-		position: { row: 1, column: 1 },
-		id: "5",
-	},
-	{
-		kind: "blue",
-		position: { row: 2, column: 1 },
-		id: "6",
-	},
-	{
-		kind: "red",
-		position: { row: 0, column: 2 },
-		id: "7",
-	},
-	{
-		kind: "blue",
-		position: { row: 1, column: 2 },
-		id: "8",
-	},
-	{
-		kind: "yellow",
-		position: { row: 2, column: 2 },
-		id: "9",
-	},
-] satisfies Array<TileProps>
 
 describe("completion manager", () => {
 	it.each([
