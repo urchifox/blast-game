@@ -222,3 +222,22 @@ export function createDeferred(): Deferred {
 	})
 	return { promise, resolve, reject }
 }
+
+/** `isSettled` is only reliable after `flushPromises()`. */
+export function trackSettled(promise: Promise<unknown>) {
+	const state = {
+		/** is only reliable after `flushPromises()`. */
+		isSettled: false,
+	}
+	promise
+		.finally(() => {
+			state.isSettled = true
+		})
+		.catch(() => {})
+	return state
+}
+
+/** Requires `vi.useFakeTimers()`. */
+export function flushPromises() {
+	return vi.advanceTimersByTimeAsync(0)
+}

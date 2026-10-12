@@ -1,29 +1,31 @@
-import { Tile } from "../domain/tile"
+import { Tile, TilePosition } from "../domain/tile"
 import { AnimationsManager } from "./animationManager"
-import { createDeferred } from "./testHelpers"
+import { createDeferred, flushPromises, trackSettled } from "./testHelpers"
 
-function createTile(): Tile {
-	return new Tile({
-		kind: "blue",
-		id: "tile-1",
-		position: { column: 0, row: 0 },
-	})
+function createTile({
+	id = "tile-1",
+	position = { column: 0, row: 0 },
+}: { id?: string; position?: TilePosition } = {}): Tile {
+	return new Tile({ kind: "blue", id, position })
 }
 
-async function isPending(promise: Promise<unknown>): Promise<boolean> {
-	const pending = Symbol("pending")
-	const result = await Promise.race([promise, Promise.resolve(pending)])
-	return result === pending
-}
+beforeEach(() => {
+	vi.useFakeTimers()
+})
+
+afterEach(() => {
+	vi.useRealTimers()
+})
 
 describe("animation manager", () => {
 	it("resolves immediately when the tile has no pending animation", async () => {
 		const animationsManager = new AnimationsManager()
 		const tile = createTile()
 
-		await expect(
-			animationsManager.waitForTileAnimations(tile)
-		).resolves.toBeUndefined()
+		const waiting = trackSettled(animationsManager.waitForTileAnimations(tile))
+		await flushPromises()
+
+		expect(waiting.isSettled).toBe(true)
 	})
 
 	it("returns the same animation promise that it received", () => {
@@ -45,11 +47,13 @@ describe("animation manager", () => {
 		const animation = createDeferred()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
-		const wait = animationsManager.waitForTileAnimations(tile)
-		expect(await isPending(wait)).toBe(true)
+		const waiting = trackSettled(animationsManager.waitForTileAnimations(tile))
+		await flushPromises()
+		expect(waiting.isSettled).toBe(false)
 
 		animation.resolve()
-		await expect(wait).resolves.toBeUndefined()
+		await flushPromises()
+		expect(waiting.isSettled).toBe(true)
 	})
 
 	it("resolves after all tile animations settle", async () => {
@@ -60,14 +64,17 @@ describe("animation manager", () => {
 		animationsManager.setAnimation({ tile, promise: animation1.promise })
 		animationsManager.setAnimation({ tile, promise: animation2.promise })
 
-		const wait = animationsManager.waitForTileAnimations(tile)
-		expect(await isPending(wait)).toBe(true)
+		const waiting = trackSettled(animationsManager.waitForTileAnimations(tile))
+		await flushPromises()
+		expect(waiting.isSettled).toBe(false)
 
 		animation1.resolve()
-		expect(await isPending(wait)).toBe(true)
+		await flushPromises()
+		expect(waiting.isSettled).toBe(false)
 
 		animation2.resolve()
-		await expect(wait).resolves.toBeUndefined()
+		await flushPromises()
+		expect(waiting.isSettled).toBe(true)
 	})
 
 	it("ignores animations that were created after the wait was created", async () => {
@@ -75,20 +82,22 @@ describe("animation manager", () => {
 		const tile = createTile()
 
 		const animation1 = createDeferred()
-		animationsManager.setAnimation({ tile, promise: animation1.promise })
-		const wait1 = animationsManager.waitForTileAnimations(tile)
-		expect(await isPending(wait1)).toBe(true)
-
 		const animation2 = createDeferred()
+		animationsManager.setAnimation({ tile, promise: animation1.promise })
+		const waiting1 = trackSettled(animationsManager.waitForTileAnimations(tile))
 		animationsManager.setAnimation({ tile, promise: animation2.promise })
 
 		animation1.resolve()
-		await expect(wait1).resolves.toBeUndefined()
+		await flushPromises()
+		expect(waiting1.isSettled).toBe(true)
 
-		const wait2 = animationsManager.waitForTileAnimations(tile)
-		expect(await isPending(wait2)).toBe(true)
+		const waiting2 = trackSettled(animationsManager.waitForTileAnimations(tile))
+		await flushPromises()
+		expect(waiting2.isSettled).toBe(false)
+
 		animation2.resolve()
-		await expect(wait2).resolves.toBeUndefined()
+		await flushPromises()
+		expect(waiting2.isSettled).toBe(true)
 	})
 
 	it("resolves when the tile's pending animation rejects", async () => {
@@ -98,9 +107,13 @@ describe("animation manager", () => {
 		animationsManager.setAnimation({ tile, promise: animation.promise })
 
 		const wait = animationsManager.waitForTileAnimations(tile)
-		expect(await isPending(wait)).toBe(true)
+		const waiting = trackSettled(wait)
+		await flushPromises()
+		expect(waiting.isSettled).toBe(false)
 
 		animation.reject()
+		await flushPromises()
+
 		await expect(wait).resolves.toBeUndefined()
 	})
 
@@ -109,13 +122,13 @@ describe("animation manager", () => {
 		const tile = createTile()
 		const animation = createDeferred()
 		animationsManager.setAnimation({ tile, promise: animation.promise })
-
 		animation.resolve()
-		await animation.promise
+		await flushPromises()
 
-		await expect(
-			animationsManager.waitForTileAnimations(tile)
-		).resolves.toBeUndefined()
+		const waiting = trackSettled(animationsManager.waitForTileAnimations(tile))
+		await flushPromises()
+
+		expect(waiting.isSettled).toBe(true)
 	})
 
 	it("resolves the next wait immediately after clear", async () => {
@@ -126,9 +139,9 @@ describe("animation manager", () => {
 
 		animationsManager.clear()
 
-		await expect(
-			animationsManager.waitForTileAnimations(tile)
-		).resolves.toBeUndefined()
+		const waiting = trackSettled(animationsManager.waitForTileAnimations(tile))
+		await flushPromises()
+		expect(waiting.isSettled).toBe(true)
 	})
 
 	it("keeps an animation registered after clear when the cleared one settles", async () => {
@@ -136,47 +149,48 @@ describe("animation manager", () => {
 		const tile = createTile()
 		const cleared = createDeferred()
 		const registered = createDeferred()
-
 		animationsManager.setAnimation({ tile, promise: cleared.promise })
 		animationsManager.clear()
 		animationsManager.setAnimation({ tile, promise: registered.promise })
 
 		cleared.resolve()
-		await cleared.promise
+		await flushPromises()
 
-		const wait = animationsManager.waitForTileAnimations(tile)
-		expect(await isPending(wait)).toBe(true)
+		const waiting = trackSettled(animationsManager.waitForTileAnimations(tile))
+		await flushPromises()
+		expect(waiting.isSettled).toBe(false)
 
 		registered.resolve()
-		await expect(wait).resolves.toBeUndefined()
+		await flushPromises()
+		expect(waiting.isSettled).toBe(true)
 	})
 
 	it("animations of different tiles settle independently", async () => {
 		const animationsManager = new AnimationsManager()
-		const tile1 = new Tile({
-			kind: "blue",
-			id: "tile-1",
-			position: { column: 0, row: 0 },
-		})
-		const tile2 = new Tile({
-			kind: "blue",
-			id: "tile-2",
-			position: { column: 1, row: 1 },
-		})
+		const tile1 = createTile({ id: "tile-1", position: { column: 0, row: 0 } })
+		const tile2 = createTile({ id: "tile-2", position: { column: 1, row: 1 } })
 		const animation1 = createDeferred()
 		const animation2 = createDeferred()
 		animationsManager.setAnimation({ tile: tile1, promise: animation1.promise })
 		animationsManager.setAnimation({ tile: tile2, promise: animation2.promise })
 
-		const wait1 = animationsManager.waitForTileAnimations(tile1)
-		const wait2 = animationsManager.waitForTileAnimations(tile2)
-		expect(await isPending(wait1)).toBe(true)
-		expect(await isPending(wait2)).toBe(true)
+		const waiting1 = trackSettled(
+			animationsManager.waitForTileAnimations(tile1)
+		)
+		const waiting2 = trackSettled(
+			animationsManager.waitForTileAnimations(tile2)
+		)
+		await flushPromises()
+		expect(waiting1.isSettled).toBe(false)
+		expect(waiting2.isSettled).toBe(false)
 
 		animation1.resolve()
-		await expect(wait1).resolves.toBeUndefined()
-		expect(await isPending(wait2)).toBe(true)
+		await flushPromises()
+		expect(waiting1.isSettled).toBe(true)
+		expect(waiting2.isSettled).toBe(false)
+
 		animation2.resolve()
-		await expect(wait2).resolves.toBeUndefined()
+		await flushPromises()
+		expect(waiting2.isSettled).toBe(true)
 	})
 })
