@@ -47,12 +47,15 @@ export class BoosterHandler {
 	}
 
 	maybeUse(tiles: Array<Tile>) {
-		if (this.booster.isActivated()) {
-			const result = this.use(tiles)
-			if (result !== null) {
-				return result
-			}
+		if (!this.booster.isActivated()) {
+			return null
 		}
+
+		const result = this.use(tiles)
+		if (result !== null) {
+			return result
+		}
+
 		tiles.forEach((tile) => {
 			this.actionManager.doActions([
 				{
