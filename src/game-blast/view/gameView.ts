@@ -70,15 +70,23 @@ export class GameView extends View {
 		const winModal = queryElement<HTMLDialogElement>("#win-modal")
 		const winModalUI = new ModalUI({
 			modal: winModal,
-			onButtonClick: () => this.game?.startNewLevel(),
-			onBackdropClick: () => this.game?.startNewLevel(),
+			onButtonClick: () => {
+				void this.game?.startNewLevel()
+			},
+			onBackdropClick: () => {
+				void this.game?.startNewLevel()
+			},
 		})
 
 		const lossModal = queryElement<HTMLDialogElement>("#loss-modal")
 		const lossModalUI = new ModalUI({
 			modal: lossModal,
-			onButtonClick: () => this.game?.restartLevel(),
-			onBackdropClick: () => this.game?.restartLevel(),
+			onButtonClick: () => {
+				void this.game?.restartLevel()
+			},
+			onBackdropClick: () => {
+				void this.game?.restartLevel()
+			},
 		})
 
 		this.game = gameFactory({

@@ -31,13 +31,13 @@ export class ModalUI implements ModalUIContract {
 		})
 	}
 
-	async open() {
+	open() {
 		if (this.modal.open) {
 			return
 		}
 		this.modal.showModal()
 		this.modal.classList.add("modal--opening")
-		await new Promise<void>((resolve) => {
+		void new Promise<void>((resolve) => {
 			this.modalWrapper.addEventListener(
 				"animationend",
 				() => {
