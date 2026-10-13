@@ -168,14 +168,17 @@ export class ActionManager {
 		payload: ActionPayloadMap[ActionName.ADD]
 	): ActionResultMap[ActionName.ADD] {
 		const tile = this.presenter.addTile(payload)
-		this.presenter.renderTile(tile)
+		void this.presenter.renderTile(tile)
 		return { addedTile: tile }
 	}
 
 	private remove(
 		payload: ActionPayloadMap[ActionName.REMOVE]
 	): ActionResultMap[ActionName.REMOVE] {
-		this.presenter.removeTilesFromCenter(payload.tiles, payload.centerPosition)
+		void this.presenter.removeTilesFromCenter(
+			payload.tiles,
+			payload.centerPosition
+		)
 		return { removedTiles: payload.tiles }
 	}
 
@@ -196,7 +199,7 @@ export class ActionManager {
 	private swap(
 		payload: ActionPayloadMap[ActionName.SWAP]
 	): ActionResultMap[ActionName.SWAP] {
-		this.presenter.swapTiles(...payload)
+		void this.presenter.swapTiles(...payload)
 		return { swappedTiles: payload }
 	}
 }

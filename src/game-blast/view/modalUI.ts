@@ -67,12 +67,12 @@ export class ModalUI implements ModalUIContract {
 
 	private onButtonClick() {
 		this._onButtonClick?.()
-		this.close()
+		void this.close()
 	}
 
 	private onBackdropClick() {
 		this._onBackdropClick?.()
-		this.close()
+		void this.close()
 	}
 
 	private async close() {

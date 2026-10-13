@@ -31,7 +31,7 @@ export class GameView extends View {
 	}
 
 	override async mount() {
-		super.mount()
+		void super.mount()
 		this.gameContainer = queryElement("#canvas-container")
 
 		const layoutCalculator = new LayoutCalculator()
@@ -102,7 +102,7 @@ export class GameView extends View {
 	override async unmount() {
 		window.removeEventListener("resize", this.handleWindowResize)
 		await this.game?.destroy()
-		super.unmount()
+		void super.unmount()
 	}
 
 	private handleWindowResize = this.onResize.bind(this)

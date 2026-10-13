@@ -37,7 +37,7 @@ export class AnimationsManager implements AnimationsManagerContract {
 			return
 		}
 
-		promises.splice(index, 1)
+		void promises.splice(index, 1)
 		if (promises.length === 0) {
 			this.animations.delete(tile)
 		} else {

@@ -102,14 +102,14 @@ export class Presenter implements PresenterContract {
 	}
 
 	selectTile(tile: Tile) {
-		this.renderer.selectTile({
+		void this.renderer.selectTile({
 			tileSnapshot: tile.getSnapshot(),
 			layoutSnapshot: this.layoutUI.getSnapshot(),
 		})
 	}
 
 	unselectTile(tile: Tile) {
-		this.renderer.unselectTile({
+		void this.renderer.unselectTile({
 			tileSnapshot: tile.getSnapshot(),
 			gridSnapshot: this.grid.getSnapshot(),
 			layoutSnapshot: this.layoutUI.getSnapshot(),

@@ -137,7 +137,7 @@ export class Game {
 			}
 
 			processed.add(tile)
-			this.presenter.waitForTileAnimations(tile).then(() => {
+			void this.presenter.waitForTileAnimations(tile).then(() => {
 				const actResult = this.tilesManager.onRemove(tile)
 				if (actResult === null) {
 					return
