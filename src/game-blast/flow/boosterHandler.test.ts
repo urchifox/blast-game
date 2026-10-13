@@ -3,8 +3,9 @@ import { GameRules } from "../domain/gameRules"
 import {
 	createFieldComponentsStubbed,
 	createTilesProps,
+	getTilesByPositions,
 } from "../domain/testHelpers"
-import { Tile, TileKind } from "../domain/tile"
+import { TileKind } from "../domain/tile"
 import { BoosterName } from "../domain/types"
 import { ActResult } from "./actionManager"
 import {
@@ -74,9 +75,7 @@ describe("booster handling", () => {
 		"updates counter and button state after use $name booster",
 		({ name, tilesPositions }) => {
 			const { boosterHandler, fieldQueries, boosterUI } = createSUT(name)
-			const tiles = tilesPositions.map((position) =>
-				fieldQueries.getTileByPosition(position)
-			) as Array<Tile>
+			const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 			const updateBoosterCounterSpy = vi.spyOn(
 				boosterUI,
 				"updateBoosterCounter"
@@ -132,9 +131,7 @@ describe("booster handling", () => {
 		"returns expected action result when uses $name booster",
 		({ name, tilesPositions, expectedResult }) => {
 			const { boosterHandler, fieldQueries } = createSUT(name)
-			const tiles = tilesPositions.map((position) =>
-				fieldQueries.getTileByPosition(position)
-			) as Array<Tile>
+			const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 
 			boosterHandler.tryActivate()
 			const result = boosterHandler.maybeUse(tiles) as ActResult
@@ -187,9 +184,7 @@ describe("booster handling", () => {
 			)
 			const tryUseBooster = () => {
 				const isActivated = boosterHandler.tryActivate()
-				const tiles = tilesPositions.map((position) =>
-					fieldQueries.getTileByPosition(position)
-				) as Array<Tile>
+				const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 				const result = boosterHandler.maybeUse(tiles)
 				return { isActivated, result }
 			}
@@ -230,9 +225,7 @@ describe("booster handling", () => {
 				boosterUI,
 				"toggleBoosterButtonActive"
 			)
-			const tiles = tilesPositions.map((position) =>
-				fieldQueries.getTileByPosition(position)
-			) as Array<Tile>
+			const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 
 			boosterHandler.deactivate()
 			const result = boosterHandler.maybeUse(tiles)
@@ -273,9 +266,7 @@ describe("booster handling", () => {
 			let canBeActivated = true
 			while (canBeActivated) {
 				canBeActivated = boosterHandler.tryActivate()
-				const tiles = tilesPositions.map((position) =>
-					fieldQueries.getTileByPosition(position)
-				) as Array<Tile>
+				const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 				boosterHandler.maybeUse(tiles)
 			}
 			boosterHandler.clear()
@@ -313,9 +304,7 @@ describe("booster handling", () => {
 			)
 
 			boosterHandler.tryActivate()
-			const tiles = tilesPositions.map((position) =>
-				fieldQueries.getTileByPosition(position)
-			) as Array<Tile>
+			const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 			boosterHandler.maybeUse(tiles)
 			const result = boosterHandler.maybeUse(tiles)
 
@@ -354,9 +343,7 @@ describe("booster handling", () => {
 			)
 
 			boosterHandler.tryActivate()
-			const tiles = tilesPositions.map((position) =>
-				fieldQueries.getTileByPosition(position)
-			) as Array<Tile>
+			const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 			const result = boosterHandler.maybeUse(tiles)
 
 			expect(result).toBeNull()

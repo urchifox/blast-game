@@ -1,8 +1,12 @@
 import { BoosterUseHandler } from "./boosterUseHandler"
 import { Command, CommandName } from "./command"
 import { GameRules } from "./gameRules"
-import { createFieldComponentsStubbed, createTilesProps } from "./testHelpers"
-import { Tile, TileKind } from "./tile"
+import {
+	createFieldComponentsStubbed,
+	createTilesProps,
+	getTilesByPositions,
+} from "./testHelpers"
+import { TileKind } from "./tile"
 import { BoosterName } from "./types"
 
 const GRID_SIZE = { columns: 3, rows: 3 }
@@ -59,9 +63,7 @@ describe("booster use handling", () => {
 		"should return null if the tiles are not the required count",
 		({ boosterName, positions }) => {
 			const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
-			const tiles = positions.map((position) =>
-				fieldQueries.getTileByPosition(position)
-			) as Array<Tile>
+			const tiles = getTilesByPositions(fieldQueries, positions)
 
 			const result = boosterUseHandler.use({ boosterName, tiles })
 
@@ -78,9 +80,7 @@ describe("booster use handling", () => {
 		"bomb should return command to remove tiles",
 		({ positions, expectedPositionsToRemove }) => {
 			const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
-			const tiles = positions.map((position) =>
-				fieldQueries.getTileByPosition(position)
-			) as Array<Tile>
+			const tiles = getTilesByPositions(fieldQueries, positions)
 
 			const commands = boosterUseHandler.use({
 				boosterName: "bomb" as BoosterName,
@@ -111,9 +111,7 @@ describe("booster use handling", () => {
 		},
 	])("tile should return commands to swap tiles", ({ positions }) => {
 		const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
-		const tiles = positions.map((position) =>
-			fieldQueries.getTileByPosition(position)
-		) as Array<Tile>
+		const tiles = getTilesByPositions(fieldQueries, positions)
 
 		const commands = boosterUseHandler.use({
 			boosterName: "teleport" as BoosterName,

@@ -91,6 +91,13 @@ export function getTileByPosition(
 	return tile
 }
 
+export function getTilesByPositions(
+	fieldQueries: FieldQueries,
+	positions: ReadonlyArray<TilePosition>
+): Array<Tile> {
+	return positions.map((position) => getTileByPosition(fieldQueries, position))
+}
+
 export function getTileById(fieldQueries: FieldQueries, id: string): Tile {
 	const tile = fieldQueries.getTileById(id)
 	if (tile === undefined) {

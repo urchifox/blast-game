@@ -3,6 +3,7 @@ import {
 	createFieldComponentsStubbed,
 	createTilesProps,
 	getTileByPosition,
+	getTilesByPositions,
 } from "../domain/testHelpers"
 import { ActionName, ActResult } from "./actionManager"
 import { BoosterHandlerResult } from "./boosterHandler"
@@ -95,9 +96,7 @@ describe("booster manager", () => {
 		"resturs correct action result when uses booster $name after activation",
 		({ name, tilesPositions, expectedResult }) => {
 			const { boosterManager, fieldQueries } = createSUT()
-			const tiles = tilesPositions.map((position) =>
-				getTileByPosition(fieldQueries, position)
-			)
+			const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 			const expectedIntermediateResults = Array.from(
 				{ length: tiles.length - 1 },
 				() => ({
@@ -155,9 +154,7 @@ describe("booster manager", () => {
 		"deactivates booster after successful use",
 		({ name, tilesPositions }) => {
 			const { boosterManager, fieldQueries } = createSUT()
-			const tiles = tilesPositions.map((position) =>
-				getTileByPosition(fieldQueries, position)
-			)
+			const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 
 			boosterManager.onBoosterButtonClick(name)
 			const results = tiles.map((tile) => boosterManager.maybeUseBooster(tile))
@@ -185,9 +182,7 @@ describe("booster manager", () => {
 		"sequential activation activates only last booster",
 		({ names, tilesPositions, expectedActions }) => {
 			const { boosterManager, fieldQueries, actionManager } = createSUT()
-			const tiles = tilesPositions.map((position) =>
-				getTileByPosition(fieldQueries, position)
-			)
+			const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 			const doActionsSpy = vi.spyOn(actionManager, "doActions")
 
 			names.forEach((name) => boosterManager.onBoosterButtonClick(name))
@@ -278,9 +273,7 @@ describe("booster manager", () => {
 			}
 			const tryUseBooster = () => {
 				boosterManager.onBoosterButtonClick(name)
-				const tiles = tilesPositions.map((position) =>
-					getTileByPosition(fieldQueries, position)
-				)
+				const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 				const results = tiles.map((tile) =>
 					boosterManager.maybeUseBooster(tile)
 				)
@@ -337,9 +330,7 @@ describe("booster manager", () => {
 		const useCount = gameRules.BOOSTER_INITIAL_VALUE[name]
 		const tryUseBooster = () => {
 			boosterManager.onBoosterButtonClick(name)
-			const tiles = tilesPositions.map((position) =>
-				getTileByPosition(fieldQueries, position)
-			)
+			const tiles = getTilesByPositions(fieldQueries, tilesPositions)
 			const results = tiles.map((tile) => boosterManager.maybeUseBooster(tile))
 			return results.pop()
 		}
