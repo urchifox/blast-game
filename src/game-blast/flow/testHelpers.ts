@@ -223,6 +223,18 @@ export function createDeferred(): Deferred {
 	return { promise, resolve, reject }
 }
 
+export function createDeferredCalls() {
+	const calls: Array<Deferred> = []
+	return {
+		calls,
+		next: () => {
+			const deferred = createDeferred()
+			calls.push(deferred)
+			return deferred.promise
+		},
+	}
+}
+
 /** `isSettled` is only reliable after `flushPromises()`. */
 export function trackSettled(promise: Promise<unknown>) {
 	const state = {
