@@ -1,7 +1,9 @@
 import { IdGenerator, RandomizationFunction } from "../../helpers/random"
+import { Field } from "./field"
 import { fieldComponentsFactory } from "./fieldComponentsFactory"
 import { FieldQueries } from "./fieldQueries"
 import { GameRules } from "./gameRules"
+import { Grid } from "./grid"
 import { LevelGenerator } from "./levelGenerator"
 import {
 	stringifyTilePosition,
@@ -11,20 +13,42 @@ import {
 	TileProps,
 } from "./tile"
 
-export function createFieldComponentsStubbed({
-	gridSize,
-	tilesProps,
-	randomizationFunction = createRandomizationFunctionStub(),
-	createId = createIdGeneratorStub(),
-}: {
+type CreateFieldComponentsStubbedProps = {
 	gridSize?: { columns: number; rows: number }
 	tilesProps?: Set<TileProps>
 	randomizationFunction?: RandomizationFunction
-	createId?: IdGenerator
-} = {}) {
+	createId: IdGenerator
+}
+type FieldComponents = {
+	grid: Grid
+	field: Field
+	fieldQueries: FieldQueries
+}
+
+export function createFieldComponentsStubbed(
+	props?: CreateFieldComponentsStubbedProps
+): FieldComponents & { firstNewTileId: undefined }
+export function createFieldComponentsStubbed(
+	// only calls without a generator can get firstNewTileId: number
+	props?: Omit<CreateFieldComponentsStubbedProps, "createId"> & {
+		createId?: undefined
+	}
+): FieldComponents & { firstNewTileId: number }
+export function createFieldComponentsStubbed(
+	props?: Partial<CreateFieldComponentsStubbedProps>
+): FieldComponents & { firstNewTileId: number | undefined } {
+	const {
+		gridSize,
+		tilesProps,
+		randomizationFunction = createRandomizationFunctionStub(),
+		createId,
+	} = props ?? {}
+	const firstNewTileId =
+		createId === undefined ? getNextTileId(tilesProps) : undefined
 	const { grid, field, fieldQueries } = fieldComponentsFactory({
 		randomizationFunction,
-		createId,
+		createId:
+			createId === undefined ? createIdGeneratorStub(firstNewTileId) : createId,
 	})
 
 	if (gridSize !== undefined) {
@@ -35,7 +59,12 @@ export function createFieldComponentsStubbed({
 		field.createInitialTiles(tilesProps)
 	}
 
-	return { grid, field, fieldQueries }
+	return { grid, field, fieldQueries, firstNewTileId }
+}
+
+export function getNextTileId(tilesProps?: Set<TileProps>): number {
+	const ids = [...(tilesProps ?? [])].map(({ id }) => Number(id))
+	return Math.max(0, ...ids.filter(Number.isFinite)) + 1
 }
 
 export function createLevelGeneratorStubbed({

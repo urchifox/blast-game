@@ -6,9 +6,11 @@ import { GameRules } from "./domain/gameRules"
 import { ProgressCounter } from "./domain/progressCounter"
 import {
 	createFieldComponentsStubbed,
+	createIdGeneratorStub,
 	createLevelGeneratorStubbed,
 	createRandomizationFunctionStub,
 	createTilesProps,
+	getNextTileId,
 	getTileByPosition,
 } from "./domain/testHelpers"
 import { TileKind, TilePosition, TileProps } from "./domain/tile"
@@ -97,6 +99,7 @@ function createSUT({
 	const gameRules = new GameRules()
 	const { grid, field, fieldQueries } = createFieldComponentsStubbed({
 		randomizationFunction,
+		createId: createIdGeneratorStub(getNextTileId(new Set(tilesProps))),
 	})
 
 	const presenter = createPresenterStubbed({
