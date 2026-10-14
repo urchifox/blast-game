@@ -50,10 +50,10 @@ describe("ProgressManager", () => {
 	describe("processMove", () => {
 		it("adds points for removed tiles and decrements moves left", () => {
 			const { progressManager, progressUI, gameRules } = createSUT()
+			progressManager.setInitialValues({ goalScore: 1500, movesLimit: 20 })
 			const updateScoreCounter = vi.spyOn(progressUI, "updateScoreCounter")
 			const updateMovesCounter = vi.spyOn(progressUI, "updateMovesCounter")
 
-			progressManager.setInitialValues({ goalScore: 1500, movesLimit: 20 })
 			progressManager.processMove(3)
 
 			expect(updateScoreCounter).toHaveBeenCalledOnce()
@@ -89,11 +89,11 @@ describe("ProgressManager", () => {
 	describe("clear", () => {
 		it("renders zeroed score, goal score and moves left", () => {
 			const { progressManager, progressUI } = createSUT()
+			progressManager.setInitialValues({ goalScore: 1500, movesLimit: 20 })
+			progressManager.processMove(3)
 			const updateScoreCounter = vi.spyOn(progressUI, "updateScoreCounter")
 			const updateMovesCounter = vi.spyOn(progressUI, "updateMovesCounter")
 
-			progressManager.setInitialValues({ goalScore: 1500, movesLimit: 20 })
-			progressManager.processMove(3)
 			progressManager.clear()
 
 			expect(updateScoreCounter).toHaveBeenCalledOnce()
