@@ -29,7 +29,7 @@ export class BoosterHandler {
 		this.actionManager = props.actionManager
 	}
 
-	use(tiles: Array<Tile>) {
+	private use(tiles: Array<Tile>) {
 		const commands = this.boosterUseHandler.use({
 			boosterName: this.name,
 			tiles: tiles,
@@ -43,20 +43,19 @@ export class BoosterHandler {
 	}
 
 	clear() {
-		this.reset()
-	}
-
-	reset() {
-		this.booster.reset()
+		this.booster.clear()
 	}
 
 	maybeUse(tiles: Array<Tile>) {
-		if (this.booster.isActivated()) {
-			const result = this.use(tiles)
-			if (result !== null) {
-				return result
-			}
+		if (!this.booster.isActivated()) {
+			return null
 		}
+
+		const result = this.use(tiles)
+		if (result !== null) {
+			return result
+		}
+
 		tiles.forEach((tile) => {
 			this.actionManager.doActions([
 				{
@@ -70,5 +69,9 @@ export class BoosterHandler {
 
 	tryActivate() {
 		return this.booster.tryActivate()
+	}
+
+	deactivate() {
+		this.booster.deactivate()
 	}
 }

@@ -1,14 +1,36 @@
 import { BoosterUseHandler } from "./boosterUseHandler"
 import { Command, CommandName } from "./command"
 import { GameRules } from "./gameRules"
-import { createField } from "./testHelpers"
-import { Tile, TileProps } from "./tile"
+import {
+	createFieldComponentsStubbed,
+	createTilesProps,
+	getTilesByPositions,
+} from "./testHelpers"
+import { TileKind } from "./tile"
 import { BoosterName } from "./types"
 
+const GRID_SIZE = { columns: 3, rows: 3 }
+const TILES_KINDS = [
+	"red",
+	"red",
+	"yellow",
+
+	"red",
+	"yellow",
+	"blue",
+
+	"yellow",
+	"blue",
+	"yellow",
+] satisfies Array<TileKind>
+const tilesProps = createTilesProps({
+	...GRID_SIZE,
+	kinds: TILES_KINDS,
+})
+
 function createBoosterUseHandler() {
-	const { fieldQueries } = createField({
-		columns: 3,
-		rows: 3,
+	const { fieldQueries } = createFieldComponentsStubbed({
+		gridSize: GRID_SIZE,
 		tilesProps: new Set(tilesProps),
 	})
 	const boosterUseHandler = new BoosterUseHandler({
@@ -22,54 +44,6 @@ function createBoosterUseHandler() {
 	}
 }
 
-const tilesProps = [
-	{
-		kind: "red",
-		position: { row: 0, column: 0 },
-		id: "1",
-	},
-	{
-		kind: "red",
-		position: { row: 1, column: 0 },
-		id: "2",
-	},
-	{
-		kind: "yellow",
-		position: { row: 2, column: 0 },
-		id: "3",
-	},
-	{
-		kind: "red",
-		position: { row: 0, column: 1 },
-		id: "4",
-	},
-	{
-		kind: "yellow",
-		position: { row: 1, column: 1 },
-		id: "5",
-	},
-	{
-		kind: "blue",
-		position: { row: 2, column: 1 },
-		id: "6",
-	},
-	{
-		kind: "yellow",
-		position: { row: 0, column: 2 },
-		id: "7",
-	},
-	{
-		kind: "blue",
-		position: { row: 1, column: 2 },
-		id: "8",
-	},
-	{
-		kind: "yellow",
-		position: { row: 2, column: 2 },
-		id: "9",
-	},
-] satisfies Array<TileProps>
-
 describe("booster use handling", () => {
 	it.each([
 		{ boosterName: "bomb" as BoosterName, positions: [] },
@@ -78,13 +52,18 @@ describe("booster use handling", () => {
 			boosterName: "teleport" as BoosterName,
 			positions: [{ row: 0, column: 0 }],
 		},
+		{
+			boosterName: "teleport" as BoosterName,
+			positions: [
+				{ row: 0, column: 0 },
+				{ row: 0, column: 0 },
+			],
+		},
 	])(
 		"should return null if the tiles are not the required count",
 		({ boosterName, positions }) => {
 			const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
-			const tiles = positions.map((position) =>
-				fieldQueries.getTileByPosition(position)
-			) as Array<Tile>
+			const tiles = getTilesByPositions(fieldQueries, positions)
 
 			const result = boosterUseHandler.use({ boosterName, tiles })
 
@@ -101,9 +80,7 @@ describe("booster use handling", () => {
 		"bomb should return command to remove tiles",
 		({ positions, expectedPositionsToRemove }) => {
 			const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
-			const tiles = positions.map((position) =>
-				fieldQueries.getTileByPosition(position)
-			) as Array<Tile>
+			const tiles = getTilesByPositions(fieldQueries, positions)
 
 			const commands = boosterUseHandler.use({
 				boosterName: "bomb" as BoosterName,
@@ -125,6 +102,25 @@ describe("booster use handling", () => {
 		}
 	)
 
+	it("bomb should skip locked tiles", () => {
+		const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
+		const [centerTile, lockedTile] = getTilesByPositions(fieldQueries, [
+			{ row: 0, column: 0 },
+			{ row: 1, column: 1 },
+		])
+		lockedTile.lock()
+
+		const commands = boosterUseHandler.use({
+			boosterName: "bomb" as BoosterName,
+			tiles: [centerTile],
+		})
+		const command = commands?.[0] as Command<CommandName.REMOVE>
+
+		expect(command.payload.tiles.has(centerTile)).toBe(true)
+		expect(command.payload.tiles.has(lockedTile)).toBe(false)
+		expect(command.payload.tiles.size).toBe(tilesProps.length - 1)
+	})
+
 	it.each([
 		{
 			positions: [
@@ -134,9 +130,7 @@ describe("booster use handling", () => {
 		},
 	])("tile should return commands to swap tiles", ({ positions }) => {
 		const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
-		const tiles = positions.map((position) =>
-			fieldQueries.getTileByPosition(position)
-		) as Array<Tile>
+		const tiles = getTilesByPositions(fieldQueries, positions)
 
 		const commands = boosterUseHandler.use({
 			boosterName: "teleport" as BoosterName,

@@ -1,6 +1,7 @@
 import { Tile } from "../domain/tile"
+import { AnimationsManagerContract } from "../types"
 
-export class AnimationsManager {
+export class AnimationsManager implements AnimationsManagerContract {
 	readonly animations = new Map<Tile, Array<Promise<void>>>()
 
 	clear() {
@@ -12,7 +13,9 @@ export class AnimationsManager {
 		promises.push(promise)
 		this.animations.set(tile, promises)
 
-		promise.finally(() => this.onPromiseResolve({ tile, promise }))
+		promise
+			.finally(() => this.onPromiseResolve({ tile, promise }))
+			.catch(() => {})
 
 		return promise
 	}
@@ -24,8 +27,17 @@ export class AnimationsManager {
 		tile: Tile
 		promise: Promise<void>
 	}) {
-		const promises = this.animations.get(tile) ?? []
-		promises.splice(promises.indexOf(promise), 1)
+		const promises = this.animations.get(tile)
+		if (promises === undefined) {
+			return
+		}
+
+		const index = promises.indexOf(promise)
+		if (index === -1) {
+			return
+		}
+
+		void promises.splice(index, 1)
 		if (promises.length === 0) {
 			this.animations.delete(tile)
 		} else {

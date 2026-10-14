@@ -304,7 +304,7 @@ export class PhaserScene extends Phaser.Scene {
 				ease: "Quad.easeIn",
 				onComplete: () => {
 					onTweenComplete()
-					this.animateBouncing(tileSprite, y - bounceHeight)
+					void this.animateBouncing(tileSprite, y - bounceHeight)
 				},
 				onStop: onTweenComplete,
 			})

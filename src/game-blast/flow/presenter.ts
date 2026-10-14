@@ -3,12 +3,12 @@ import { Grid } from "../domain/grid"
 import { Tile, TileKind, TilePosition, TileProps } from "../domain/tile"
 import { wait } from "../../helpers/time"
 import { TILE_DELAY_BETWEEN_REMOVALS_MS } from "./animationRules"
-import { AnimationsManager } from "./animationManager"
 import {
 	LayoutUIContract,
 	PresenterContract,
 	RendererContract,
 	OnTileClickCallback,
+	AnimationsManagerContract,
 } from "../types"
 import { FieldQueries } from "../domain/fieldQueries"
 
@@ -18,7 +18,7 @@ type PresenterProps = {
 	fieldQueries: FieldQueries
 	grid: Grid
 	renderer: RendererContract
-	animationsManager: AnimationsManager
+	animationsManager: AnimationsManagerContract
 }
 
 export class Presenter implements PresenterContract {
@@ -102,8 +102,16 @@ export class Presenter implements PresenterContract {
 	}
 
 	selectTile(tile: Tile) {
-		this.renderer.selectTile({
+		void this.renderer.selectTile({
 			tileSnapshot: tile.getSnapshot(),
+			layoutSnapshot: this.layoutUI.getSnapshot(),
+		})
+	}
+
+	unselectTile(tile: Tile) {
+		void this.renderer.unselectTile({
+			tileSnapshot: tile.getSnapshot(),
+			gridSnapshot: this.grid.getSnapshot(),
 			layoutSnapshot: this.layoutUI.getSnapshot(),
 		})
 	}
@@ -147,6 +155,7 @@ export class Presenter implements PresenterContract {
 						promise: promise(),
 					})
 					.finally(() => tile.unlock())
+					.catch(() => {})
 			})
 		}
 
@@ -201,6 +210,7 @@ export class Presenter implements PresenterContract {
 						promise: promiseAnimation,
 					})
 					.finally(() => tile.unlock())
+					.catch(() => {})
 			)
 		)
 	}
@@ -316,6 +326,7 @@ export class Presenter implements PresenterContract {
 						promise: fallAnimationPromise,
 					})
 					.finally(() => tile.unlock())
+					.catch(() => {})
 			)
 		)
 
@@ -333,6 +344,7 @@ export class Presenter implements PresenterContract {
 						promise: renderAnimationPromise,
 					})
 					.finally(() => tile.unlock())
+					.catch(() => {})
 			)
 		)
 	}
@@ -364,6 +376,7 @@ export class Presenter implements PresenterContract {
 						promise: shuffleFieldPromise,
 					})
 					.finally(() => tile.unlock())
+					.catch(() => {})
 			)
 		)
 	}

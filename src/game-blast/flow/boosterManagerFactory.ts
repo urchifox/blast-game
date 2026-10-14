@@ -8,7 +8,7 @@ import { BoosterName } from "../domain/types"
 import { Booster } from "./booster"
 import { BoosterHandler } from "./boosterHandler"
 import { BoosterManager } from "./boosterManager"
-import { BoosterUIMap } from "../types"
+import { BoosterUIContract, BoosterUIMap } from "../types"
 
 export type BoosterManagerFactoryProps = {
 	boosterUIMap: BoosterUIMap
@@ -27,28 +27,58 @@ export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
 
 	const boostersHandlersMap = BOOSTER_NAMES.reduce(
 		(acc, name) => {
-			const boosterCounter = new BoosterCounter({
-				startValue: gameRules.BOOSTER_INITIAL_VALUE[name],
-				endValue: 0,
+			const boosterUI = boosterUIMap[name]
+			const boosterHandler = createBoosterHandler({
+				boosterUseHandler,
+				gameRules,
+				actionManager,
+				name,
+				boosterUI,
 			})
-
-			const booster = new Booster({
-				boosterCounter: boosterCounter,
-				boosterUI: boosterUIMap[name],
-			})
-
-			acc[name] = new BoosterHandler({
-				name: name,
-				boosterUseHandler: boosterUseHandler,
-				booster: booster,
-				actionManager: actionManager,
-			})
+			acc[name] = boosterHandler
 			return acc
 		},
 		{} as Record<BoosterName, BoosterHandler>
 	)
 
-	return new BoosterManager({
+	const boosterManager = new BoosterManager({
 		boostersHandlersMap: boostersHandlersMap,
+		actionManager: actionManager,
+		fieldQueries: fieldQueries,
 	})
+
+	return boosterManager
+}
+
+export function createBoosterHandler({
+	boosterUseHandler,
+	gameRules,
+	actionManager,
+	name,
+	boosterUI,
+}: {
+	boosterUseHandler: BoosterUseHandler
+	gameRules: GameRules
+	actionManager: ActionManager
+	name: BoosterName
+	boosterUI: BoosterUIContract
+}) {
+	const boosterCounter = new BoosterCounter({
+		startValue: gameRules.BOOSTER_INITIAL_VALUE[name],
+		endValue: 0,
+	})
+
+	const booster = new Booster({
+		boosterCounter: boosterCounter,
+		boosterUI: boosterUI,
+	})
+
+	const boosterHandler = new BoosterHandler({
+		name,
+		boosterUseHandler,
+		booster,
+		actionManager,
+	})
+
+	return boosterHandler
 }

@@ -38,7 +38,7 @@ export class Tile {
 	private readonly position: TileProps["position"]
 
 	private readonly id: string
-	private _isLocked = false
+	private _locksCount = 0
 
 	constructor(props: TileProps) {
 		this.kind = props.kind
@@ -59,7 +59,7 @@ export class Tile {
 	}
 
 	isLocked(): boolean {
-		return this._isLocked
+		return this._locksCount > 0
 	}
 
 	getSnapshot(): TileSnapshot {
@@ -77,11 +77,11 @@ export class Tile {
 	}
 
 	lock() {
-		this._isLocked = true
+		this._locksCount++
 	}
 
 	unlock() {
-		this._isLocked = false
+		this._locksCount = Math.max(0, this._locksCount - 1)
 	}
 }
 

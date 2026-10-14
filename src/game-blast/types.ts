@@ -56,6 +56,7 @@ export type PresenterContract = {
 
 	waitForTileAnimations(tile: Tile): Promise<void>
 	selectTile(tile: Tile): void
+	unselectTile(tile: Tile): void
 	swapTiles(tile1: Tile, tile2: Tile): Promise<void>
 	addTile(props: { kind: TileKind; position: TilePosition }): Tile
 	renderTile(tile: Tile): Promise<void>
@@ -66,7 +67,7 @@ export type PresenterContract = {
 	): Promise<void>
 }
 
-export type OnTileClickCallback = (id: string) => void
+export type OnTileClickCallback = (id: string) => Promise<void>
 
 export type RendererContract = {
 	init(): Promise<void>
@@ -110,4 +111,22 @@ export type RendererContract = {
 		gridSnapshot: GridSnapshot
 		layoutSnapshot: LayoutSnapshot
 	}): Promise<void>
+}
+
+export type AnimationsManagerContract = {
+	setAnimation(props: { tile: Tile; promise: Promise<void> }): Promise<void>
+	clear(): void
+	waitForTileAnimations(tile: Tile): Promise<void>
+}
+
+export type LevelGeneratorContract = {
+	generateLevelData(): LevelData
+}
+
+export type LevelData = {
+	tilesProps: Set<TileProps>
+	columns: number
+	rows: number
+	goalScore: number
+	movesLimit: number
 }

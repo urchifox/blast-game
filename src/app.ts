@@ -14,4 +14,4 @@ const viewManager = new ViewManager({
 	loadingScreen,
 })
 
-viewManager.init({ viewClass: GameView, viewProps: {} })
+void viewManager.init({ viewClass: GameView, viewProps: {} })

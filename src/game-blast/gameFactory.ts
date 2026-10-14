@@ -1,15 +1,12 @@
 import { AnimationsManager } from "./flow/animationManager"
 import { createId } from "../helpers/random"
 import { CompletionManager } from "./domain/completionManager"
-import { Field } from "./domain/field"
-import { FieldQueries } from "./domain/fieldQueries"
 import { Game } from "./game"
 import { Presenter } from "./flow/presenter"
 import { GameRules } from "./domain/gameRules"
 import { LevelGenerator } from "./domain/levelGenerator"
 import { ProgressManager } from "./flow/progressManager"
 import { PhaserRenderer } from "./rendering/phaserRenderer"
-import { Grid } from "./domain/grid"
 import { boosterManagerFactory } from "./flow/boosterManagerFactory"
 import { tilesManagerFactory } from "./flow/tilesManagerFactory"
 import { ActionManager } from "./flow/actionManager"
@@ -21,6 +18,7 @@ import {
 	BoosterUIMap,
 	ProgressUIContract,
 } from "./types"
+import { fieldComponentsFactory } from "./domain/fieldComponentsFactory"
 
 export type GameFactoryProps = {
 	gameContainer: HTMLElement
@@ -35,14 +33,10 @@ export function gameFactory(props: GameFactoryProps) {
 	const gameRules = new GameRules()
 	const randomizationFunction = Math.random
 
-	const grid = new Grid()
-
-	const field = new Field({
-		getGridSnapshot: grid.getSnapshot.bind(grid),
+	const { grid, field, fieldQueries } = fieldComponentsFactory({
 		randomizationFunction,
 		createId,
 	})
-	const fieldQueries = new FieldQueries({ field, grid })
 
 	const animationsManager = new AnimationsManager()
 	const renderer = new PhaserRenderer({

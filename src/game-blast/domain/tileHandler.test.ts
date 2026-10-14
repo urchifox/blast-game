@@ -1,19 +1,86 @@
 import { Command, CommandName } from "./command"
 import { GameRules } from "./gameRules"
-import { createField } from "./testHelpers"
-import { Tile, TileProps } from "./tile"
+import {
+	createFieldComponentsStubbed,
+	createRandomizationFunctionStub,
+	createTilesProps,
+	getTileByPosition,
+} from "./testHelpers"
+import { TileKind } from "./tile"
 import { TileHandler } from "./tileHandler"
 
+const GRID_SIZE = { columns: 7, rows: 7 }
+const TILES_KINDS = [
+	"green",
+	"rockets-column",
+	"rockets-row",
+	"red",
+	"red",
+	"green",
+	"green",
+
+	"yellow",
+	"yellow",
+	"purple",
+	"purple",
+	"red",
+	"green",
+	"blue",
+
+	"purple",
+	"purple",
+	"purple",
+	"yellow",
+	"yellow",
+	"green",
+	"blue",
+
+	"purple",
+	"yellow",
+	"yellow",
+	"yellow",
+	"blue",
+	"blue",
+	"blue",
+
+	"purple",
+	"green",
+	"green",
+	"green",
+	"green",
+	"green",
+	"blue",
+
+	"purple",
+	"yellow",
+	"yellow",
+	"yellow",
+	"dynamite",
+	"green",
+	"blue",
+
+	"bomb",
+	"yellow",
+	"yellow",
+	"yellow",
+	"yellow",
+	"blue",
+	"blue",
+] satisfies Array<TileKind>
+const tilesProps = createTilesProps({
+	...GRID_SIZE,
+	kinds: TILES_KINDS,
+})
+
 function createTileHandler() {
-	const { fieldQueries } = createField({
-		columns: 7,
-		rows: 7,
+	const { fieldQueries } = createFieldComponentsStubbed({
+		gridSize: GRID_SIZE,
 		tilesProps: new Set(tilesProps),
 	})
 	const tileHandler = new TileHandler({
 		gameRules: new GameRules(),
 		fieldQueries: fieldQueries,
-		randomizationFunction: () => 0,
+		randomizationFunction: createRandomizationFunctionStub(),
 	})
 	return {
 		tileHandler,
@@ -21,409 +88,12 @@ function createTileHandler() {
 	}
 }
 
-const tilesProps = [
-	{
-		kind: "green",
-		position: {
-			row: 0,
-			column: 0,
-		},
-		id: "mpdtppZLdhmA8UgVB2Ftj",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 1,
-			column: 0,
-		},
-		id: "AalR8vxWVB1zNItuNwpMO",
-	},
-	{
-		kind: "purple",
-		position: {
-			row: 2,
-			column: 0,
-		},
-		id: "UKXcqShPB9GCWYSFxRC1s",
-	},
-	{
-		kind: "purple",
-		position: {
-			row: 3,
-			column: 0,
-		},
-		id: "hVCUOn_vqjOlsXFlRNIjP",
-	},
-	{
-		kind: "purple",
-		position: {
-			row: 4,
-			column: 0,
-		},
-		id: "A2bGsklBCfLDNkqp8zsAx",
-	},
-	{
-		kind: "purple",
-		position: {
-			row: 5,
-			column: 0,
-		},
-		id: "TXoSwJ_ZdjfZp_Ii5Vbpu",
-	},
-	{
-		kind: "bomb",
-		position: {
-			row: 6,
-			column: 0,
-		},
-		id: "IeWlopBGZTJTHmBOaSTb9",
-	},
-	{
-		kind: "rockets-column",
-		position: {
-			row: 0,
-			column: 1,
-		},
-		id: "0s8EGBE6xUbd1aOD429pt",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 1,
-			column: 1,
-		},
-		id: "ZM8U9Is2pQdFqBrefl6YV",
-	},
-	{
-		kind: "purple",
-		position: {
-			row: 2,
-			column: 1,
-		},
-		id: "38xEVwYHxgV05c65mteSK",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 3,
-			column: 1,
-		},
-		id: "mIuMp9dDlEB3JzKV2_58-",
-	},
-	{
-		kind: "green",
-		position: {
-			row: 4,
-			column: 1,
-		},
-		id: "wLY2bqEwJHGkW5abfgHo1",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 5,
-			column: 1,
-		},
-		id: "DltUO4tlfqQO1gH8ByLIQ",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 6,
-			column: 1,
-		},
-		id: "bIQbGyXbEyfe2ORXttpNQ",
-	},
-	{
-		kind: "rockets-row",
-		position: {
-			row: 0,
-			column: 2,
-		},
-		id: "7cX4NEgHt0lukEz6tp4bI",
-	},
-	{
-		kind: "purple",
-		position: {
-			row: 1,
-			column: 2,
-		},
-		id: "W9_vTccul6w74J0CLK4cT",
-	},
-	{
-		kind: "purple",
-		position: {
-			row: 2,
-			column: 2,
-		},
-		id: "U3AkJlTnmotu8ArUZc0zS",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 3,
-			column: 2,
-		},
-		id: "jKIHoCCMs8vLPZ8ghl0n1",
-	},
-	{
-		kind: "green",
-		position: {
-			row: 4,
-			column: 2,
-		},
-		id: "ALwYfW92A1s3_7xAFQuFB",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 5,
-			column: 2,
-		},
-		id: "osBu_Uz0ESxi-VZ6AgZ0Z",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 6,
-			column: 2,
-		},
-		id: "maFiBh6Ir5uxVJooYfUPt",
-	},
-	{
-		kind: "red",
-		position: {
-			row: 0,
-			column: 3,
-		},
-		id: "7ZVItpkLYRonE_efq0l6g",
-	},
-	{
-		kind: "purple",
-		position: {
-			row: 1,
-			column: 3,
-		},
-		id: "pnV7CT3U_PJIdBdAvetVL",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 2,
-			column: 3,
-		},
-		id: "LTeFSLsUYC2IM4GrgW9xf",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 3,
-			column: 3,
-		},
-		id: "XcsGn4LgIDcuXo-ek6AMU",
-	},
-	{
-		kind: "green",
-		position: {
-			row: 4,
-			column: 3,
-		},
-		id: "zW5Y_2tuQY_CC6ll6GSaQ",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 5,
-			column: 3,
-		},
-		id: "j1opsfdAU531G7r-Aw58N",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 6,
-			column: 3,
-		},
-		id: "D7wgIcqaB8L83Rwh7HKCt",
-	},
-	{
-		kind: "red",
-		position: {
-			row: 0,
-			column: 4,
-		},
-		id: "_v_Pu5do60KuYwN4hZ99E",
-	},
-	{
-		kind: "red",
-		position: {
-			row: 1,
-			column: 4,
-		},
-		id: "vWlD0DG0hSM1vABw_MYTz",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 2,
-			column: 4,
-		},
-		id: "HF51E95M1TCHcCb9uE65n",
-	},
-	{
-		kind: "blue",
-		position: {
-			row: 3,
-			column: 4,
-		},
-		id: "6DH_TShjpI_LxuJZTyf0I",
-	},
-	{
-		kind: "green",
-		position: {
-			row: 4,
-			column: 4,
-		},
-		id: "NdM3OtEKM6aKQGr2MtqbV",
-	},
-	{
-		kind: "dynamite",
-		position: {
-			row: 5,
-			column: 4,
-		},
-		id: "5MeBpS2bJOmXyWqL5oPfx",
-	},
-	{
-		kind: "yellow",
-		position: {
-			row: 6,
-			column: 4,
-		},
-		id: "ghlVRfzdJAc87NSYjsD0k",
-	},
-	{
-		kind: "green",
-		position: {
-			row: 0,
-			column: 5,
-		},
-		id: "mK7non5l7EuKA6u8_y5Vs",
-	},
-	{
-		kind: "green",
-		position: {
-			row: 1,
-			column: 5,
-		},
-		id: "cGboV1pll55mxRmAHdXMm",
-	},
-	{
-		kind: "green",
-		position: {
-			row: 2,
-			column: 5,
-		},
-		id: "YNMPH3CbhKvlJOPYw6tzb",
-	},
-	{
-		kind: "blue",
-		position: {
-			row: 3,
-			column: 5,
-		},
-		id: "btFBtwZuHTY7tDt2WtGqh",
-	},
-	{
-		kind: "green",
-		position: {
-			row: 4,
-			column: 5,
-		},
-		id: "SbfRju1TJ4bgpZv_jLdE3",
-	},
-	{
-		kind: "green",
-		position: {
-			row: 5,
-			column: 5,
-		},
-		id: "msQipRuMpOfbXUG8DCQn9",
-	},
-	{
-		kind: "blue",
-		position: {
-			row: 6,
-			column: 5,
-		},
-		id: "ggs-rm2tpLEPSHdfIz1Vy",
-	},
-	{
-		kind: "green",
-		position: {
-			row: 0,
-			column: 6,
-		},
-		id: "cRRybom7zky6wrJCd80aP",
-	},
-	{
-		kind: "blue",
-		position: {
-			row: 1,
-			column: 6,
-		},
-		id: "Ws-Ppm0Emc7z_6zqslN_N",
-	},
-	{
-		kind: "blue",
-		position: {
-			row: 2,
-			column: 6,
-		},
-		id: "zarji_w5VDJMVjmDK4fC4",
-	},
-	{
-		kind: "blue",
-		position: {
-			row: 3,
-			column: 6,
-		},
-		id: "a3t9-yhugyplYM9933L-E",
-	},
-	{
-		kind: "blue",
-		position: {
-			row: 4,
-			column: 6,
-		},
-		id: "GglC3vT-NB56FizpbSewd",
-	},
-	{
-		kind: "blue",
-		position: {
-			row: 5,
-			column: 6,
-		},
-		id: "--8L2CYoDqGli9iRtLd1U",
-	},
-	{
-		kind: "blue",
-		position: {
-			row: 6,
-			column: 6,
-		},
-		id: "snAVBwL0LC3YODdolCdk9",
-	},
-] satisfies Array<TileProps>
-
 describe("tile click handling", () => {
 	it.each([{ clickedPosition: { row: 0, column: 0 } }])(
 		"no commands if there is no connection to clicked tile",
 		({ clickedPosition }) => {
 			const { tileHandler, fieldQueries } = createTileHandler()
-			const clickedTile = fieldQueries.getTileByPosition(
-				clickedPosition
-			) as Tile
+			const clickedTile = getTileByPosition(fieldQueries, clickedPosition)
 
 			const commands = tileHandler.onClick(clickedTile)
 
@@ -451,9 +121,7 @@ describe("tile click handling", () => {
 		"commands to remove tiles if 2 or 3 connections to clicked tile",
 		({ clickedPosition, positionsToRemove }) => {
 			const { tileHandler, fieldQueries } = createTileHandler()
-			const clickedTile = fieldQueries.getTileByPosition(
-				clickedPosition
-			) as Tile
+			const clickedTile = getTileByPosition(fieldQueries, clickedPosition)
 
 			const commands = tileHandler.onClick(clickedTile)
 			const commandRemove = commands?.[0] as Command<CommandName.REMOVE>
@@ -554,9 +222,7 @@ describe("tile click handling", () => {
 		"commands to remove tiles and add bonus if more than 4 connections to clicked tile",
 		({ clickedPosition, positionsToRemove, bonusTypes }) => {
 			const { tileHandler, fieldQueries } = createTileHandler()
-			const clickedTile = fieldQueries.getTileByPosition(
-				clickedPosition
-			) as Tile
+			const clickedTile = getTileByPosition(fieldQueries, clickedPosition)
 
 			const commands = tileHandler.onClick(clickedTile)
 			const commandRemove = commands?.[0] as Command<CommandName.REMOVE>
@@ -589,7 +255,7 @@ describe("tile remove handling", () => {
 		"commans nothing after normal tile removal",
 		({ clickedPosition }) => {
 			const { tileHandler, fieldQueries } = createTileHandler()
-			const tile = fieldQueries.getTileByPosition(clickedPosition) as Tile
+			const tile = getTileByPosition(fieldQueries, clickedPosition)
 
 			const commands = tileHandler.onRemove(tile)
 
@@ -644,7 +310,7 @@ describe("tile remove handling", () => {
 		"commans remove tiles after special tile removal",
 		({ clickedPosition, positionsToRemove }) => {
 			const { tileHandler, fieldQueries } = createTileHandler()
-			const tile = fieldQueries.getTileByPosition(clickedPosition) as Tile
+			const tile = getTileByPosition(fieldQueries, clickedPosition)
 
 			const commands = tileHandler.onRemove(tile)
 			const commandRemove = commands?.[0] as Command<CommandName.REMOVE>

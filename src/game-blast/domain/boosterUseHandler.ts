@@ -27,7 +27,7 @@ export class BoosterUseHandler {
 	}): Array<Command> | null {
 		const tilesRequired =
 			this.gameRules.BOOSTER_TILES_COUNT_FOR_USE[boosterName]
-		if (tiles.length !== tilesRequired) {
+		if (new Set(tiles).size !== tilesRequired) {
 			return null
 		}
 
@@ -39,10 +39,13 @@ export class BoosterUseHandler {
 					tiles[0].getPosition(),
 					this.gameRules.BOOSTER_BOMB_RADIUS
 				)
+				const availableTiles = Array.from(tilesInRadius).filter(
+					(tile) => !tile.isLocked()
+				)
 				commands.push({
 					name: CommandName.REMOVE,
 					payload: {
-						tiles: tilesInRadius,
+						tiles: new Set(availableTiles),
 						removingFromPosition: tiles[0].getPosition(),
 					},
 				})

@@ -31,7 +31,7 @@ export class GameView extends View {
 	}
 
 	override async mount() {
-		super.mount()
+		void super.mount()
 		this.gameContainer = queryElement("#canvas-container")
 
 		const layoutCalculator = new LayoutCalculator()
@@ -70,15 +70,23 @@ export class GameView extends View {
 		const winModal = queryElement<HTMLDialogElement>("#win-modal")
 		const winModalUI = new ModalUI({
 			modal: winModal,
-			onButtonClick: () => this.game?.startNewLevel(),
-			onBackdropClick: () => this.game?.startNewLevel(),
+			onButtonClick: () => {
+				void this.game?.startNewLevel()
+			},
+			onBackdropClick: () => {
+				void this.game?.startNewLevel()
+			},
 		})
 
 		const lossModal = queryElement<HTMLDialogElement>("#loss-modal")
 		const lossModalUI = new ModalUI({
 			modal: lossModal,
-			onButtonClick: () => this.game?.restartLevel(),
-			onBackdropClick: () => this.game?.restartLevel(),
+			onButtonClick: () => {
+				void this.game?.restartLevel()
+			},
+			onBackdropClick: () => {
+				void this.game?.restartLevel()
+			},
 		})
 
 		this.game = gameFactory({
@@ -102,7 +110,7 @@ export class GameView extends View {
 	override async unmount() {
 		window.removeEventListener("resize", this.handleWindowResize)
 		await this.game?.destroy()
-		super.unmount()
+		void super.unmount()
 	}
 
 	private handleWindowResize = this.onResize.bind(this)

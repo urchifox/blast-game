@@ -1,58 +1,32 @@
-import { createField } from "./testHelpers"
-import { Tile, TileProps } from "./tile"
+import {
+	createFieldComponentsStubbed,
+	createTilesProps,
+	getTileByPosition,
+} from "./testHelpers"
+import { TileKind } from "./tile"
 
-const tilesProps = [
-	{
-		id: "1",
-		kind: "red",
-		position: { row: 0, column: 0 },
-	},
-	{
-		id: "2",
-		kind: "red",
-		position: { row: 1, column: 0 },
-	},
-	{
-		id: "3",
-		kind: "yellow",
-		position: { row: 2, column: 0 },
-	},
-	{
-		id: "4",
-		kind: "red",
-		position: { row: 0, column: 1 },
-	},
-	{
-		id: "5",
-		kind: "yellow",
-		position: { row: 1, column: 1 },
-	},
-	{
-		id: "6",
-		kind: "blue",
-		position: { row: 2, column: 1 },
-	},
-	{
-		id: "7",
-		kind: "yellow",
-		position: { row: 0, column: 2 },
-	},
-	{
-		id: "8",
-		kind: "blue",
-		position: { row: 1, column: 2 },
-	},
-	{
-		id: "9",
-		kind: "yellow",
-		position: { row: 2, column: 2 },
-	},
-] satisfies Array<TileProps>
+const GRID_SIZE = { columns: 3, rows: 3 }
+const TILES_KINDS = [
+	"red",
+	"red",
+	"yellow",
+
+	"red",
+	"yellow",
+	"blue",
+
+	"yellow",
+	"blue",
+	"yellow",
+] satisfies Array<TileKind>
+const tilesProps = createTilesProps({
+	...GRID_SIZE,
+	kinds: TILES_KINDS,
+})
 
 function createFieldQueries() {
-	return createField({
-		columns: 3,
-		rows: 3,
+	return createFieldComponentsStubbed({
+		gridSize: GRID_SIZE,
 		tilesProps: new Set(tilesProps),
 	})
 }
@@ -228,7 +202,7 @@ describe("field queries", () => {
 		"finds same kind neighbour tiles for provided tile",
 		({ tilePosition, expectedPositions }) => {
 			const { fieldQueries } = createFieldQueries()
-			const tile = fieldQueries.getTileByPosition(tilePosition) as Tile
+			const tile = getTileByPosition(fieldQueries, tilePosition)
 			const sameKindNeighbourTiles =
 				fieldQueries.getSameKindNeighbourTiles(tile).tiles
 			const sameKindNeighbourTilesPositions = [...sameKindNeighbourTiles].map(
