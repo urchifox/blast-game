@@ -1,4 +1,6 @@
+import { Field } from "../domain/field"
 import { GameRules } from "../domain/gameRules"
+import { Tile } from "../domain/tile"
 import {
 	createFieldComponentsStubbed,
 	createTilesProps,
@@ -31,7 +33,7 @@ const tilesProps = createTilesProps({
 })
 
 function createSUT() {
-	const { fieldQueries } = createFieldComponentsStubbed({
+	const { field, fieldQueries } = createFieldComponentsStubbed({
 		gridSize: { columns: 3, rows: 3 },
 		tilesProps: new Set(tilesProps),
 	})
@@ -45,7 +47,7 @@ function createSUT() {
 		actionManager,
 	})
 
-	return { boosterManager, fieldQueries, actionManager, gameRules }
+	return { boosterManager, field, fieldQueries, actionManager, gameRules }
 }
 
 describe("booster manager", () => {
@@ -343,6 +345,42 @@ describe("booster manager", () => {
 
 		expect(result).toEqual({ isUsed: false, actResult: null })
 	})
+
+	it.each([
+		{
+			reason: "locked",
+			makeUnavailable: (tile: Tile) => tile.lock(),
+		},
+		{
+			reason: "removed from the field",
+			makeUnavailable: (tile: Tile, field: Field) =>
+				field.removeTile(tile.getPosition()),
+		},
+	])(
+		"drops a selected tile that became $reason instead of swapping it",
+		({ makeUnavailable }) => {
+			const { boosterManager, field, fieldQueries, actionManager } = createSUT()
+			const doActionsSpy = vi.spyOn(actionManager, "doActions")
+			const tile1 = getTileByPosition(fieldQueries, { column: 0, row: 0 })
+			const tile2 = getTileByPosition(fieldQueries, { column: 0, row: 1 })
+			const tile3 = getTileByPosition(fieldQueries, { column: 1, row: 1 })
+
+			boosterManager.onBoosterButtonClick("teleport")
+			boosterManager.maybeUseBooster(tile1)
+			makeUnavailable(tile1, field)
+			const result2 = boosterManager.maybeUseBooster(tile2)
+			const result3 = boosterManager.maybeUseBooster(tile3)
+			const swappedTiles = [...(result3.actResult?.swappedTiles ?? [])].flat()
+
+			const actions = doActionsSpy.mock.calls.flatMap((call) => call[0])
+			expect(actions[1]).toEqual({
+				name: ActionName.UNSELECT,
+				payload: tile1,
+			})
+			expect(result2).toEqual({ isUsed: true, actResult: null })
+			expect(new Set(swappedTiles)).toEqual(new Set([tile2, tile3]))
+		}
+	)
 
 	it("forgets selected tiles for the activated booster after clear", () => {
 		const { boosterManager, fieldQueries } = createSUT()

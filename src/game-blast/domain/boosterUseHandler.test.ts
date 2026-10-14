@@ -102,6 +102,25 @@ describe("booster use handling", () => {
 		}
 	)
 
+	it("bomb should skip locked tiles", () => {
+		const { boosterUseHandler, fieldQueries } = createBoosterUseHandler()
+		const [centerTile, lockedTile] = getTilesByPositions(fieldQueries, [
+			{ row: 0, column: 0 },
+			{ row: 1, column: 1 },
+		])
+		lockedTile.lock()
+
+		const commands = boosterUseHandler.use({
+			boosterName: "bomb" as BoosterName,
+			tiles: [centerTile],
+		})
+		const command = commands?.[0] as Command<CommandName.REMOVE>
+
+		expect(command.payload.tiles.has(centerTile)).toBe(true)
+		expect(command.payload.tiles.has(lockedTile)).toBe(false)
+		expect(command.payload.tiles.size).toBe(tilesProps.length - 1)
+	})
+
 	it.each([
 		{
 			positions: [
