@@ -1,15 +1,13 @@
-import { BoosterCounter } from "../domain/boosterCounter"
-import { BoosterUseHandler } from "../domain/boosterUseHandler"
 import { BOOSTER_NAMES } from "../domain/config"
 import { Field } from "../domain/field"
 import { FieldQueries } from "../domain/fieldQueries"
 import { GameRules } from "../domain/gameRules"
 import { Grid } from "../domain/grid"
 import { Tile } from "../domain/tile"
-import { BoosterName } from "../domain/types"
 import {
 	AnimationsManagerContract,
 	BoosterUIContract,
+	BoosterUIMap,
 	LayoutUIContract,
 	ModalUIContract,
 	PresenterContract,
@@ -17,11 +15,9 @@ import {
 	RendererContract,
 } from "../types"
 import { ActionManager } from "./actionManager"
-import { Booster } from "./booster"
-import { BoosterHandler } from "./boosterHandler"
-import { BoosterManager } from "./boosterManager"
 import { Presenter } from "./presenter"
 import { AnimationsManager } from "./animationManager"
+import { boosterManagerFactory } from "./boosterManagerFactory"
 
 export function createBoosterUIStub(): BoosterUIContract {
 	return {
@@ -129,66 +125,19 @@ export function createActionManagerStubbed({
 	})
 }
 
-export function createBoosterHandlerStubbed({
-	boosterUseHandler,
-	gameRules,
-	actionManager,
-	name,
-	boosterUI,
-}: {
-	boosterUseHandler: BoosterUseHandler
-	gameRules: GameRules
-	actionManager: ActionManager
-	name: BoosterName
-	boosterUI: BoosterUIContract
-}) {
-	const boosterCounter = new BoosterCounter({
-		startValue: gameRules.BOOSTER_INITIAL_VALUE[name],
-		endValue: 0,
-	})
-
-	const booster = new Booster({
-		boosterCounter: boosterCounter,
-		boosterUI: boosterUI,
-	})
-
-	const boosterHandler = new BoosterHandler({
-		name,
-		boosterUseHandler,
-		booster,
-		actionManager,
-	})
-
-	return boosterHandler
-}
-
 export function createBoosterManagerStubbed(props: {
 	gameRules: GameRules
 	fieldQueries: FieldQueries
 	actionManager: ActionManager
 }) {
-	const boosterUseHandler = new BoosterUseHandler({
-		gameRules: props.gameRules,
-		fieldQueries: props.fieldQueries,
-	})
+	const boosterUIMap = BOOSTER_NAMES.reduce((acc, name) => {
+		acc[name] = createBoosterUIStub()
+		return acc
+	}, {} as BoosterUIMap)
 
-	const boostersHandlersMap = BOOSTER_NAMES.reduce(
-		(acc, name) => {
-			const boosterUI = createBoosterUIStub()
-			acc[name] = createBoosterHandlerStubbed({
-				...props,
-				boosterUseHandler,
-				name,
-				boosterUI,
-			})
-			return acc
-		},
-		{} as Record<BoosterName, BoosterHandler>
-	)
-
-	const boosterManager = new BoosterManager({
-		boostersHandlersMap: boostersHandlersMap,
-		actionManager: props.actionManager,
+	const boosterManager = boosterManagerFactory({
+		...props,
+		boosterUIMap,
 	})
 
 	return boosterManager

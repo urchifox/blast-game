@@ -8,11 +8,8 @@ import {
 import { TileKind } from "../domain/tile"
 import { BoosterName } from "../domain/types"
 import { ActResult } from "./actionManager"
-import {
-	createActionManagerStubbed,
-	createBoosterHandlerStubbed,
-	createBoosterUIStub,
-} from "./testHelpers"
+import { createBoosterHandler } from "./boosterManagerFactory"
+import { createActionManagerStubbed, createBoosterUIStub } from "./testHelpers"
 
 const GRID_SIZE = { columns: 3, rows: 3 }
 const TILES_KINDS = [
@@ -47,7 +44,7 @@ function createSUT(name: BoosterName) {
 	})
 	const boosterUI = createBoosterUIStub()
 
-	const boosterHandler = createBoosterHandlerStubbed({
+	const boosterHandler = createBoosterHandler({
 		boosterUseHandler,
 		gameRules,
 		actionManager,
