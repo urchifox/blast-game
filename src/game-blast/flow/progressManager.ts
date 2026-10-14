@@ -17,6 +17,7 @@ export class ProgressManager {
 
 	clear() {
 		this.progressCounter.clear()
+		this.renderCounters()
 	}
 
 	setInitialValues({
