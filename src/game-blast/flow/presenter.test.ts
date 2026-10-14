@@ -259,6 +259,105 @@ describe("Presenter", () => {
 			expect(newTile.isLocked()).toBe(false)
 			expect(processing.isSettled).toBe(true)
 		})
+
+		describe("when a moved tile is moved again before its fall finishes", () => {
+			function startFirstFall() {
+				const sut = createSUT()
+				const { presenter, renderer, fieldQueries } = sut
+				const falls = createDeferredCalls()
+				vi.spyOn(renderer, "fallTilesToCurrentPositions").mockImplementation(
+					falls.next
+				)
+				const removedTile = getTileByPosition(fieldQueries, {
+					row: 1,
+					column: 1,
+				})
+				const movedTile = getTileByPosition(fieldQueries, { row: 0, column: 1 })
+
+				void presenter.removeTilesFromCenter(
+					new Set([removedTile]),
+					removedTile.getPosition()
+				)
+				void presenter.processRemovedTiles(new Set([removedTile]))
+
+				return { ...sut, falls, movedTile }
+			}
+
+			function removeLowerTileInColumn({
+				presenter,
+				fieldQueries,
+			}: Pick<ReturnType<typeof createSUT>, "presenter" | "fieldQueries">) {
+				const removedTile = getTileByPosition(fieldQueries, {
+					row: 2,
+					column: 1,
+				})
+				void presenter.removeTilesFromCenter(
+					new Set([removedTile]),
+					removedTile.getPosition()
+				)
+				void presenter.processRemovedTiles(new Set([removedTile]))
+			}
+
+			it("keeps the tile locked until the second fall finishes", async () => {
+				const { falls, movedTile, ...sut } = startFirstFall()
+				await flushPromises()
+				expect(falls.calls).toHaveLength(1)
+
+				removeLowerTileInColumn(sut)
+				await flushPromises()
+				expect(falls.calls).toHaveLength(2)
+
+				falls.calls[0].resolve()
+				await flushPromises()
+				expect(movedTile.isLocked()).toBe(true)
+
+				falls.calls[1].resolve()
+				await flushPromises()
+				expect(movedTile.isLocked()).toBe(false)
+			})
+
+			it("keeps the tile locked while the second fall waits for the removal below", async () => {
+				const { falls, movedTile, renderer, ...sut } = startFirstFall()
+				await flushPromises()
+				const removals = createDeferredCalls()
+				vi.spyOn(renderer, "removeTile").mockImplementation(removals.next)
+
+				removeLowerTileInColumn(sut)
+				await flushPromises()
+				expect(falls.calls).toHaveLength(1)
+
+				falls.calls[0].resolve()
+				await flushPromises()
+				expect(movedTile.isLocked()).toBe(true)
+
+				removals.calls[0].resolve()
+				await flushPromises()
+				expect(falls.calls).toHaveLength(2)
+				expect(movedTile.isLocked()).toBe(true)
+
+				falls.calls[1].resolve()
+				await flushPromises()
+				expect(movedTile.isLocked()).toBe(false)
+			})
+
+			it("keeps the tile locked until a shuffle started during the fall finishes", async () => {
+				const { falls, movedTile, renderer, presenter } = startFirstFall()
+				await flushPromises()
+				const shuffles = createDeferredCalls()
+				vi.spyOn(renderer, "shuffleTiles").mockImplementation(shuffles.next)
+
+				void presenter.shuffleField()
+				await flushPromises()
+
+				falls.calls[0].resolve()
+				await flushPromises()
+				expect(movedTile.isLocked()).toBe(true)
+
+				shuffles.calls[0].resolve()
+				await flushPromises()
+				expect(movedTile.isLocked()).toBe(false)
+			})
+		})
 	})
 
 	describe("swapTiles", () => {
