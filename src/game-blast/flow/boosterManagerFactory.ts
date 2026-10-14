@@ -44,6 +44,7 @@ export function boosterManagerFactory(props: BoosterManagerFactoryProps) {
 	const boosterManager = new BoosterManager({
 		boostersHandlersMap: boostersHandlersMap,
 		actionManager: actionManager,
+		fieldQueries: fieldQueries,
 	})
 
 	return boosterManager
