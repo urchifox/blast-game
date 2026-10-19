@@ -13,6 +13,8 @@ export class ModalUI implements ModalUIContract {
 	private readonly _onBackdropClick: ModalProps["onBackdropClick"]
 
 	private readonly modalWrapper: HTMLElement
+	private isOpening = false
+	private isClosing = false
 
 	constructor(props: ModalProps) {
 		this.modal = props.modal
@@ -32,17 +34,20 @@ export class ModalUI implements ModalUIContract {
 	}
 
 	open() {
-		if (this.modal.open) {
+		if (this.modal.open || this.isOpening || this.isClosing) {
 			return
 		}
+
+		this.isOpening = true
 		this.modal.showModal()
 		this.modal.classList.add("modal--opening")
-		void new Promise<void>((resolve) => {
+
+		void new Promise<void>(() => {
 			this.modalWrapper.addEventListener(
 				"animationend",
 				() => {
 					this.modal.classList.remove("modal--opening")
-					resolve()
+					this.isOpening = false
 				},
 				{ once: true }
 			)
@@ -51,6 +56,10 @@ export class ModalUI implements ModalUIContract {
 
 	private onClick(event: Event) {
 		event.preventDefault()
+		if (this.isOpening || this.isClosing) {
+			return
+		}
+
 		const target = event.target
 		if (!isHtmlElement(target)) {
 			return
@@ -67,30 +76,32 @@ export class ModalUI implements ModalUIContract {
 
 	private onButtonClick() {
 		this._onButtonClick?.()
-		void this.close()
+		this.close()
 	}
 
 	private onBackdropClick() {
 		this._onBackdropClick?.()
-		void this.close()
+		this.close()
 	}
 
-	private async close() {
+	private close() {
 		if (!this.modal.open) {
 			return
 		}
+
+		this.isClosing = true
 		this.modal.classList.add("modal--closing")
-		await new Promise<void>((resolve) => {
+
+		void new Promise<void>(() => {
 			this.modalWrapper.addEventListener(
 				"animationend",
 				() => {
 					this.modal.classList.remove("modal--closing")
-					resolve()
+					this.modal.close()
+					this.isClosing = false
 				},
 				{ once: true }
 			)
 		})
-
-		this.modal.close()
 	}
 }
