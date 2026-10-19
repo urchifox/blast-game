@@ -155,7 +155,7 @@ describe("ModalUI", () => {
 		expect(modal.open).toBe(true)
 	})
 
-	it("ignores closing if already closed", async () => {
+	it("ignores clicks while closing", async () => {
 		const {
 			modalUI,
 			modal,
@@ -174,6 +174,68 @@ describe("ModalUI", () => {
 
 		expect(onBackdropClick).toHaveBeenCalledOnce()
 		expect(onButtonClick).not.toHaveBeenCalled()
+		expect(modal.open).toBe(false)
+	})
+
+	it("ignores opening while closing", async () => {
+		const {
+			modalUI,
+			modal,
+			modalButton,
+			modalWrapper,
+			onButtonClick,
+			onBackdropClick,
+		} = createSUT()
+		modalUI.open()
+		modalWrapper.dispatchEvent(new Event("animationend"))
+		await flushPromises()
+
+		modalButton.click()
+		modalUI.open()
+		expect(modal.classList.contains("modal--opening")).toBe(false)
+		modalWrapper.dispatchEvent(new Event("animationend"))
+		await flushPromises()
+
+		expect(modal.classList.contains("modal--closing")).toBe(false)
+		expect(modal.classList.contains("modal--opening")).toBe(false)
+		expect(onButtonClick).toHaveBeenCalledOnce()
+		expect(onBackdropClick).not.toHaveBeenCalled()
+		expect(modal.open).toBe(false)
+	})
+
+	it("opens and closes modal after it was opened and closed", async () => {
+		const {
+			modalUI,
+			modal,
+			modalButton,
+			modalWrapper,
+			onButtonClick,
+			onBackdropClick,
+		} = createSUT()
+		modalUI.open()
+		modalWrapper.dispatchEvent(new Event("animationend"))
+		await flushPromises()
+		modalButton.click()
+		modalWrapper.dispatchEvent(new Event("animationend"))
+		await flushPromises()
+
+		modalUI.open()
+		expect(modal.open).toBe(true)
+		expect(modal.classList.contains("modal--opening")).toBe(true)
+
+		modalWrapper.dispatchEvent(new Event("animationend"))
+		await flushPromises()
+		expect(modal.classList.contains("modal--opening")).toBe(false)
+
+		modalButton.click()
+		expect(modal.open).toBe(true)
+		expect(modal.classList.contains("modal--closing")).toBe(true)
+
+		modalWrapper.dispatchEvent(new Event("animationend"))
+		await flushPromises()
+		expect(modal.classList.contains("modal--closing")).toBe(false)
+		expect(onButtonClick).toHaveBeenCalledTimes(2)
+		expect(onBackdropClick).not.toHaveBeenCalled()
 		expect(modal.open).toBe(false)
 	})
 
