@@ -27,21 +27,22 @@ describe("LayoutUI", () => {
 	})
 
 	it("updates sizes according to the grid snapshot", () => {
-		const { layoutUI } = createSUT()
-		vi.mock("../../helpers/dom", () => ({
-			getElementInnerSize: vi
-				.fn()
-				.mockReturnValue({ width: 300, height: 1000 }),
-		}))
+		const { layoutUI, layoutCalculator } = createSUT()
+		const getSizesSpy = vi.spyOn(layoutCalculator, "getSizes")
+		const mocksizes = {
+			gridWidth: 1,
+			gridHeight: 2,
+			tileWidth: 3,
+			tileHeight: 4,
+			tileGapX: 5,
+			tileGapY: 6,
+		}
+		getSizesSpy.mockReturnValue(mocksizes)
 
 		const snapshot = layoutUI.updateSizes({ columns: 5, rows: 5 })
 
-		expect(snapshot.tileWidth).toBeCloseTo(60)
-		expect(snapshot.tileHeight).toBeCloseTo(67.2)
-		expect(snapshot.gridWidth).toBeCloseTo(300)
-		expect(snapshot.gridHeight).toBeCloseTo(309.12)
-		expect(snapshot.tileGapX).toBe(0)
-		expect(snapshot.tileGapY).toBeCloseTo(-6.72)
+		expect(snapshot).toEqual(mocksizes)
+		expect(layoutUI.getSnapshot()).toEqual(mocksizes)
 	})
 
 	it("sets game container size when the sizes are not null", () => {
