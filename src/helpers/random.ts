@@ -26,8 +26,12 @@ export function getRandomNumber(
 		throw new Error("Step must be greater than 0")
 	}
 
+	if (max === min) {
+		return min
+	}
+
 	if (max < min) {
-		throw new Error("Max must be greater than or equal to min")
+		return getRandomNumber({ min: max, max: min, step })
 	}
 
 	const stepsCount = Math.floor((max - min) / step)
