@@ -1,21 +1,20 @@
-import { RandomizationFunction } from "./random"
+import { getRandomNumber, RandomizationFunction } from "./random"
 
 export function getShuffledArray<T>(
 	array: Array<T>,
 	options?: { randomizationFunction?: RandomizationFunction }
 ): T[] {
 	const randomizationFunction = options?.randomizationFunction ?? Math.random
-	let currentIndex = array.length,
-		randomIndex
-	const newArray = [...array]
+	const pending = [...array]
+	const newArray: T[] = []
 
-	while (currentIndex > 0) {
-		randomIndex = Math.floor(randomizationFunction() * currentIndex)
-		currentIndex--
-		;[newArray[currentIndex], newArray[randomIndex]] = [
-			newArray[randomIndex],
-			newArray[currentIndex],
-		]
+	while (pending.length > 0) {
+		const randomIndex = getRandomNumber(
+			{ min: 0, max: pending.length - 1 },
+			randomizationFunction
+		)
+		const [picked] = pending.splice(randomIndex, 1)
+		newArray.push(picked)
 	}
 
 	return newArray
