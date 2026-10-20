@@ -32,10 +32,11 @@ export class SlowFakeView extends View {
 		this.mountGate = props.mountGate
 	}
 
-	override mount() {
-		void super.mount()
+	override async mount() {
+		const parentMount = super.mount()
 		this.mountGate.markStarted()
-		return this.mountGate.mounted
+		await parentMount
+		await this.mountGate.mounted
 	}
 }
 
