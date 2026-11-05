@@ -42,6 +42,7 @@ export function gameFactory(props: GameFactoryProps) {
 	const renderer = new PhaserRenderer({
 		container: props.gameContainer,
 		layoutUI: props.layoutUI,
+		getTileSnapshot: (id) => fieldQueries.getTileById(id)?.getSnapshot(),
 	})
 
 	const presenter = new Presenter({
