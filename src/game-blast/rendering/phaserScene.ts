@@ -25,11 +25,13 @@ const tileTextureModules = import.meta.glob("../assets/img/*.png", {
 export type PhaserSceneProps = {
 	getContainerOffset: () => { offsetX: number; offsetY: number }
 	getTileImage: (tileSnapshot: TileSnapshot) => string
+	getTileSnapshot: (id: string) => TileSnapshot | undefined
 }
 
 export class PhaserScene extends Phaser.Scene {
 	private readonly getContainerOffset: PhaserSceneProps["getContainerOffset"]
 	private readonly getTileImage: PhaserSceneProps["getTileImage"]
+	private readonly getTileSnapshot: PhaserSceneProps["getTileSnapshot"]
 
 	private readonly tilesMap = new Map<string, Phaser.GameObjects.Sprite>()
 	private readonly scaleTweens = new Map<
@@ -51,6 +53,7 @@ export class PhaserScene extends Phaser.Scene {
 		super(SCENE_KEY)
 		this.getContainerOffset = props.getContainerOffset
 		this.getTileImage = props.getTileImage
+		this.getTileSnapshot = props.getTileSnapshot
 	}
 
 	// #region Initialization
@@ -183,8 +186,12 @@ export class PhaserScene extends Phaser.Scene {
 
 		await this.animateAppear({ tileSprite, layoutSnapshot, pauseDuration })
 		if (isAppearOnDefaultPosition === true) {
+			const latestTileSnapshot = this.getTileSnapshot(id)
+			if (latestTileSnapshot === undefined) {
+				return
+			}
 			await this.animateFallingToCurrentPosition(
-				tileSnapshot,
+				latestTileSnapshot,
 				gridSnapshot,
 				layoutSnapshot
 			)
@@ -317,16 +324,25 @@ export class PhaserScene extends Phaser.Scene {
 		tileSprite: Phaser.GameObjects.Sprite,
 		bounceY: number
 	) {
-		await new Promise((resolve) => {
-			this.tweens.add({
+		await new Promise<void>((resolve) => {
+			const onTweenComplete = () => {
+				if (this.positionTweens.get(tileSprite) === bounceTween) {
+					this.positionTweens.delete(tileSprite)
+				}
+				resolve()
+			}
+
+			const bounceTween = this.tweens.add({
 				targets: tileSprite,
 				y: bounceY,
 				duration: TILE_BOUNCE_DURATION_MS / 2,
 				ease: "Sine.easeOut",
 				yoyo: true,
-				onComplete: resolve,
-				onStop: resolve,
+				onComplete: onTweenComplete,
+				onStop: onTweenComplete,
 			})
+
+			this.positionTweens.set(tileSprite, bounceTween)
 		})
 	}
 

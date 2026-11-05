@@ -11,6 +11,7 @@ export type RendererParams<Method extends keyof RendererContract> = Parameters<
 export type PhaserRendererProps = {
 	container: HTMLElement
 	layoutUI: LayoutUIContract
+	getTileSnapshot: (id: string) => TileSnapshot | undefined
 }
 
 export class PhaserRenderer implements RendererContract {
@@ -29,6 +30,7 @@ export class PhaserRenderer implements RendererContract {
 				this.layoutUI
 			),
 			getTileImage: this.getTileImage.bind(this),
+			getTileSnapshot: props.getTileSnapshot,
 		})
 
 		this.game = new Phaser.Game({

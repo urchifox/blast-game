@@ -28,8 +28,8 @@ import { LevelGeneratorContract, OnTileClickCallback } from "./types"
 
 const GRID_SIZE = { columns: 7, rows: 7 }
 const TILES_KINDS = [
-	"green",
 	"rockets-column",
+	"green",
 	"rockets-row",
 	"red",
 	"red",
@@ -311,7 +311,7 @@ describe("Game", () => {
 		const { movesLeft: initialMovesLeft } = updateMovesSpy.mock.calls[0][0]
 		await clickTileByPosition({
 			fieldQueries,
-			tilePosition: { row: 0, column: 0 },
+			tilePosition: { row: 0, column: 1 },
 			onTileClickCallback: presenterInitSpy.mock.calls[0][0],
 		})
 
@@ -588,7 +588,7 @@ describe("Game", () => {
 
 	it.each([
 		{
-			tilePosition: { row: 0, column: 1 },
+			tilePosition: { row: 0, column: 0 },
 		},
 		{
 			tilePosition: { row: 0, column: 2 },
@@ -636,6 +636,42 @@ describe("Game", () => {
 			})
 		}
 	)
+
+	it("processes chain of special tiles activation", async () => {
+		vi.useFakeTimers()
+		const { game, presenter, fieldQueries, progressUI } = createSUT({
+			levelGenerator: {
+				generateLevelData: () => ({
+					tilesProps: new Set(tilesProps),
+					columns: 7,
+					rows: 7,
+					goalScore: 100,
+					movesLimit: 10,
+				}),
+			},
+		})
+		const presenterInitSpy = vi.spyOn(presenter, "init")
+		const updateScoreSpy = vi.spyOn(progressUI, "updateScoreCounter")
+		const updateMovesSpy = vi.spyOn(progressUI, "updateMovesCounter")
+
+		await game.init()
+		const tilePosition: TilePosition = { row: 0, column: 2 }
+		await clickTileByPosition({
+			fieldQueries,
+			tilePosition,
+			onTileClickCallback: presenterInitSpy.mock.calls[0][0],
+		})
+
+		expect(updateScoreSpy.mock.calls.length).toBe(2)
+		expect(updateMovesSpy.mock.calls.length).toBe(2)
+		expect(updateScoreSpy).toHaveBeenLastCalledWith({
+			score: 414,
+			goalScore: 100,
+		})
+		expect(updateMovesSpy).toHaveBeenLastCalledWith({
+			movesLeft: 9,
+		})
+	})
 
 	it.each([
 		{
