@@ -28,8 +28,8 @@ import { LevelGeneratorContract, OnTileClickCallback } from "./types"
 
 const GRID_SIZE = { columns: 7, rows: 7 }
 const TILES_KINDS = [
-	"green",
 	"rockets-column",
+	"green",
 	"rockets-row",
 	"red",
 	"red",
@@ -311,7 +311,7 @@ describe("Game", () => {
 		const { movesLeft: initialMovesLeft } = updateMovesSpy.mock.calls[0][0]
 		await clickTileByPosition({
 			fieldQueries,
-			tilePosition: { row: 0, column: 0 },
+			tilePosition: { row: 0, column: 1 },
 			onTileClickCallback: presenterInitSpy.mock.calls[0][0],
 		})
 
@@ -588,7 +588,7 @@ describe("Game", () => {
 
 	it.each([
 		{
-			tilePosition: { row: 0, column: 1 },
+			tilePosition: { row: 0, column: 0 },
 		},
 		{
 			tilePosition: { row: 0, column: 2 },
