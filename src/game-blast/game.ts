@@ -126,36 +126,35 @@ export class Game {
 		this.boosterManager.onBoosterButtonClick(boosterName)
 	}
 
-	private async processRemovingTiles(removedTiles: Set<Tile>) {
-		const processed = new Set<Tile>()
+	private async processRemovingTiles(initialRemovedTiles: Set<Tile>) {
+		const removedTiles = new Set(initialRemovedTiles)
+		const triggeredTiles = new Set<Tile>()
 
-		const pending = [...removedTiles]
-		while (pending.length > 0) {
-			const tile = pending.shift()
-			if (tile === undefined || processed.has(tile)) {
-				continue
+		const triggerTile = async (tile: Tile) => {
+			if (triggeredTiles.has(tile)) {
+				return
+			}
+			triggeredTiles.add(tile)
+			await this.presenter.waitForTileAnimations(tile)
+
+			const actResult = this.tilesManager.onRemove(tile)
+			if (actResult === null) {
+				return
 			}
 
-			processed.add(tile)
-			void this.presenter.waitForTileAnimations(tile).then(() => {
-				const actResult = this.tilesManager.onRemove(tile)
-				if (actResult === null) {
-					return
+			const chainedTriggers = []
+			for (const chainedTile of actResult.removedTiles) {
+				if (removedTiles.has(chainedTile)) {
+					continue
 				}
-				for (const removedTile of actResult.removedTiles) {
-					if (!removedTiles.has(removedTile)) {
-						removedTiles.add(removedTile)
-						pending.push(removedTile)
-					}
-				}
-			})
+				removedTiles.add(chainedTile)
+				chainedTriggers.push(triggerTile(chainedTile))
+			}
+
+			await Promise.all(chainedTriggers)
 		}
 
-		await Promise.all(
-			Array.from(processed).map((tile) =>
-				this.presenter.waitForTileAnimations(tile)
-			)
-		)
+		await Promise.all([...initialRemovedTiles].map(triggerTile))
 
 		this.progressManager.processMove(removedTiles.size)
 

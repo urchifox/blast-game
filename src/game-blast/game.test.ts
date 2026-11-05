@@ -637,6 +637,42 @@ describe("Game", () => {
 		}
 	)
 
+	it("processes chain of special tiles activation", async () => {
+		vi.useFakeTimers()
+		const { game, presenter, fieldQueries, progressUI } = createSUT({
+			levelGenerator: {
+				generateLevelData: () => ({
+					tilesProps: new Set(tilesProps),
+					columns: 7,
+					rows: 7,
+					goalScore: 100,
+					movesLimit: 10,
+				}),
+			},
+		})
+		const presenterInitSpy = vi.spyOn(presenter, "init")
+		const updateScoreSpy = vi.spyOn(progressUI, "updateScoreCounter")
+		const updateMovesSpy = vi.spyOn(progressUI, "updateMovesCounter")
+
+		await game.init()
+		const tilePosition: TilePosition = { row: 0, column: 2 }
+		await clickTileByPosition({
+			fieldQueries,
+			tilePosition,
+			onTileClickCallback: presenterInitSpy.mock.calls[0][0],
+		})
+
+		expect(updateScoreSpy.mock.calls.length).toBe(2)
+		expect(updateMovesSpy.mock.calls.length).toBe(2)
+		expect(updateScoreSpy).toHaveBeenLastCalledWith({
+			score: 414,
+			goalScore: 100,
+		})
+		expect(updateMovesSpy).toHaveBeenLastCalledWith({
+			movesLeft: 9,
+		})
+	})
+
 	it.each([
 		{
 			name: "bomb",
